@@ -30,10 +30,7 @@ public:
         std::uninitialized_fill_n(data_, size, value);
     }
 
-    ~ArrayList()
-    {
-        free();
-    }
+    ~ArrayList() { free(); }
 
     ArrayList(const ArrayList& list)
     {
@@ -43,7 +40,7 @@ public:
     }
 
     ArrayList(ArrayList&& list) noexcept
-        :data_(list.data_), size_(list.size_), cap_(list.cap_)
+        : data_(list.data_), size_(list.size_), cap_(list.cap_)
     {
         list.data_ = nullptr;
         size_ = cap_ = 0;
@@ -75,32 +72,22 @@ public:
         return *this;
     }
 
-    void add(const T& x)
-    {
-        T tmp = x;
-        add(std::move(tmp));
-    }
-
-    void add(T&& x)
+    template <class X>
+    void add(X&& x)
     {
         if (!full())
         {
-            alloc_.construct(data_ + size_, std::forward<T>(x));
+            alloc_.construct(data_ + size_, std::forward<X>(x));
             ++size_;
         }
         else
         {
-            insert(size_, std::forward<T>(x));
+            insert(size_, std::forward<X>(x));
         }
     }
 
-    void insert(int idx, const T& x)
-    {
-        T tmp = x;
-        insert(idx, std::move(tmp));
-    }
-
-    void insert(int idx, T&& x)
+    template <class X>
+    void insert(int idx, X&& x)
     {
         if (!full())
         {
@@ -109,7 +96,7 @@ public:
             //元素后移
             for (int i = size_ - 2; i > idx; --i)
                 alloc_.construct(data_ + i, std::move(data_[i - 1]));
-            data_[idx] = std::forward<T>(x);
+            data_[idx] = std::forward<X>(x);
         }
         else
         {
@@ -119,7 +106,7 @@ public:
 
             for (int i = 0; i < idx; ++i)
                 alloc_.construct(newData + i, std::move(data_[i]));
-            alloc_.construct(newData + idx, std::forward<T>(x));
+            alloc_.construct(newData + idx, std::forward<X>(x));
             for (int i = idx; i < size_; ++i)
                 alloc_.construct(newData + i + 1, std::move(data_[i]));
 
@@ -173,32 +160,6 @@ public:
         alloc_.destroy(data_ + size_);
     }
 
-    T& front()
-    {
-        return data_[0];
-    }
-    T& back()
-    {
-        return data_[size_ - 1];
-    }
-    T* begin()
-    {
-        return data_;
-    }
-    T* end()
-    {
-        return data_ + size_;
-    }
-
-    T& operator[](int i)
-    {
-        return data_[i];
-    }
-    const T& operator[](int i) const
-    {
-        return data_[i];
-    }
-
     void clear()
     {
         for (int i = size_ - 1; i >= 0; --i)
@@ -207,26 +168,22 @@ public:
         }
         size_ = 0;
     }
-    bool empty() const
-    {
-        return size_ == 0;
-    }
-    bool full() const
-    {
-        return size_ == cap_;
-    }
-    const T* data() const
-    {
-        return data_;
-    }
-    int cap() const
-    {
-        return cap_;
-    }
-    int size() const
-    {
-        return size_;
-    }
+
+    T& front() { return data_[0]; }
+    T& back() { return data_[size_ - 1]; }
+
+    T* begin() { return data_; }
+    T* end() { return data_ + size_; }
+
+    T& operator[](int i) { return data_[i]; }
+    const T& operator[](int i) const { return data_[i]; }
+
+    bool empty() const { return size_ == 0; }
+    bool full() const { return size_ == cap_; }
+
+    const T* data() const { return data_; }
+    int cap() const { return cap_; }
+    int size() const { return size_; }
 
 private:
     void free()
@@ -245,8 +202,9 @@ private:
     int cap_;//容量
 };
 
-extern template class ArrayList<int>;
+
 template class ArrayList<int>;
+
 
 int main()
 {
@@ -260,7 +218,8 @@ int main()
     list.insert(0, 55);
     int val = 90;
     list.insert(0, val);
-    list.add(77);
+    val = 77;
+    list.add(val);
     list.reverse();
     cout << "reverse: " << list << endl;
 
@@ -269,9 +228,9 @@ int main()
 
     ArrayList<std::unique_ptr<int>> list3;
     list3.add(unique_ptr<int>(new int(3)));
-    
+
     auto list4 = std::move(list3);
-    cout<<*list4[0]<<std::endl;
+    cout << *list4[0] << std::endl;
 
     auto t1 = steady_clock::now();
     cout << "runtime: " << duration_cast<milliseconds>(t1 - t0).count() << " ms" << endl;

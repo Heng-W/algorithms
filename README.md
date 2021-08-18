@@ -5,7 +5,8 @@
 
 #### 数据结构（data_structure）
 
-- array_list.cpp: 动态数组实现的线性表
+- array_list.cpp：动态数组实现的线性表
+- linked_list.cpp：双向循环链表实现的线性表
 
 
 #### 排序（sort）
