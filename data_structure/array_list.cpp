@@ -7,6 +7,11 @@
 template <class T>
 class ArrayList
 {
+    friend void swap(ArrayList& list1, ArrayList& list2)
+    {
+        list1.swap(list2);
+    }
+    
     friend std::ostream& operator<<(std::ostream& out, const ArrayList& list)
     {
         for (int i = 0; i < list.size_; ++i)
@@ -70,6 +75,14 @@ public:
             size_ = cap_ = 0;
         }
         return *this;
+    }
+    
+    void swap(ArrayList& list)
+    {
+        using std::swap;
+        swap(data_, list.data_);
+        swap(size_, list.size_);
+        swap(cap_, list.cap_);
     }
 
     template <class X>
@@ -146,7 +159,7 @@ public:
     //反转
     void reverse()
     {
-        using namespace std;
+        using std::swap;
         for (int i = 0; i < size_ / 2; ++i)
         {
             swap(data_[i], data_[size_ - i - 1]);
@@ -203,8 +216,6 @@ private:
 };
 
 
-template class ArrayList<int>;
-
 
 int main()
 {
@@ -230,7 +241,6 @@ int main()
     list3.add(unique_ptr<int>(new int(3)));
 
     auto list4 = std::move(list3);
-    cout << *list4[0] << std::endl;
 
     auto t1 = steady_clock::now();
     cout << "runtime: " << duration_cast<milliseconds>(t1 - t0).count() << " ms" << endl;

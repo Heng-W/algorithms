@@ -7,6 +7,11 @@
 template <class T>
 class LinkedList
 {
+    friend void swap(LinkedList& list1, LinkedList& list2)
+    {
+        list1.swap(list2);
+    }
+
     friend std::ostream& operator<<(std::ostream& out, const LinkedList& list)
     {
         auto cur = list.begin();
@@ -57,25 +62,33 @@ public:
     LinkedList(LinkedList&& list):
         LinkedList()
     {
-        *this = std::move(list);
+        swap(list);
     }
 
 
     LinkedList& operator=(const LinkedList& list)
     {
-        LinkedList newList = list;
-        return *this = std::move(newList);
+        LinkedList tmp = list;
+        swap(tmp);
+        return *this;
     }
 
     LinkedList& operator=(LinkedList&& list) noexcept
     {
         if (this != &list)
         {
-            using namespace std;
-            swap(head_, list.head_);
-            swap(size_, list.size_);
+            clear();
+            swap(list);
         }
         return *this;
+    }
+
+
+    void swap(LinkedList& list)
+    {
+        using std::swap;
+        swap(head_, list.head_);
+        swap(size_, list.size_);
     }
 
     void clear()
