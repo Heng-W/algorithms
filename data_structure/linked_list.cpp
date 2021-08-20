@@ -101,6 +101,7 @@ public:
         }
         head_->next = head_;
         head_->prev = head_;
+        size_ = 0;
     }
 
     //表头插入
