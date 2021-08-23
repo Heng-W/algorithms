@@ -18,6 +18,7 @@ make
 - linked_list.cpp：双向循环链表实现的线性表
 - queue.cpp：链表实现的队列
 - stack.cpp：链表实现的堆栈
+- binary_heap.cpp：二叉堆，实现优先级队列
 
 
 #### 排序（sort）

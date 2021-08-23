@@ -54,9 +54,10 @@ void heapSort(T* arr, int size)
     {
         adjustHeap(arr, size, i);
     }
+    using std::swap;
     for (int i = size - 1; i >= 1; --i)
     {
-        std::swap(arr[0], arr[i]);  // 将最大值交换到末尾保存
+        swap(arr[0], arr[i]);  // 将最大值交换到末尾保存
         adjustHeap(arr, i, 0); // 重新进行堆调整
     }
 }
