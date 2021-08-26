@@ -6,5 +6,6 @@ int main(){
     ht.insertUnique(10);
     ht.insertUnique(15);
     cout << ht.nodeCnt() << endl;
+    cout << ht << endl;
     return 0;
 }

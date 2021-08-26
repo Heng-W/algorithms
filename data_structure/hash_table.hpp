@@ -8,6 +8,21 @@
 template <class Object, class ExtractKey, class HashFunc>
 class HashTable
 {
+    friend std::ostream& operator<<(std::ostream& out, const HashTable& ht)
+    {
+        for (int i = 0; i < ht.buckets_.size(); ++i)
+        {
+            Node* cur = ht.buckets_[i];
+            while (cur)
+            {
+                out << cur->obj << " ";
+                cur = cur->next;
+            }
+        }
+        return out;
+    }
+
+    class Node;
 public:
 
     HashTable(int n):
@@ -24,16 +39,15 @@ public:
         resize(nodeCnt_ + 1);//检查是否需要重建表格
 
         int pos = position(obj);//找到位置
-        Node* first = buckets_[pos];
-        for (Node* cur = first; cur; cur = cur->next)
+        Node* cur = buckets_[pos];
+        while (cur)
         {
             if (getKey_(obj) == getKey_(cur->obj))
-            {
                 return false;
-            }
+            cur = cur->next;
         }
         Node* tmp = new Node(std::forward<X>(obj));
-        tmp->next = first;
+        tmp->next = buckets_[pos];
         buckets_[pos] = tmp;
         ++nodeCnt_;
         return true;
@@ -45,8 +59,8 @@ public:
         resize(nodeCnt_ + 1);//检查是否需要重建表格
 
         int pos = position(obj);//找到位置
-        Node* first = buckets_[pos];
-        for (Node* cur = first; cur; cur = cur->next)
+        Node* cur = buckets_[pos];
+        while (cur)
         {
             if (getKey_(obj) == getKey_(cur->obj))
             {
@@ -56,11 +70,53 @@ public:
                 ++nodeCnt_;
                 return;
             }
+            cur = cur->next;
         }
         Node* tmp = new Node(std::forward<X>(obj));
-        tmp->next = first;
+        tmp->next = buckets_[pos];
         buckets_[pos] = tmp;
         ++nodeCnt_;
+    }
+
+    Node* find(const Object& obj)
+    {
+        const auto* tmp = this;
+        return const_cast<Node*>(tmp->find(obj));
+    }
+
+    const Node* find(const Object& obj) const
+    {
+        int pos = position(obj);//找到位置
+        const Node* cur = buckets_[pos];
+        while (cur)
+        {
+            if (getKey_(obj) == getKey_(cur->obj))
+                return cur;
+            cur = cur->next;
+        }
+        return nullptr;
+    }
+
+    bool remove(const Object& obj)
+    {
+        int pos = position(obj);//找到位置
+        Node* cur = buckets_[pos];
+        Node* prev = nullptr;
+        while (cur)
+        {
+            if (getKey_(obj) == getKey_(cur->obj))
+            {
+                if (prev == nullptr)
+                    buckets_[pos] = cur->next;
+                else
+                    prev->next = cur->next;
+                delete cur;
+                return true;
+            }
+            prev = cur;
+            cur = cur->next;
+        }
+        return false;
     }
 
     void clear()
@@ -80,6 +136,8 @@ public:
     }
 
     int nodeCnt() const { return nodeCnt_; }
+
+    int bucketSize() const { return buckets_.size(); }
 
 private:
     void initBuckets(int size)

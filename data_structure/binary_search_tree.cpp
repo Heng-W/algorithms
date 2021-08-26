@@ -103,14 +103,20 @@ private:
             std::cout << node->data << " ";
         }
     }
-
+    
     //删除子树
-    void deleteTree(Node* node)
+    void deleteTree(Node*& node)
+    {
+        _deleteTree(node);
+        node = nullptr;
+    }
+
+    void _deleteTree(Node* node)
     {
         if (node)
         {
-            deleteTree(node->left);
-            deleteTree(node->right);
+            _deleteTree(node->left);
+            _deleteTree(node->right);
             delete node;
         }
     }
