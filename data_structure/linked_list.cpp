@@ -31,8 +31,8 @@ public:
         Node* prev;
         Node* next;
 
-        template <class X>
-        Node(X&& _data): data(std::forward<X>(_data)) {}
+        Node(const T& _data): data(_data) {}
+        Node(T&& _data): data(std::move(_data)) {}
     };
 
     LinkedList(): size_(0)
@@ -105,25 +105,16 @@ public:
     }
 
     //表头插入
-    template <class X>
-    void insertFront(X&& x) { insert(begin(), std::forward<X>(x)); }
+    void insertFront(const T& x) { insert(begin(), x); }
+    void insertFront(T&& x) { insert(begin(), std::move(x)); }
 
     //表尾插入
-    template <class X>
-    void insertBack(X&& x) { insert(end(), std::forward<X>(x)); }
+    void insertBack(const T& x) { insert(end(), x); }
+    void insertBack(T&& x) { insert(end(), std::move(x)); }
 
     //插入
-    template <class X>
-    Node* insert(Node* p, X&& x)
-    {
-        Node* tmp = new Node(x);
-        tmp->next = p;
-        tmp->prev = p->prev;
-        p->prev->next = tmp;
-        p->prev = tmp;
-        ++size_;
-        return tmp;
-    }
+    Node* insert(Node* p, const T& x) { return _insert(p, x); }
+    Node* insert(Node* p, T&& x) { return _insert(p, std::move(x)); }
 
     //删除
     Node* remove(Node* p)
@@ -157,6 +148,7 @@ public:
 
     Node* begin() { return head_->next; }
     const Node* begin() const { return head_->next; }
+
     Node* end() { return head_; }
     const Node* end() const { return head_; }
 
@@ -168,6 +160,19 @@ public:
     T& back() { return end()->prev->data; }
 
 private:
+    //插入
+    template <class X>
+    Node* _insert(Node* p, X&& x)
+    {
+        Node* tmp = new Node(x);
+        tmp->next = p;
+        tmp->prev = p->prev;
+        p->prev->next = tmp;
+        p->prev = tmp;
+        ++size_;
+        return tmp;
+    }
+
     Node* head_; //头结点
     int size_; //元素个数
 };

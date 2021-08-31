@@ -5,14 +5,14 @@
 #include <iostream>
 
 //哈希表
-template <class Object, class ExtractKey, class HashFunc>
+template <class Object, class HashFunc, class ExtractKey>
 class HashTable
 {
     friend std::ostream& operator<<(std::ostream& out, const HashTable& ht)
     {
         for (int i = 0; i < ht.buckets_.size(); ++i)
         {
-            Node* cur = ht.buckets_[i];
+            auto cur = ht.buckets_[i];
             while (cur)
             {
                 out << cur->obj << " ";
@@ -24,87 +24,65 @@ class HashTable
 
     class Node;
 public:
+    using Iterator = Node*;
+    using ConstIterator = const Node*;
+    using KeyType = typename std::result_of<ExtractKey(Object)>::type;
 
-    HashTable(int n):
+    HashTable(int n = 32):
         nodeCnt_(0),
-        getKey_(ExtractKey()),
-        hash_(HashFunc())
+        hash_(HashFunc()),
+        getKey_(ExtractKey())
     {
         initBuckets(n);
     }
 
-    template <class X>
-    bool insertUnique(X&& obj)
-    {
-        resize(nodeCnt_ + 1);//检查是否需要重建表格
+    std::pair<Node*, bool> insertUnique(const Object& obj)
+    { return _insertUnique(obj); }
 
-        int pos = position(obj);//找到位置
-        Node* cur = buckets_[pos];
-        while (cur)
-        {
-            if (getKey_(obj) == getKey_(cur->obj))
-                return false;
-            cur = cur->next;
-        }
-        Node* tmp = new Node(std::forward<X>(obj));
-        tmp->next = buckets_[pos];
-        buckets_[pos] = tmp;
-        ++nodeCnt_;
-        return true;
-    }
+    std::pair<Node*, bool> insertUnique(Object&& obj)
+    { return _insertUnique(std::move(obj)); }
 
-    template <class X>
-    void insertEqual(X&& obj)
-    {
-        resize(nodeCnt_ + 1);//检查是否需要重建表格
+    Node* insertEqual(const Object& obj) { return _insertEqual(obj); }
+    Node* insertEqual(Object&& obj) { return _insertEqual(std::move(obj)); }
 
-        int pos = position(obj);//找到位置
-        Node* cur = buckets_[pos];
-        while (cur)
-        {
-            if (getKey_(obj) == getKey_(cur->obj))
-            {
-                Node* tmp = new Node(std::forward<X>(obj));
-                tmp->next = cur->next;
-                cur->next = tmp;
-                ++nodeCnt_;
-                return;
-            }
-            cur = cur->next;
-        }
-        Node* tmp = new Node(std::forward<X>(obj));
-        tmp->next = buckets_[pos];
-        buckets_[pos] = tmp;
-        ++nodeCnt_;
-    }
-
-    Node* find(const Object& obj)
+    Node* find(const KeyType& key)
     {
         const auto* tmp = this;
-        return const_cast<Node*>(tmp->find(obj));
+        return const_cast<Node*>(tmp->find(key));
     }
 
-    const Node* find(const Object& obj) const
+    const Node* find(const KeyType& key) const
     {
-        int pos = position(obj);//找到位置
+        int pos = bucketPos(key);//找到位置
         const Node* cur = buckets_[pos];
         while (cur)
         {
-            if (getKey_(obj) == getKey_(cur->obj))
+            if (key == getKey_(cur->obj))
                 return cur;
             cur = cur->next;
         }
         return nullptr;
     }
 
-    bool remove(const Object& obj)
+    Object& findOrInsert(const Object& obj)
     {
-        int pos = position(obj);//找到位置
+        return insertUnique(obj).first->obj;
+    }
+
+    Object& findOrInsert(Object&& obj)
+    {
+        return insertUnique(std::move(obj)).first->obj;
+    }
+
+
+    bool remove(const KeyType& key)
+    {
+        int pos = bucketPos(key);//找到位置
         Node* cur = buckets_[pos];
         Node* prev = nullptr;
         while (cur)
         {
-            if (getKey_(obj) == getKey_(cur->obj))
+            if (key == getKey_(cur->obj))
             {
                 if (prev == nullptr)
                     buckets_[pos] = cur->next;
@@ -137,9 +115,55 @@ public:
 
     int nodeCnt() const { return nodeCnt_; }
 
-    int bucketSize() const { return buckets_.size(); }
+    int bucketCnt() const { return buckets_.size(); }
 
 private:
+
+    template <class X>
+    std::pair<Node*, bool> _insertUnique(X&& obj)
+    {
+        resize(nodeCnt_ + 1);//检查是否需要重建表格
+
+        int pos = bucketPos(getKey_(obj));//找到位置
+        Node* cur = buckets_[pos];
+        while (cur)
+        {
+            if (getKey_(obj) == getKey_(cur->obj))
+                return {cur, false};
+            cur = cur->next;
+        }
+        Node* newNode = new Node(std::forward<X>(obj));
+        newNode->next = buckets_[pos];
+        buckets_[pos] = newNode;
+        ++nodeCnt_;
+        return {newNode, true};
+    }
+
+    template <class X>
+    Node* _insertEqual(X&& obj)
+    {
+        resize(nodeCnt_ + 1);//检查是否需要重建表格
+
+        Node* newNode = new Node(std::forward<X>(obj));
+        int pos = bucketPos(getKey_(obj));//找到位置
+        Node* cur = buckets_[pos];
+        while (cur)
+        {
+            if (getKey_(obj) == getKey_(cur->obj))
+            {
+                newNode->next = cur->next;
+                cur->next = newNode;
+                ++nodeCnt_;
+                return newNode;
+            }
+            cur = cur->next;
+        }
+        newNode->next = buckets_[pos];
+        buckets_[pos] = newNode;
+        ++nodeCnt_;
+        return newNode;
+    }
+
     void initBuckets(int size)
     {
         int newSize = roundup(size);
@@ -147,14 +171,14 @@ private:
         nodeCnt_ = 0;
     }
 
-    int position(const Object& obj) const
+    int bucketPos(const KeyType& key) const
     {
-        return position(obj, buckets_.size());
+        return bucketPos(key, buckets_.size());
     }
 
-    int position(const Object& obj, int n) const
+    int bucketPos(const KeyType& key, int n) const
     {
-        return hash_(getKey_(obj)) % n;
+        return hash_(key) % n;
     }
 
     int roundup(int n)
@@ -186,7 +210,7 @@ private:
             while (first)
             {
                 //找到在新buckets中的位置
-                int newPos = position(first->obj, newSize);
+                int newPos = bucketPos(getKey_(first->obj), newSize);
                 //旧bucket指向下一个节点
                 buckets_[i] = first->next;
                 //当前节点插入到新bucket
@@ -204,15 +228,16 @@ private:
         Node* next;
         Object obj;
 
-        template <class X>
-        Node(X&& _obj): obj(std::forward<X>(_obj)) {}
+        Node(const Object& _obj): obj(_obj) {}
+        Node(Object&& _obj): obj(std::move(_obj)) {}
     };
 
     std::vector<Node*> buckets_;
     int nodeCnt_;
 
-    ExtractKey getKey_;
     HashFunc hash_;
+    ExtractKey getKey_;
 };
+
 
 #endif //HASH_TABLE_HPP

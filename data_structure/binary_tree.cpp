@@ -96,54 +96,18 @@ public:
     }
 
 
-    //设置根结点
-    template <class X>
-    Node* setroot(X&& x)
-    {
-        clear();
-        root_ = new Node(std::forward<X>(x));
-        root_->left = root_->right = nullptr;
-        root_->parent = nullptr;
-        return root_;
-    }
+    Node* setroot(const T& x) { return _setroot(x); }
+    Node* setroot(T&& x) { return _setroot(std::move(x)); }
 
-    //添加左孩子结点
-    template <class X>
-    Node* addleft(Node* node, X&& x)
-    {
-        Node* newNode = new Node(std::forward<X>(x));
-        newNode->left = newNode->right = nullptr;
-        newNode->parent = node;
-        node->left = newNode;
-        return newNode;
-    }
+    Node* addleft(Node* node, const T& x) { return _addleft(node, x); }
+    Node* addleft(Node* node, T&& x) { return _addleft(node, std::move(x)); }
 
-    //添加右孩子结点
-    template <class X>
-    Node* addright(Node* node, X&& x)
-    {
-        Node* newNode = new Node(std::forward<X>(x));
-        newNode->left = newNode->right = nullptr;
-        newNode->parent = node;
-        node->right = newNode;
-        return newNode;
-    }
+    Node* addright(Node* node, const T& x) { return _addright(node, x); }
+    Node* addright(Node* node, T&& x) { return _addright(node, std::move(x)); }
 
 
-    Node* find(const T& data) { return find(root_, data); }
+    Node* find(const T& data) { return _find(root_, data); }
 
-    Node* find(Node* node, const T& data)
-    {
-        if (node == nullptr)
-            return nullptr;
-        if (node->data == data)
-            return node;
-        Node* result = find(node->left, data);
-        if (result)
-            return result;
-        else
-            return find(node->right, data);
-    }
 
     void mirror(Node* node)
     {
@@ -326,13 +290,60 @@ private:
         Node* right;
         Node* parent;
 
-        template <class X>
-        Node(X&& _data): data(std::forward<X>(_data)) {}
+        Node(const T& _data): data(_data) {}
+        Node(T&& _data): data(std::move(_data)) {}
     };
 
     int _depth(Node* node) const
     {
         return node ? std::max(_depth(node->left), _depth(node->right)) + 1 : 0;
+    }
+
+
+    //设置根结点
+    template <class X>
+    Node* _setroot(X&& x)
+    {
+        clear();
+        root_ = new Node(std::forward<X>(x));
+        root_->left = root_->right = nullptr;
+        root_->parent = nullptr;
+        return root_;
+    }
+
+    //添加左孩子结点
+    template <class X>
+    Node* _addleft(Node* node, X&& x)
+    {
+        Node* newNode = new Node(std::forward<X>(x));
+        newNode->left = newNode->right = nullptr;
+        newNode->parent = node;
+        node->left = newNode;
+        return newNode;
+    }
+
+    //添加右孩子结点
+    template <class X>
+    Node* _addright(Node* node, X&& x)
+    {
+        Node* newNode = new Node(std::forward<X>(x));
+        newNode->left = newNode->right = nullptr;
+        newNode->parent = node;
+        node->right = newNode;
+        return newNode;
+    }
+
+    Node* _find(Node* node, const T& data)
+    {
+        if (node == nullptr)
+            return nullptr;
+        if (node->data == data)
+            return node;
+        Node* result = _find(node->left, data);
+        if (result)
+            return result;
+        else
+            return _find(node->right, data);
     }
 
     //前序遍历（递归）

@@ -11,7 +11,7 @@ class ArrayList
     {
         list1.swap(list2);
     }
-    
+
     friend std::ostream& operator<<(std::ostream& out, const ArrayList& list)
     {
         for (int i = 0; i < list.size_; ++i)
@@ -76,7 +76,7 @@ public:
         }
         return *this;
     }
-    
+
     void swap(ArrayList& list)
     {
         using std::swap;
@@ -85,51 +85,12 @@ public:
         swap(cap_, list.cap_);
     }
 
-    template <class X>
-    void add(X&& x)
-    {
-        if (!full())
-        {
-            alloc_.construct(data_ + size_, std::forward<X>(x));
-            ++size_;
-        }
-        else
-        {
-            insert(size_, std::forward<X>(x));
-        }
-    }
+    void add(const T& x) { _add(x); }
+    void add(T&& x) { _add(std::move(x)); }
 
-    template <class X>
-    void insert(int idx, X&& x)
-    {
-        if (!full())
-        {
-            alloc_.construct(data_ + size_, std::move(data_[size_ - 1]));//末尾构造一个元素
-            ++size_;
-            //元素后移
-            for (int i = size_ - 2; i > idx; --i)
-                alloc_.construct(data_ + i, std::move(data_[i - 1]));
-            data_[idx] = std::forward<X>(x);
-        }
-        else
-        {
-            //扩容，拷贝到新地址
-            int newCap = cap_ != 0 ? 2 * cap_ : 1;
-            auto newData = alloc_.allocate(newCap);
+    void insert(int idx, const T& x) { _insert(idx, x); }
+    void insert(int idx, T&& x) { _insert(idx, std::move(x)); }
 
-            for (int i = 0; i < idx; ++i)
-                alloc_.construct(newData + i, std::move(data_[i]));
-            alloc_.construct(newData + idx, std::forward<X>(x));
-            for (int i = idx; i < size_; ++i)
-                alloc_.construct(newData + i + 1, std::move(data_[i]));
-
-            free();
-            //调整为新数据
-            data_ = newData;
-            ++size_;
-            cap_ = newCap;
-        }
-    }
 
     int find(const T& x)
     {
@@ -199,6 +160,53 @@ public:
     int size() const { return size_; }
 
 private:
+
+    template <class X>
+    void _add(X&& x)
+    {
+        if (!full())
+        {
+            alloc_.construct(data_ + size_, std::forward<X>(x));
+            ++size_;
+        }
+        else
+        {
+            _insert(size_, std::forward<X>(x));
+        }
+    }
+
+    template <class X>
+    void _insert(int idx, X&& x)
+    {
+        if (!full())
+        {
+            alloc_.construct(data_ + size_, std::move(data_[size_ - 1]));//末尾构造一个元素
+            ++size_;
+            //元素后移
+            for (int i = size_ - 2; i > idx; --i)
+                alloc_.construct(data_ + i, std::move(data_[i - 1]));
+            data_[idx] = std::forward<X>(x);
+        }
+        else
+        {
+            //扩容，拷贝到新地址
+            int newCap = cap_ != 0 ? 2 * cap_ : 1;
+            auto newData = alloc_.allocate(newCap);
+
+            for (int i = 0; i < idx; ++i)
+                alloc_.construct(newData + i, std::move(data_[i]));
+            alloc_.construct(newData + idx, std::forward<X>(x));
+            for (int i = idx; i < size_; ++i)
+                alloc_.construct(newData + i + 1, std::move(data_[i]));
+
+            free();
+            //调整为新数据
+            data_ = newData;
+            ++size_;
+            cap_ = newCap;
+        }
+    }
+
     void free()
     {
         if (data_)
