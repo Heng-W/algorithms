@@ -15,12 +15,12 @@ public:
     ~BinarySearchTree() { clear(); }
 
     //插入节点（递归）
-    template <class X>
-    bool insert(X&& x) { return insert(root_, std::forward<X>(x)); }
+    bool insert(const T& x) { return _insert(root_, x); }
+    bool insert(T&& x) { return _insert(root_, std::move(x)); }
 
     //插入节点（非递归）
-    template <class X>
-    bool insertByIter(X&& x);
+    bool insertByIter(const T& x) { return _insertByIter(x); }
+    bool insertByIter(T&& x)  { return _insertByIter(std::move(x)); }
 
     //批量插入（拷贝）
     void insertRange(const T* begin, const T* end)
@@ -30,7 +30,7 @@ public:
     }
 
     //批量插入（移动）
-    void moveInsertRange(T* begin, T* end)
+    void emplaceRange(T* begin, T* end)
     {
         for (auto p = begin; p != end; ++p)
             insert(std::move(*p));
@@ -59,7 +59,10 @@ public:
 
 private:
     template <class X>
-    bool insert(Node*& node, X&& x);
+    bool _insert(Node*& node, X&& x);
+
+    template <class X>
+    bool _insertByIter(X&& x);
 
     bool deleteData(Node*& node, const T& data);
 
@@ -103,7 +106,7 @@ private:
             std::cout << node->data << " ";
         }
     }
-    
+
     //删除子树
     void deleteTree(Node*& node)
     {
@@ -127,15 +130,15 @@ private:
         Node* left;
         Node* right;
 
-        template <class X>
-        Node(X&& _data): data(std::forward<X>(_data)) {}
+        Node(const T& _data): data(_data) {}
+        Node(T&& _data): data(std::move(_data)) {}
     };
     Node* root_;
 };
 
 template <class T>
 template <class X>
-bool BinarySearchTree<T>::insert(Node*& node, X&& x)
+bool BinarySearchTree<T>::_insert(Node*& node, X&& x)
 {
     if (node == nullptr)
     {
@@ -144,16 +147,16 @@ bool BinarySearchTree<T>::insert(Node*& node, X&& x)
         return true;
     }
     if (x < node->data)
-        return insert(node->left, std::forward<X>(x));
+        return _insert(node->left, std::forward<X>(x));
     else if (node->data < x)
-        return insert(node->right, std::forward<X>(x));
+        return _insert(node->right, std::forward<X>(x));
     else
         return false;
 }
 
 template <class T>
 template <class X>
-bool BinarySearchTree<T>::insertByIter(X&& x)
+bool BinarySearchTree<T>::_insertByIter(X&& x)
 {
     Node* newNode = new Node(std::forward<X>(x));
     newNode->left = newNode->right = nullptr;
@@ -183,8 +186,7 @@ bool BinarySearchTree<T>::insertByIter(X&& x)
 }
 
 template <class T>
-typename BinarySearchTree<T>::Node* 
-BinarySearchTree<T>::find(Node* node, const T& data)
+auto BinarySearchTree<T>::find(Node* node, const T& data) ->Node*
 {
     if (node == nullptr)
         return nullptr;
@@ -192,13 +194,12 @@ BinarySearchTree<T>::find(Node* node, const T& data)
         return find(node->left, data);
     else if (node->data < data)
         return find(node->right, data);
-    else 
+    else
         return node;
 }
 
 template <class T>
-typename BinarySearchTree<T>::Node* 
-BinarySearchTree<T>::findByIter(Node* node, const T& data)
+auto BinarySearchTree<T>::findByIter(Node* node, const T& data) ->Node*
 {
     while (node)
     {

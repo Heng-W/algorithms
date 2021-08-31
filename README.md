@@ -3,8 +3,8 @@
 
 ### 实现语言：C++
 
-### 编译方式：cmake
-#### Linux环境编译
+### 构建方式：cmake
+#### 若Linux下编译：
 ```shell
 mkdir build 
 cd build
@@ -19,6 +19,7 @@ make
 - queue.cpp：链表实现的队列
 - stack.cpp：链表实现的堆栈
 - binary_heap.cpp：二叉堆，实现优先级队列
+- binary_tree.cpp：二叉树
 - binary_search_tree.cpp：二叉搜索树
 - hash_table.hpp：哈希表
 

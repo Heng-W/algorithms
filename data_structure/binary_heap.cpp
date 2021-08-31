@@ -14,26 +14,17 @@ class BinaryHeap
         return out;
     }
 public:
+    using Sequence = std::vector<T>;
+
     BinaryHeap() = default;
 
-    BinaryHeap(std::initializer_list<T> data): data_(data) { build(); }
+    BinaryHeap(const Sequence& data): data_(data) { build(); }
+    BinaryHeap(Sequence&& data): data_(std::move(data)) { build(); }
 
-    template <class X>
-    BinaryHeap(X&& data): data_(std::forward<X>(data)) { build(); }
 
-    template <class X>
-    void reset(X&& data)
-    {
-        data_ = std::forward<X>(data);
-        build();
-    }
+    void push(const T& x) { _push(x); }
+    void push(T&& x) { _push(std::move(x)); }
 
-    template <class X>
-    void push(X&& x)
-    {
-        data_.push_back(std::forward<X>(x));
-        percolateUp(data_.size() - 1);
-    }
 
     void pop()
     {
@@ -53,6 +44,14 @@ public:
     int size() const { return data_.size(); }
 
 private:
+
+    template <class X>
+    void _push(X&& x)
+    {
+        data_.push_back(std::forward<X>(x));
+        percolateUp(data_.size() - 1);
+    }
+
     void build()
     {
         //从最后一个非叶节点开始

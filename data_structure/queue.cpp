@@ -17,8 +17,8 @@ public:
         T data;
         Node* next;
 
-        template <class X>
-        Node(X&& _data): data(std::forward<X>(_data)) {}
+        Node(const T& _data): data(_data) {}
+        Node(T&& _data): data(std::move(_data)) {}
     };
 
     Queue(): head_(nullptr), tail_(nullptr), size_(0) {}
@@ -75,23 +75,8 @@ public:
         swap(size_, queue.size_);
     }
 
-    //加入队列
-    template <class X>
-    void enQueue(X&& x)
-    {
-        Node* newNode = new Node(std::forward<X>(x));
-        newNode->next = nullptr;
-        if (empty())
-        {
-            head_ = tail_ = newNode;
-        }
-        else
-        {
-            tail_->next = newNode;
-            tail_ = newNode;
-        }
-        ++size_;
-    }
+    void enQueue(const T& x) { _enQueue(x); }
+    void enQueue(T&& x) { _enQueue(std::move(x)); }
 
     //弹出队列
     T deQueue()
@@ -123,6 +108,24 @@ public:
     int size() const { return size_; }
 
 private:
+    //加入队列
+    template <class X>
+    void _enQueue(X&& x)
+    {
+        Node* newNode = new Node(std::forward<X>(x));
+        newNode->next = nullptr;
+        if (empty())
+        {
+            head_ = tail_ = newNode;
+        }
+        else
+        {
+            tail_->next = newNode;
+            tail_ = newNode;
+        }
+        ++size_;
+    }
+
     Node* head_;
     Node* tail_;
 

@@ -17,8 +17,8 @@ public:
         T data;
         Node* next;
 
-        template <class X>
-        Node(X&& _data): data(std::forward<X>(_data)) {}
+        Node(const T& _data): data(_data) {}
+        Node(T&& _data): data(std::move(_data)) {}
     };
 
     Stack(): head_(nullptr), size_(0) {}
@@ -74,14 +74,8 @@ public:
     }
 
     //加入元素
-    template <class X>
-    void push(X&& x)
-    {
-        Node* newNode = new Node(std::forward<X>(x));
-        newNode->next = head_;
-        head_ = newNode;
-        ++size_;
-    }
+    void push(const T& x) { _push(x); }
+    void push(T&& x) { _push(std::move(x)); }
 
     //弹出
     T pop()
@@ -113,6 +107,16 @@ public:
     int size() const { return size_; }
 
 private:
+    //加入元素
+    template <class X>
+    void _push(X&& x)
+    {
+        Node* newNode = new Node(std::forward<X>(x));
+        newNode->next = head_;
+        head_ = newNode;
+        ++size_;
+    }
+
     Node* head_;
     int size_;
 };
