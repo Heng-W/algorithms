@@ -37,7 +37,7 @@ make
 - bubble_sort.cpp：冒泡排序
 
 
-#### 数值方法（numerical_methods）
+#### 数值计算（numerical）
 
 - SOR.cpp：SOR迭代法（线性方程组求解）
 - gaussian_elimination.cpp：列主元高斯消元法（线性方程组求解）
