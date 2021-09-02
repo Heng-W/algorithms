@@ -1,6 +1,6 @@
 // 快速排序
-#include <iostream>
 
+#include <iostream>
 
 //三数取中
 inline int midIndex(int* arr, int left, int right)
@@ -30,7 +30,8 @@ inline int midIndex(int* arr, int left, int right)
 
 int partition(int* arr, int left, int right)
 {
-    std::swap(arr[left], arr[midIndex(arr, left, right)]);
+    using std::swap;
+    swap(arr[left], arr[midIndex(arr, left, right)]);
 
     int pivot = arr[left];
 
@@ -48,7 +49,8 @@ int partition(int* arr, int left, int right)
 
 int partition1(int* arr, int left, int right)
 {
-    std::swap(arr[left], arr[midIndex(arr, left, right)]);
+    using std::swap;
+    swap(arr[left], arr[midIndex(arr, left, right)]);
 
     int originLeft = left;
     int pivot = arr[left];
@@ -58,7 +60,7 @@ int partition1(int* arr, int left, int right)
         while (left < right && arr[right] >= pivot) --right;
         while (left < right && arr[left] <= pivot) ++left;
         if (left < right)
-            std::swap(arr[left], arr[right]);
+            swap(arr[left], arr[right]);
         else
             break;
     }
@@ -79,13 +81,22 @@ void quickSort(int* arr, int left, int right)
 }
 
 
+#include <ctime>
+#include <cstdlib>
+#include <vector>
+
 int main()
 {
-    int arr[] = {8, 1, 14, 3, 21, 5, 7, 10};
-    quickSort(arr, 0, sizeof(arr) / sizeof(int) - 1);
-    for (const auto& e : arr)
+    using namespace std;
+    srand(time(nullptr));
+    vector<int> vec;
+    for (int i = 0; i < 10; ++i)
     {
-        std::cout << e << std::endl;
+        vec.push_back(rand() % 100);
     }
+    quickSort(&vec[0], 0, vec.size() - 1);
+    for (const auto& x : vec)
+        cout << x << " ";
+    cout << endl;
     return 0;
 }

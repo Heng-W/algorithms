@@ -4,7 +4,7 @@
 ### 实现语言：C++
 
 ### 构建方式：cmake
-#### 若Linux下编译：
+#### 例如在Linux下编译：
 ```shell
 mkdir build 
 cd build
@@ -22,11 +22,19 @@ make
 - binary_tree.cpp：二叉树
 - binary_search_tree.cpp：二叉搜索树
 - hash_table.hpp：哈希表
+- hash_set.cpp：哈希表实现的集合
+- hash_map.cpp：哈希表实现的map
 
 
 #### 排序（sort）
 - quick_sort.cpp：快速排序
+- merge_sort.cpp：归并排序
 - heap_sort.cpp：堆排序
+- shell_sort.cpp：希尔排序
+- radix_sort.cpp：基数排序
+- insert_sort.cpp：插入排序
+- select_sort.cpp：选择排序
+- bubble_sort.cpp：冒泡排序
 
 
 #### 数值方法（numerical_methods）
