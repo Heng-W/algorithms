@@ -1,9 +1,10 @@
 //堆排序
+
 #include <iostream>
 
 
 //递归调整
-template <typename T>
+template <class T>
 void adjustHeapByRecursion(T* arr, int size, int idx)
 {
     int left = 2 * idx + 1;
@@ -21,7 +22,7 @@ void adjustHeapByRecursion(T* arr, int size, int idx)
 
 
 //迭代调整
-template <typename T>
+template <class T>
 void adjustHeap(T* arr, int size, int idx)
 {
     T tmp = arr[idx];
@@ -46,7 +47,7 @@ void adjustHeap(T* arr, int size, int idx)
 }
 
 
-template <typename T>
+template <class T>
 void heapSort(T* arr, int size)
 {
     //从最后一个非叶子节点开始，进行堆调整
@@ -62,13 +63,23 @@ void heapSort(T* arr, int size)
     }
 }
 
+
+#include <ctime>
+#include <cstdlib>
+#include <vector>
+
 int main()
 {
-    int arr[] = {8, 1, 14, 3, 21, 5, 7, 10};
-    heapSort(arr, sizeof(arr) / sizeof(int));
-    for (const auto& e : arr)
+    using namespace std;
+    srand(time(nullptr));
+    vector<int> vec;
+    for (int i = 0; i < 10; ++i)
     {
-        std::cout << e << std::endl;
+        vec.push_back(rand() % 100);
     }
+    heapSort(&vec[0], vec.size());
+    for (const auto& x : vec)
+        cout << x << " ";
+    cout << endl;
     return 0;
 }

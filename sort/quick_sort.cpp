@@ -1,4 +1,5 @@
 // 快速排序
+
 #include <iostream>
 
 
@@ -79,13 +80,22 @@ void quickSort(int* arr, int left, int right)
 }
 
 
+#include <ctime>
+#include <cstdlib>
+#include <vector>
+
 int main()
 {
-    int arr[] = {8, 1, 14, 3, 21, 5, 7, 10};
-    quickSort(arr, 0, sizeof(arr) / sizeof(int) - 1);
-    for (const auto& e : arr)
+    using namespace std;
+    srand(time(nullptr));
+    vector<int> vec;
+    for (int i = 0; i < 10; ++i)
     {
-        std::cout << e << std::endl;
+        vec.push_back(rand() % 100);
     }
+    quickSort(&vec[0], 0, vec.size() - 1);
+    for (const auto& x : vec)
+        cout << x << " ";
+    cout << endl;
     return 0;
 }
