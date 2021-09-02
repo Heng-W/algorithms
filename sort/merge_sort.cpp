@@ -61,16 +61,22 @@ template <class T>
 void mergeSortI(std::vector<T>& data)
 {
     std::vector<T> tmp = data;
-    const int size = data.size();
-    for (int k = 1; k < size; k *= 2)
+    //len：子序列长度
+    for (int len = 1; len < data.size(); len *= 2)
     {
-        int pos;
-        for (pos = 0; pos <= size - 2 * k; pos += 2 * k)
-            merge(&data[pos], &data[pos + k], &data[pos + k], &data[pos + 2 * k], &tmp[pos]);
-        if (size > pos + k)
-            merge(&data[pos], &data[pos + k], &data[pos + k], &data[size], &tmp[pos]);
+        T* cur = &*data.begin();
+        T* end = &*data.end();
+        T* dst = &*tmp.begin();
+        while (end - cur >= 2 * len)
+        {
+            merge(cur, cur + len, cur + len, cur + 2 * len, dst);
+            cur += 2 * len;
+            dst += 2 * len;
+        }
+        if (end - cur > len)
+            merge(cur, cur + len, cur + len, end, dst);
         else
-            std::copy(&data[pos], &data[size], &tmp[pos]);
+            std::copy(cur, end, dst);
         data.swap(tmp);
     }
 }

@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-
 //三数取中
 inline int midIndex(int* arr, int left, int right)
 {
@@ -31,7 +30,8 @@ inline int midIndex(int* arr, int left, int right)
 
 int partition(int* arr, int left, int right)
 {
-    std::swap(arr[left], arr[midIndex(arr, left, right)]);
+    using std::swap;
+    swap(arr[left], arr[midIndex(arr, left, right)]);
 
     int pivot = arr[left];
 
@@ -49,7 +49,8 @@ int partition(int* arr, int left, int right)
 
 int partition1(int* arr, int left, int right)
 {
-    std::swap(arr[left], arr[midIndex(arr, left, right)]);
+    using std::swap;
+    swap(arr[left], arr[midIndex(arr, left, right)]);
 
     int originLeft = left;
     int pivot = arr[left];
@@ -59,7 +60,7 @@ int partition1(int* arr, int left, int right)
         while (left < right && arr[right] >= pivot) --right;
         while (left < right && arr[left] <= pivot) ++left;
         if (left < right)
-            std::swap(arr[left], arr[right]);
+            swap(arr[left], arr[right]);
         else
             break;
     }
