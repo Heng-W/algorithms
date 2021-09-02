@@ -78,7 +78,6 @@ void mergeSortI(std::vector<T>& data)
 
 #include <ctime>
 #include <cstdlib>
-#include <vector>
 #include <iostream>
 
 int main()

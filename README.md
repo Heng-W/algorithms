@@ -31,6 +31,7 @@ make
 - merge_sort.cpp：归并排序
 - heap_sort.cpp：堆排序
 - shell_sort.cpp：希尔排序
+- radix_sort.cpp：基数排序
 - insert_sort.cpp：插入排序
 - select_sort.cpp：选择排序
 - bubble_sort.cpp：冒泡排序
