@@ -8,4 +8,4 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -O2")
 
 add_subdirectory(data_structure)
 add_subdirectory(sort)
-add_subdirectory(numerical_methods)
+add_subdirectory(numerical)
