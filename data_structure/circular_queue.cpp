@@ -1,6 +1,8 @@
+//数组实现的环形队列
 
 #include <assert.h>
 #include <memory>
+
 
 template <class T>
 class CircularQueue
