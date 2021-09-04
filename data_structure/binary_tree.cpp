@@ -286,6 +286,23 @@ public:
 
     void clear() { deleteTree(root_); }
 
+    //中序遍历方式删除
+    void clear2()
+    {
+        if (root_ == nullptr) return;
+        std::queue<Node*> nodes;
+        nodes.push(root_);
+        while (!nodes.empty())
+        {
+            Node* cur = nodes.front();
+            nodes.pop();
+            if (cur->left) nodes.push(cur->left);
+            if (cur->right) nodes.push(cur->right);
+            delete cur;
+        }
+        root_ = nullptr;
+    }
+
 private:
     struct Node
     {
@@ -396,20 +413,15 @@ private:
         }
     }
 
+    //递归删除子树节点
     void deleteTree(Node*& node)
-    {
-        _deleteTree(node);
-        node = nullptr;
-    }
-
-    //递归删除结点
-    void _deleteTree(Node* node)
     {
         if (node)
         {
-            _deleteTree(node->left);
-            _deleteTree(node->right);
+            deleteTree(node->left);
+            deleteTree(node->right);
             delete node;
+            node = nullptr;
         }
     }
 

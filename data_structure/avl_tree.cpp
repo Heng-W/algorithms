@@ -105,10 +105,9 @@ private:
                 return false;
             if (height(node->left) - height(node->right) == 2)
             {
-                if (x < node->left->data)
-                    rightRotation(node);
-                else
-                    leftRightRotation(node);
+                if (node->left->data < x)
+                    leftRotation(node->left);
+                rightRotation(node);
             }
         }
         else if (node->data < x)
@@ -117,10 +116,9 @@ private:
                 return false;
             if (height(node->right) - height(node->left) == 2)
             {
-                if (node->right->data < x)
-                    leftRotation(node);
-                else
-                    rightLeftRotation(node);
+                if (x < node->right->data)
+                    rightRotation(node->right);
+                leftRotation(node);
             }
         }
         else
@@ -142,11 +140,9 @@ private:
                 return false;
             if (height(node->right) - height(node->left) == 2)
             {
-                Node* rchild = node->right;
-                if (height(rchild->right) >= height(rchild->left))
-                    leftRotation(node);
-                else
-                    rightLeftRotation(node);
+                if (height(node->right->right) < height(node->right->left))
+                    rightRotation(node->right);
+                leftRotation(node);
             }
         }
         else if (node->data < data)
@@ -155,11 +151,9 @@ private:
                 return false;
             if (height(node->left) - height(node->right) == 2)
             {
-                Node* lchild = node->left;
-                if (height(lchild->left) >= height(lchild->right))
-                    rightRotation(node);
-                else
-                    leftRightRotation(node);
+                if (height(node->left->left) < height(node->left->right))
+                    leftRotation(node->left);
+                rightRotation(node);
             }
         }
         else
@@ -218,18 +212,6 @@ private:
         updateHeight(lchild);
 
         node = lchild;
-    }
-
-    void rightLeftRotation(Node*& node)
-    {
-        rightRotation(node->right);
-        leftRotation(node);
-    }
-
-    void leftRightRotation(Node*& node)
-    {
-        leftRotation(node->left);
-        rightRotation(node);
     }
 
     //中序遍历（递归）

@@ -1,6 +1,5 @@
 // 二叉搜索树
 #include <vector>
-#include <queue>
 
 
 template <class T>
@@ -59,7 +58,7 @@ public:
 
     int depth() const { return depth(root_); }
 
-    void clear();
+    void clear() { deleteTree(root_); }
 
 private:
     template <class X>
@@ -88,6 +87,18 @@ private:
             inorder(node->left, res);
             res.push_back(node->data);
             inorder(node->right, res);
+        }
+    }
+
+    //递归删除子树节点
+    void deleteTree(Node*& node)
+    {
+        if (node)
+        {
+            deleteTree(node->left);
+            deleteTree(node->right);
+            delete node;
+            node = nullptr;
         }
     }
 
@@ -125,16 +136,8 @@ template <class T>
 template <class X>
 bool BinarySearchTree<T>::_insertByIter(X&& x)
 {
-    Node* newNode = new Node(std::forward<X>(x));
-    newNode->left = newNode->right = nullptr;
-
-    if (root_ == nullptr)
-    {
-        root_ = newNode;
-        return true;
-    }
-    Node* cur = root_;
     Node* parent = nullptr;
+    Node* cur = root_;
     while (cur)
     {
         parent = cur;
@@ -145,10 +148,15 @@ bool BinarySearchTree<T>::_insertByIter(X&& x)
         else
             return false;
     }
-    if (x < parent->data)
-        parent->left = newNode;
+    Node* node = new Node(std::forward<X>(x));
+    node->left = node->right = nullptr;
+
+    if (root_ == nullptr)
+        root_ = node;
+    else if (x < parent->data)
+        parent->left = node;
     else
-        parent->right = newNode;
+        parent->right = node;
     return true;
 }
 
@@ -245,23 +253,6 @@ void BinarySearchTree<T>::deleteNode(Node*& node)
         node = (node->left != nullptr) ? node->left : node->right;
         delete tmp;
     }
-}
-
-template <class T>
-void BinarySearchTree<T>::clear()
-{
-    if (root_ == nullptr) return;
-    std::queue<Node*> nodes;
-    nodes.push(root_);
-    while (!nodes.empty())
-    {
-        Node* cur = nodes.front();
-        nodes.pop();
-        if (cur->left) nodes.push(cur->left);
-        if (cur->right) nodes.push(cur->right);
-        delete cur;
-    }
-    root_ = nullptr;
 }
 
 
