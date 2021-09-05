@@ -18,9 +18,12 @@ make
 - linked_list.cpp：双向循环链表实现的线性表
 - queue.cpp：链表实现的队列
 - stack.cpp：链表实现的堆栈
+- circular_queue.cpp：数组实现的环形队列
 - binary_heap.cpp：二叉堆，实现优先级队列
 - binary_tree.cpp：二叉树
 - binary_search_tree.cpp：二叉搜索树
+- avl_tree.cpp：avl树
+- rb_tree.hpp：红黑树
 - hash_table.hpp：哈希表
 - hash_set.cpp：哈希表实现的集合
 - hash_map.cpp：哈希表实现的map
@@ -37,7 +40,7 @@ make
 - bubble_sort.cpp：冒泡排序
 
 
-#### 数值方法（numerical_methods）
+#### 数值计算（numerical）
 
 - SOR.cpp：SOR迭代法（线性方程组求解）
 - gaussian_elimination.cpp：列主元高斯消元法（线性方程组求解）

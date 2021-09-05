@@ -1,5 +1,6 @@
 // 二叉树
 #include <assert.h>
+#include <vector>
 #include <stack>
 #include <queue>
 #include <algorithm>
@@ -165,6 +166,7 @@ public:
     //先序遍历（非递归2）
     std::vector<T> preorderI2() const
     {
+        if (root_ == nullptr) return {};
         std::vector<T> res;
         std::stack<Node*> sta;
         sta.push(root_);
@@ -236,6 +238,7 @@ public:
     //后序遍历（非递归2）
     std::vector<T> postorderI2() const
     {
+        if (root_ == nullptr) return {};
         std::vector<T> res;
         std::stack<Node*> sta;
         Node* cur = root_;
@@ -261,18 +264,19 @@ public:
     }
 
     //层序遍历
-    std::vector<T> leverorder() const
+    std::vector<T> levelOrder() const
     {
+        if (root_ == nullptr) return {};
         std::vector<T> res;
-        std::queue<Node*> queue;
-        queue.push(root_);
-        while (!queue.empty())
+        std::queue<Node*> nodes;
+        nodes.push(root_);
+        while (!nodes.empty())
         {
-            Node* cur = queue.front();
-            queue.pop();
+            Node* cur = nodes.front();
+            nodes.pop();
             res.push_back(cur->data);
-            if (cur->left) queue.push(cur->left);
-            if (cur->right) queue.push(cur->right);
+            if (cur->left) nodes.push(cur->left);
+            if (cur->right) nodes.push(cur->right);
         }
         return res;
     }
@@ -281,6 +285,23 @@ public:
     int depth() const { return _depth(root_); }
 
     void clear() { deleteTree(root_); }
+
+    //中序遍历方式删除
+    void clear2()
+    {
+        if (root_ == nullptr) return;
+        std::queue<Node*> nodes;
+        nodes.push(root_);
+        while (!nodes.empty())
+        {
+            Node* cur = nodes.front();
+            nodes.pop();
+            if (cur->left) nodes.push(cur->left);
+            if (cur->right) nodes.push(cur->right);
+            delete cur;
+        }
+        root_ = nullptr;
+    }
 
 private:
     struct Node
@@ -392,20 +413,15 @@ private:
         }
     }
 
+    //递归删除子树节点
     void deleteTree(Node*& node)
-    {
-        _deleteTree(node);
-        node = nullptr;
-    }
-
-    //递归删除结点
-    void _deleteTree(Node* node)
     {
         if (node)
         {
-            _deleteTree(node->left);
-            _deleteTree(node->right);
+            deleteTree(node->left);
+            deleteTree(node->right);
             delete node;
+            node = nullptr;
         }
     }
 
@@ -433,15 +449,15 @@ void printInfo(const BinaryTree<T>& tree)
     res = tree.postorder();
     for (const auto& x : res) cout << x << " ";
     cout << endl;
-    cout << "levelorder traversal: ";
-    res = tree.leverorder();
+    cout << "levelOrder traversal: ";
+    res = tree.levelOrder();
     for (const auto& x : res) cout << x << " ";
     cout << endl;
 }
 
 
-#include <stdlib.h>
-#include <time.h>
+#include <cstdlib>
+#include <ctime>
 
 int main()
 {
@@ -461,7 +477,7 @@ int main()
     auto pre = tree1.preorder();
     auto in = tree1.inorder();
     auto post = tree1.postorder();
-    auto level = tree1.leverorder();
+    auto level = tree1.levelOrder();
 
     BinaryTree<int> tree2(pre.data(), in.data(), in.size(), 0);
     BinaryTree<int> tree3(in.data(), post.data(), in.size(), 1);

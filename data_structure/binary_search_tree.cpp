@@ -1,5 +1,5 @@
 // 二叉搜索树
-#include <iostream>
+#include <vector>
 
 
 template <class T>
@@ -37,10 +37,10 @@ public:
     }
 
     //查找节点（递归）
-    Node* find(Node* node, const T& data);
+    Node* find(const T& data) { return _find(root_, data); }
 
     //查找节点（非递归）
-    Node* findByIter(Node* node, const T& data);
+    Node* findByIter(const T& data);
 
     //删除（递归）
     bool deleteData(const T& data) { return deleteData(root_, data); }
@@ -48,10 +48,13 @@ public:
     //删除（非递归）
     bool deleteDataByIter(const T& data);
 
-    //前序，中序，后序遍历
-    void preorder() const { preorder(root_); }
-    void inorder() const { inorder(root_); }
-    void postorder() const { postorder(root_); }
+    //中序遍历
+    std::vector<T> inorder() const
+    {
+        std::vector<T> res;
+        inorder(root_, res);
+        return res;
+    }
 
     int depth() const { return depth(root_); }
 
@@ -64,6 +67,8 @@ private:
     template <class X>
     bool _insertByIter(X&& x);
 
+    Node* _find(Node* node, const T& data);
+
     bool deleteData(Node*& node, const T& data);
 
     void deleteNode(Node*& node);
@@ -74,53 +79,26 @@ private:
         return node ? std::max(depth(node->left), depth(node->right)) + 1 : 0;
     }
 
-    //前序遍历
-    void preorder(Node* node) const
-    {
-        if (node)
-        {
-            std::cout << node->data << " ";
-            preorder(node->left);
-            preorder(node->right);
-        }
-    }
-
     //中序遍历
-    void inorder(Node* node) const
+    void inorder(Node* node, std::vector<T>& res) const
     {
         if (node)
         {
-            inorder(node->left);
-            std::cout << node->data << " ";
-            inorder(node->right);
+            inorder(node->left, res);
+            res.push_back(node->data);
+            inorder(node->right, res);
         }
     }
 
-    //后序遍历
-    void postorder(Node* node) const
-    {
-        if (node)
-        {
-            postorder(node->left);
-            postorder(node->right);
-            std::cout << node->data << " ";
-        }
-    }
-
-    //删除子树
+    //递归删除子树节点
     void deleteTree(Node*& node)
     {
-        _deleteTree(node);
-        node = nullptr;
-    }
-
-    void _deleteTree(Node* node)
-    {
         if (node)
         {
-            _deleteTree(node->left);
-            _deleteTree(node->right);
+            deleteTree(node->left);
+            deleteTree(node->right);
             delete node;
+            node = nullptr;
         }
     }
 
@@ -158,16 +136,8 @@ template <class T>
 template <class X>
 bool BinarySearchTree<T>::_insertByIter(X&& x)
 {
-    Node* newNode = new Node(std::forward<X>(x));
-    newNode->left = newNode->right = nullptr;
-
-    if (root_ == nullptr)
-    {
-        root_ = newNode;
-        return true;
-    }
-    Node* cur = root_;
     Node* parent = nullptr;
+    Node* cur = root_;
     while (cur)
     {
         parent = cur;
@@ -178,37 +148,43 @@ bool BinarySearchTree<T>::_insertByIter(X&& x)
         else
             return false;
     }
-    if (x < parent->data)
-        parent->left = newNode;
+    Node* node = new Node(std::forward<X>(x));
+    node->left = node->right = nullptr;
+
+    if (root_ == nullptr)
+        root_ = node;
+    else if (x < parent->data)
+        parent->left = node;
     else
-        parent->right = newNode;
+        parent->right = node;
     return true;
 }
 
 template <class T>
-auto BinarySearchTree<T>::find(Node* node, const T& data) ->Node*
+auto BinarySearchTree<T>::_find(Node* node, const T& data) ->Node*
 {
     if (node == nullptr)
         return nullptr;
-    if (data < node->data)
-        return find(node->left, data);
+    else if (data < node->data)
+        return _find(node->left, data);
     else if (node->data < data)
-        return find(node->right, data);
+        return _find(node->right, data);
     else
         return node;
 }
 
 template <class T>
-auto BinarySearchTree<T>::findByIter(Node* node, const T& data) ->Node*
+auto BinarySearchTree<T>::findByIter(const T& data) ->Node*
 {
-    while (node)
+    Node* cur = root_;
+    while (cur)
     {
-        if (data < node->data)
-            node = node->left;
-        else if (node->data < data)
-            node = node->right;
+        if (data < cur->data)
+            cur = cur->left;
+        else if (cur->data < data)
+            cur = cur->right;
         else
-            return node;
+            return cur;
     }
     return nullptr;
 }
@@ -218,15 +194,13 @@ bool BinarySearchTree<T>::deleteData(Node*& node, const T& data)
 {
     if (node == nullptr)
         return false;//未找到
-    if (data == node->data)
-    {
-        deleteNode(node);//删除节点
-        return true;
-    }
-    if (data < node->data)
+    else if (data < node->data)
         return deleteData(node->left, data);
-    else
+    else if (node->data < data)
         return deleteData(node->right, data);
+    else
+        deleteNode(node);//删除节点
+    return true;
 }
 
 template <class T>
@@ -257,19 +231,7 @@ bool BinarySearchTree<T>::deleteDataByIter(const T& data)
 template <class T>
 void BinarySearchTree<T>::deleteNode(Node*& node)
 {
-    if (node->left == nullptr) //左节点为空
-    {
-        Node* tmp = node;
-        node = node->right;
-        delete tmp;
-    }
-    else if (node->right == nullptr) //右节点为空
-    {
-        Node* tmp = node;
-        node = node->left;
-        delete tmp;
-    }
-    else //左右节点都不为空
+    if (node->left && node->right)
     {
         Node* parent = node;
         Node* sub = node->right;
@@ -285,30 +247,42 @@ void BinarySearchTree<T>::deleteNode(Node*& node)
             parent->right = sub->right;
         delete sub;
     }
+    else
+    {
+        Node* tmp = node;
+        node = (node->left != nullptr) ? node->left : node->right;
+        delete tmp;
+    }
 }
 
-#include <stdlib.h>
-#include <time.h>
+
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
+#include <iterator>
 
 int main()
 {
     using namespace std;
-    constexpr int N = 10;
-    int num[N];
-
     srand(time(nullptr));
-    for (int i = 0; i < N; ++i)
+
+    vector<int> vec;
+    for (int i = 0; i < 10; ++i)
     {
-        num[i] = rand() % 128;
+        vec.push_back(rand() % 100);
     }
 
-    BinarySearchTree<int> tree(num, num + N);
-    tree.inorder();
+    BinarySearchTree<int> tree(&*vec.cbegin(), &*vec.cend());
+    auto res = tree.inorder();
+    copy(res.cbegin(), res.cend(), ostream_iterator<int>(cout, " "));
     cout << endl;
 
-    tree.deleteData(num[0]);
-    tree.deleteData(num[1]);
-    tree.inorder();
+    for (int i = 0; i < 5; ++i)
+    {
+        tree.deleteData(vec[i]);
+    }
+    res = tree.inorder();
+    copy(res.cbegin(), res.cend(), ostream_iterator<int>(cout, " "));
     cout << endl;
 
     return 0;
