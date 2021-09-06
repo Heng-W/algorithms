@@ -1,11 +1,11 @@
 
 #include "rb_tree.hpp"
 
-template <class Object>
+template <class Object, class Compare = std::less<Object>>
 class Set
 {
 public:
-    using Tree = RBTree<Object>;
+    using Tree = RBTree<Object, Object, std::_Identity<Object>, Compare>;
     using Iterator = typename Tree::Iterator;
     using ConstIterator = typename Tree::ConstIterator;
     using KeyType = typename Tree::KeyType;

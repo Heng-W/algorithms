@@ -55,13 +55,15 @@ public:
     std::pair<Iterator, bool>
     insert(Object&& obj) { return _insert(std::move(obj)); }
 
-
     //插入（元素可以重复）
-    Iterator insertEqual(const Object& obj) { return _insert(obj); }
-    Iterator insertEqual(Object&& obj) { return _insert(std::move(obj)); }
+    Iterator insertEqual(const Object& obj) { return _insertEqual(obj); }
+    Iterator insertEqual(Object&& obj) { return _insertEqual(std::move(obj)); }
 
     //删除
     bool remove(const KeyType& key);
+
+    Object& findOrInsert(const Object& obj) { return *insert(obj).first; }
+    Object& findOrInsert(Object&& obj) { return *insert(std::move(obj)).first; }
 
 
     void clear() { deleteTree(root_); }
@@ -271,7 +273,7 @@ leftRotation(Node* node)
     node->right = rchild->left;
     if (rchild->left != nil_)
         rchild->left->parent = node;
-
+        
     setParentPtr(node, rchild);
 
     rchild->left = node;
@@ -372,8 +374,8 @@ remove(const KeyType& key)
         Node* sub = node->right;
         while (sub->left != nil_)
             sub = sub->left;
-        node->obj = std::move(sub->obj);
-        node = sub;
+        node->obj=std::move(sub->obj);
+        node=sub;
     }
     if (node->left == nil_ && node->right == nil_)
     {
