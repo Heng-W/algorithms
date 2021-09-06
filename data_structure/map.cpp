@@ -54,28 +54,34 @@ private:
 
 
 #include <iostream>
+#include <memory>
+
+template <typename T, typename... Ts>
+inline std::unique_ptr<T> makeUnique(Ts&& ... params)
+{
+    return std::unique_ptr<T>(new T(std::forward<Ts>(params)...));
+}
 
 int main()
 {
     using namespace std;
-    Map<int, int> map;
-    map.insert({298, 153});
-    map.insert({190, 123});
-    map.insert({892, 132});
-    map.insert({92, 456});
-    map.insert({122, 125});
+    Map<int, unique_ptr<int>> map;
+    map.insert({298, makeUnique<int>(153)});
+    map.insert({320, makeUnique<int>(178)});
+    map.insert({120, makeUnique<int>(134)});
+    map.insert({356, makeUnique<int>(232)});
 
     cout << map.count() << endl;
 
-    cout << (map.find(298) != map.end()) << endl;
+    cout << (map.find(120) != map.end()) << endl;
     cout << (map.find(10) != map.end()) << endl;
 
-    cout << map[20] << endl;
-    cout << map[122] << endl;
+    map.remove(298);
 
-    //map.remove(92);
+    map[110] = makeUnique<int>(282);
+    map[90] = makeUnique<int>(265);
 
-    for (const auto& x : map) cout << x.second << " ";
+    for (const auto& x : map) cout << *x.second << " ";
     cout << endl;
 
     return 0;
