@@ -1,79 +1,57 @@
 #ifndef HASH_TABLE_HPP
 #define HASH_TABLE_HPP
 
+#include <functional>
 #include <vector>
-#include <iostream>
 
 //哈希表
-template <class Object, class HashFunc, class ExtractKey>
+template <class Object, class HashFunc = std::hash<Object>,
+          class ExtractKey = std::_Identity<Object>>
 class HashTable
 {
-    friend std::ostream& operator<<(std::ostream& out, const HashTable& ht)
-    {
-        for (int i = 0; i < ht.buckets_.size(); ++i)
-        {
-            auto cur = ht.buckets_[i];
-            while (cur)
-            {
-                out << cur->obj << " ";
-                cur = cur->next;
-            }
-        }
-        return out;
-    }
-
-    class Node;
+    template <class NodePtr> struct Iterator_;
+    struct Node;
 public:
-    using Iterator = Node*;
-    using ConstIterator = const Node*;
+    using Iterator = Iterator_<Node*>;
+    using ConstIterator = Iterator_<const Node*>;
     using KeyType = typename std::result_of<ExtractKey(Object)>::type;
 
     HashTable(int n = 32):
-        nodeCnt_(0),
+        nodeCount_(0),
         hash_(HashFunc()),
         getKey_(ExtractKey())
     {
         initBuckets(n);
     }
 
-    std::pair<Node*, bool> insertUnique(const Object& obj)
-    { return _insertUnique(obj); }
+    //插入元素（不重复）
+    std::pair<Iterator, bool> insert(const Object& obj)
+    { return _insert(obj); }
 
-    std::pair<Node*, bool> insertUnique(Object&& obj)
-    { return _insertUnique(std::move(obj)); }
+    std::pair<Iterator, bool> insert(Object&& obj)
+    { return _insert(std::move(obj)); }
 
-    Node* insertEqual(const Object& obj) { return _insertEqual(obj); }
-    Node* insertEqual(Object&& obj) { return _insertEqual(std::move(obj)); }
+    //插入元素（可以重复）
+    Iterator insertEqual(const Object& obj) { return _insertEqual(obj); }
+    Iterator insertEqual(Object&& obj) { return _insertEqual(std::move(obj)); }
 
-    Node* find(const KeyType& key)
-    {
-        const auto* tmp = this;
-        return const_cast<Node*>(tmp->find(key));
-    }
+    //查找
+    ConstIterator find(const KeyType& key) const
+    { return ConstIterator(_find(key), this); }
 
-    const Node* find(const KeyType& key) const
-    {
-        int pos = bucketPos(key);//找到位置
-        const Node* cur = buckets_[pos];
-        while (cur)
-        {
-            if (key == getKey_(cur->obj))
-                return cur;
-            cur = cur->next;
-        }
-        return nullptr;
-    }
+    Iterator find(const KeyType& key)
+    { return Iterator(const_cast<Node*>(_find(key)), this); }
+
 
     Object& findOrInsert(const Object& obj)
     {
-        return insertUnique(obj).first->obj;
+        return *insert(obj).first;
     }
 
     Object& findOrInsert(Object&& obj)
     {
-        return insertUnique(std::move(obj)).first->obj;
+        return *insert(std::move(obj)).first;
     }
-
 
     bool remove(const KeyType& key)
     {
@@ -110,65 +88,95 @@ public:
             }
             buckets_[i] = nullptr;
         }
-        nodeCnt_ = 0;
+        nodeCount_ = 0;
     }
 
-    int nodeCnt() const { return nodeCnt_; }
+    int nodeCount() const { return nodeCount_; }
 
-    int bucketCnt() const { return buckets_.size(); }
+    int bucketCount() const { return buckets_.size(); }
+
+
+    ConstIterator begin() const { return ConstIterator(_begin(), this); }
+    Iterator begin() { return Iterator(const_cast<Node*>(_begin()), this); }
+
+    ConstIterator end() const { return ConstIterator(nullptr, this); }
+    Iterator end() { return Iterator(nullptr, this); }
 
 private:
 
-    template <class X>
-    std::pair<Node*, bool> _insertUnique(X&& obj)
+    const Node* _find(const KeyType& key) const
     {
-        resize(nodeCnt_ + 1);//检查是否需要重建表格
+        int pos = bucketPos(key);//找到位置
+        const Node* cur = buckets_[pos];
+        while (cur)
+        {
+            if (key == getKey_(cur->obj))
+                return cur;
+            cur = cur->next;
+        }
+        return nullptr;
+    }
+
+    template <class X>
+    std::pair<Iterator, bool> _insert(X&& obj)
+    {
+        resize(nodeCount_ + 1);//检查是否需要重建表格
 
         int pos = bucketPos(getKey_(obj));//找到位置
         Node* cur = buckets_[pos];
         while (cur)
         {
             if (getKey_(obj) == getKey_(cur->obj))
-                return {cur, false};
+                return {Iterator(cur, this), false};
             cur = cur->next;
         }
-        Node* newNode = new Node(std::forward<X>(obj));
-        newNode->next = buckets_[pos];
-        buckets_[pos] = newNode;
-        ++nodeCnt_;
-        return {newNode, true};
+        Node* node = new Node(std::forward<X>(obj));
+        node->next = buckets_[pos];
+        buckets_[pos] = node;
+        ++nodeCount_;
+        return {Iterator(node, this), true};
     }
 
     template <class X>
-    Node* _insertEqual(X&& obj)
+    Iterator _insertEqual(X&& obj)
     {
-        resize(nodeCnt_ + 1);//检查是否需要重建表格
+        resize(nodeCount_ + 1);//检查是否需要重建表格
 
-        Node* newNode = new Node(std::forward<X>(obj));
+        Node* node = new Node(std::forward<X>(obj));
         int pos = bucketPos(getKey_(obj));//找到位置
         Node* cur = buckets_[pos];
         while (cur)
         {
             if (getKey_(obj) == getKey_(cur->obj))
             {
-                newNode->next = cur->next;
-                cur->next = newNode;
-                ++nodeCnt_;
-                return newNode;
+                node->next = cur->next;
+                cur->next = node;
+                ++nodeCount_;
+                return node;
             }
             cur = cur->next;
         }
-        newNode->next = buckets_[pos];
-        buckets_[pos] = newNode;
-        ++nodeCnt_;
-        return newNode;
+        node->next = buckets_[pos];
+        buckets_[pos] = node;
+        ++nodeCount_;
+        return Iterator(node, this);
     }
 
     void initBuckets(int size)
     {
         int newSize = roundup(size);
         buckets_.resize(newSize, nullptr);
-        nodeCnt_ = 0;
+        nodeCount_ = 0;
+    }
+
+    const Node* _begin() const
+    {
+        const Node* cur = buckets_[0];
+        int pos = 0;
+        while (++pos < buckets_.size() && !buckets_[pos]);
+        if (pos < buckets_.size())
+            cur = buckets_[pos];
+        return cur;
     }
 
     int bucketPos(const KeyType& key) const
@@ -223,6 +231,48 @@ private:
         buckets_.swap(tmp);
     }
 
+    template <class NodePtr>
+    struct Iterator_
+    {
+        using Self = Iterator_;
+
+        NodePtr node;
+        const HashTable* tab;
+
+        using ObjectRef = decltype((node->obj));
+        using ObjectPtr = decltype(&node->obj);
+
+        Iterator_() {}
+        Iterator_(NodePtr _node, const HashTable* _tab): node(_node), tab(_tab) {}
+
+        bool operator==(const Self& it) const { return node == it.node; }
+        bool operator!=(const Self& it) const { return node != it.node; }
+
+        ObjectRef operator*() const { return node->obj; }
+        ObjectPtr operator->() const { return &*this; }
+
+        Self& operator++()
+        {
+            const Node* old = node;
+            node = node->next;
+            if (!node)
+            {
+                int pos = tab->bucketPos(tab->getKey_(old->obj));
+                while (++pos < tab->buckets_.size() && !tab->buckets_[pos]);
+                if (pos < tab->buckets_.size())
+                    node = tab->buckets_[pos];
+            }
+            return *this;
+        }
+
+        Self operator++(int)
+        {
+            Self tmp = *this;
+            ++*this;
+            return tmp;
+        }
+    };
+
     struct Node
     {
         Node* next;
@@ -233,7 +283,7 @@ private:
     };
 
     std::vector<Node*> buckets_;
-    int nodeCnt_;
+    int nodeCount_;
 
     HashFunc hash_;
     ExtractKey getKey_;

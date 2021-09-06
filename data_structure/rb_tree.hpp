@@ -1,24 +1,27 @@
 #ifndef RB_TREE_HPP
 #define RB_TREE_HPP
 
-#include <cstdlib>
-#include <vector>
-#include <iostream>
-
+#include <functional>
 
 //红黑树
-template <class Object, class KeyType = Object,
+template <class Object, class Key = Object,
           class ExtractKey = std::_Identity<Object>,
-          class Compare = std::less<KeyType>>
+          class Compare = std::less<Key>>
 class RBTree
 {
-    class Node;
+    template <class NodePtr> struct Iterator_;
+    struct Node;
 public:
+    using Iterator = Iterator_<Node*>;
+    using ConstIterator = Iterator_<const Node*>;
+    using KeyType = Key;
 
-    RBTree() : root_(nullptr), nodeCount_(0), comp_(Compare())
+
+    RBTree(): nodeCount_(0), comp_(Compare())
     {
         nil_ = (Node*)::malloc(sizeof(Node));
         nil_->color = BLACK;
+        nil_->left = nil_->right = nullptr;
         root_ = nil_;
     }
 
@@ -39,50 +42,61 @@ public:
     }
 
     //查找
-    Node* find(const KeyType& key);
+    ConstIterator find(const KeyType& key) const
+    { return ConstIterator(_find(key), this); }
+
+    Iterator find(const KeyType& key)
+    { return Iterator(const_cast<Node*>(_find(key)), this); }
 
     //插入
-    std::pair<Node*, bool>
+    std::pair<Iterator, bool>
     insert(const Object& obj) { return _insert(obj); }
 
-    std::pair<Node*, bool>
+    std::pair<Iterator, bool>
     insert(Object&& obj) { return _insert(std::move(obj)); }
 
 
     //插入（元素可以重复）
-    Node* insertEqual(const Object& obj) { return _insert(obj); }
-    Node* insertEqual(Object&& obj) { return _insert(std::move(obj)); }
+    Iterator insertEqual(const Object& obj) { return _insert(obj); }
+    Iterator insertEqual(Object&& obj) { return _insert(std::move(obj)); }
 
     //删除
     bool remove(const KeyType& key);
 
-    //前序遍历
-    std::vector<Object> preorder() const
-    {
-        std::vector<Object> res;
-        preorder(root_, res);
-        return res;
-    }
-
-    //中序遍历
-    std::vector<Object> inorder() const
-    {
-        std::vector<Object> res;
-        inorder(root_, res);
-        return res;
-    }
 
     void clear() { deleteTree(root_); }
 
-    int nodeCount() const { return nodeCount_; }
+    int count() const { return nodeCount_; }
+
+    ConstIterator begin() const { return ConstIterator(minimum(), this); }
+    Iterator begin() { return Iterator(const_cast<Node*>(minimum()), this); }
+
+    ConstIterator end() const { return ConstIterator(nil_, this); }
+    Iterator end() { return Iterator(nil_, this); }
+
+
+    const Node* minimum() const
+    {
+        const Node* cur = root_;
+        while (cur->left != nil_) cur = cur->left;
+        return cur;
+    }
+
+    const Node* maximum() const
+    {
+        const Node* cur = root_;
+        while (cur->right != nil_) cur = cur->right;
+        return cur;
+    }
 
 private:
+    const Node* _find(const KeyType& key) const;
 
     template <class X>
-    std::pair<Node*, bool> _insert(X&& x);
+    std::pair<Iterator, bool> _insert(X&& x);
 
     template <class X>
-    Node* _insertEqual(X&& x);
+    Iterator _insertEqual(X&& x);
 
     //插入平衡调整
     void insertRebalance(Node* cur);
@@ -101,28 +115,6 @@ private:
     getKey(const Object& obj) { return ExtractKey()(obj);}
 
 
-    //前序遍历
-    void preorder(Node* node, std::vector<Object>& res) const
-    {
-        if (node != nil_)
-        {
-            res.push_back(node->obj);
-            preorder(node->left, res);
-            preorder(node->right, res);
-        }
-    }
-
-    //中序遍历
-    void inorder(Node* node, std::vector<Object>& res) const
-    {
-        if (node != nil_)
-        {
-            inorder(node->left, res);
-            res.push_back(node->obj);
-            inorder(node->right, res);
-        }
-    }
-
     //递归删除子树节点
     void deleteTree(Node*& node)
     {
@@ -131,9 +123,49 @@ private:
             deleteTree(node->left);
             deleteTree(node->right);
             delete node;
-            node = nullptr;
+            node = nil_;
         }
     }
+
+    template <class NodePtr>
+    struct Iterator_
+    {
+        using Self = Iterator_;
+
+        NodePtr node;
+        const RBTree* tree;
+
+        using ObjectRef = decltype((node->obj));
+        using ObjectPtr = decltype(&node->obj);
+
+        Iterator_() {}
+        Iterator_(NodePtr _node, const RBTree* _tree): node(_node), tree(_tree) {}
+
+        bool operator==(const Self& it) const { return node == it.node; }
+        bool operator!=(const Self& it) const { return node != it.node; }
+
+        ObjectRef operator*() const { return node->obj; }
+        ObjectPtr operator->() const { return &*this; }
+
+        Self& operator++() { increase(); return *this; }
+        Self operator++(int)
+        {
+            Self tmp = *this;
+            ++*this;
+            return tmp;
+        }
+
+        Self& operator--() { decrease(); return *this; }
+        Self operator--(int)
+        {
+            Self tmp = *this;
+            --*this;
+            return tmp;
+        }
+    private:
+        void increase();
+        void decrease();
+    };
 
 
     enum Color : char {RED, BLACK};
@@ -158,11 +190,52 @@ private:
 };
 
 
+
+template <class Object, class KeyType, class ExtractKey, class Compare>
+template <class NodePtr>
+void RBTree<Object, KeyType, ExtractKey, Compare>::Iterator_<NodePtr>::
+increase()
+{
+    if (node->right != tree->nil_)
+    {
+        node = node->right;
+        while (node->left != tree->nil_)
+            node = node->left;
+    }
+    else
+    {
+        while (node == node->parent->right)
+            node = node->parent;
+        node = node->parent;
+    }
+}
+
+
+template <class Object, class KeyType, class ExtractKey, class Compare>
+template <class NodePtr>
+void RBTree<Object, KeyType, ExtractKey, Compare>::Iterator_<NodePtr>::
+decrease()
+{
+    if (node->left != tree->nil_)
+    {
+        node = node->left;
+        while (node->right != tree->nil_)
+            node = node->right;
+    }
+    else
+    {
+        while (node == node->parent->left)
+            node = node->parent;
+        node = node->parent;
+    }
+}
+
+
 template <class Object, class KeyType, class ExtractKey, class Compare>
 auto RBTree<Object, KeyType, ExtractKey, Compare>::
-find(const KeyType& key) ->  Node*
+_find(const KeyType& key) const ->  const Node*
 {
-    Node* cur = root_;
+    const Node* cur = root_;
     while (cur != nil_)
     {
         if (comp_(key, getKey(cur->obj)))
@@ -170,9 +243,9 @@ find(const KeyType& key) ->  Node*
         else if (comp_(getKey(cur->obj), key))
             cur = cur->right;
         else
-            return cur;
+            break;
     }
-    return nullptr;
+    return cur;
 }
 
 
@@ -225,7 +298,7 @@ rightRotation(Node* node)
 template <class Object, class KeyType, class ExtractKey, class Compare>
 template <class X>
 auto RBTree<Object, KeyType, ExtractKey, Compare>::
-_insert(X&& x) -> std::pair<Node*, bool>
+_insert(X&& x) -> std::pair<Iterator, bool>
 {
     Node* parent = nil_;
     Node* cur = root_;
@@ -237,7 +310,7 @@ _insert(X&& x) -> std::pair<Node*, bool>
         else if (comp_(getKey(cur->obj), getKey(x)))
             cur = cur->right;
         else
-            return {cur, false};
+            return {Iterator(cur, this), false};
     }
     Node* node = new Node(std::forward<X>(x));
     node->left = node->right = nil_;
@@ -252,14 +325,14 @@ _insert(X&& x) -> std::pair<Node*, bool>
         parent->right = node;
     ++nodeCount_;
     insertRebalance(node);
-    return {node, true};
+    return {Iterator(node, this), true};
 }
 
 
 template <class Object, class KeyType, class ExtractKey, class Compare>
 template <class X>
 auto RBTree<Object, KeyType, ExtractKey, Compare>::
-_insertEqual(X&& x) -> Node*
+_insertEqual(X&& x) -> Iterator
 {
     Node* parent = nil_;
     Node* cur = root_;
@@ -284,7 +357,7 @@ _insertEqual(X&& x) -> Node*
         parent->right = node;
     ++nodeCount_;
     insertRebalance(node);
-    return node;
+    return Iterator(node, this);
 }
 
 
@@ -292,8 +365,8 @@ template <class Object, class KeyType, class ExtractKey, class Compare>
 bool  RBTree<Object, KeyType, ExtractKey, Compare>::
 remove(const KeyType& key)
 {
-    Node* node = find(key);
-    if (node == nullptr) return false;
+    Node* node = find(key).node;
+    if (node == nil_) return false;
     if (node->left != nil_ && node->right != nil_)
     {
         Node* sub = node->right;

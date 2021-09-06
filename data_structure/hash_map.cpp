@@ -5,11 +5,6 @@
 template <class Key, class Value, class HashFunc = std::hash<Key>>
 class HashMap
 {
-    friend std::ostream& operator<<(std::ostream& out, const HashMap& map)
-    {
-        out << map.table_;
-        return out;
-    }
 public:
     template <class Pair>
     struct select1st
@@ -30,10 +25,10 @@ public:
     HashMap(int n = 32): table_(n) {}
 
     std::pair<Iterator, bool> insert(const Object& obj)
-    { return table_.insertUnique(obj); }
+    { return table_.insert(obj); }
 
     std::pair<Iterator, bool> insert(Object&& obj)
-    { return table_.insertUnique(std::move(obj)); }
+    { return table_.insert(std::move(obj)); }
 
     Iterator find(const KeyType& key) {return table_.find(key);}
     ConstIterator find(const KeyType& key) const {return table_.find(key);}
@@ -48,12 +43,20 @@ public:
 
     void clear() { table_.clear(); }
 
-    int nodeCnt() const { return table_.nodeCnt(); }
+    int nodeCount() const { return table_.nodeCount(); }
+
+    ConstIterator begin() const { return table_.begin(); }
+    Iterator begin() { return table_.begin(); }
+
+    ConstIterator end() const { return table_.end(); }
+    Iterator end() { return table_.end(); }
 
 private:
     MHashTable table_;
 };
 
+
+#include <iostream>
 
 int main()
 {
@@ -65,16 +68,18 @@ int main()
     map.insert({92, 456});
     map.insert({122, 125});
 
-    cout << map.nodeCnt() << endl;
+    cout << map.nodeCount() << endl;
 
-    cout << map.find(298) << endl;
-    cout << map.find(10) << endl;
+    cout << (map.find(298) != map.end()) << endl;
+    cout << (map.find(10) != map.end()) << endl;
 
     cout << map[20] << endl;
     cout << map[122] << endl;
-    cout << map.nodeCnt() << endl;
 
     map.remove(92);
+
+    for (const auto& x : map) cout << x.second << " ";
+    cout << endl;
 
     return 0;
 }

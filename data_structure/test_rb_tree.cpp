@@ -3,8 +3,9 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <vector>
 #include <iostream>
-#include <iterator>
+
 
 int main()
 {
@@ -18,17 +19,16 @@ int main()
     }
 
     RBTree<int> tree(&*vec.cbegin(), &*vec.cend());
-    auto res = tree.inorder();
-    copy(res.cbegin(), res.cend(), ostream_iterator<int>(cout, " "));
-    cout << endl;
-    res = tree.preorder();
-    copy(res.cbegin(), res.cend(), ostream_iterator<int>(cout, " "));
+
+    for (const auto& x : tree) cout << x << " ";
     cout << endl;
 
     for (int i = 0; i < 10; ++i)
     {
         tree.remove(vec[i]);
     }
+    for (const auto& x : tree) cout << x << " ";
+    cout << endl;
 
     return 0;
 }

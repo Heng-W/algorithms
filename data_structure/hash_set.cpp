@@ -1,16 +1,12 @@
 
 #include "hash_table.hpp"
 
+
 template <class Object, class HashFunc = std::hash<Object>>
 class HashSet
 {
-    friend std::ostream& operator<<(std::ostream& out, const HashSet& set)
-    {
-        out << set.table_;
-        return out;
-    }
 public:
-    using MHashTable = HashTable<Object, HashFunc, std::_Identity<Object>>;
+    using MHashTable = HashTable<Object, HashFunc>;
     using Iterator = typename MHashTable::Iterator;
     using ConstIterator = typename MHashTable::ConstIterator;
     using KeyType = typename MHashTable::KeyType;
@@ -18,10 +14,10 @@ public:
     HashSet(int n = 32): table_(n) {}
 
     std::pair<Iterator, bool> insert(const Object& obj)
-    { return table_.insertUnique(obj); }
+    { return table_.insert(obj); }
 
     std::pair<Iterator, bool> insert(Object&& obj)
-    { return table_.insertUnique(std::move(obj)); }
+    { return table_.insert(std::move(obj)); }
 
     Iterator find(const KeyType& key) {return table_.find(key);}
     ConstIterator find(const KeyType& key) const {return table_.find(key);}
@@ -30,12 +26,20 @@ public:
 
     void clear() { table_.clear(); }
 
-    int nodeCnt() const { return table_.nodeCnt(); }
+    int nodeCount() const { return table_.nodeCount(); }
+
+    ConstIterator begin() const { return table_.begin(); }
+    Iterator begin() { return table_.begin(); }
+
+    ConstIterator end() const { return table_.end(); }
+    Iterator end() { return table_.end(); }
 
 private:
     MHashTable table_;
 };
 
+
+#include <iostream>
 
 int main()
 {
@@ -47,15 +51,18 @@ int main()
     set.insert(92);
     set.insert(122);
 
-    cout << set.nodeCnt() << endl;
+    cout << set.nodeCount() << endl;
 
-    cout << set.find(298) << endl;
-    cout << set.find(10) << endl;
+    cout << (set.find(298) != set.end()) << endl;
+    cout << (set.find(10) != set.end()) << endl;
 
-    cout << set << endl;
+    for (const auto& x : set) cout << x << " ";
+    cout << endl;
 
     set.remove(92);
-    cout << set << endl;
+    
+    for (const auto& x : set) cout << x << " ";
+    cout << endl;
 
     return 0;
 }
