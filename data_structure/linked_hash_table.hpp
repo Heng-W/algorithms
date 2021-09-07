@@ -5,7 +5,7 @@
 #include <functional>
 #include <vector>
 
-//哈希表
+//哈希表和双向循环链表结合
 template <class Object, class HashFunc = std::hash<Object>,
           class ExtractKey = std::_Identity<Object>>
 class LinkedHashTable
@@ -17,6 +17,9 @@ public:
     using ConstIterator = Iterator_<const Node*>;
     using KeyType = typename std::result_of<ExtractKey(Object)>::type;
 
+    using RemoveCallback = std::function<bool()>;
+
+    
     LinkedHashTable(int n = 32):
         nodeCount_(0),
         hash_(HashFunc()),
@@ -32,6 +35,9 @@ public:
         clear();
         ::free(head_);
     }
+
+    void setRemoveCallback(const RemoveCallback& cb) 
+    { removeCallback_ = cb; }
 
     //插入元素
     std::pair<Iterator, bool> insert(const Object& obj)
@@ -59,7 +65,7 @@ public:
         return *insert(std::move(obj)).first;
     }
 
-    void removeFirst() { return erase(begin();) }
+    void removeFirst() { erase(begin()); }
 
     Iterator erase(Iterator it)
     {
@@ -125,7 +131,7 @@ public:
         nodeCount_ = 0;
     }
 
-    int nodeCount() const { return nodeCount_; }
+    int count() const { return nodeCount_; }
 
     int bucketCount() const { return buckets_.size(); }
 
@@ -174,6 +180,8 @@ private:
         head_->before = node;
 
         ++nodeCount_;
+        if (removeCallback_ && removeCallback_())
+            removeFirst();
         return {node, true};
     }
 
@@ -301,6 +309,8 @@ private:
 
     HashFunc hash_;
     ExtractKey getKey_;
+
+    RemoveCallback removeCallback_;
 };
 
 

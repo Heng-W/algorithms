@@ -20,9 +20,13 @@ public:
     using Iterator = typename Container::Iterator;
     using ConstIterator = typename Container::ConstIterator;
     using KeyType = typename Container::KeyType;
+    using RemoveCallback = typename Container::RemoveCallback;
 
 
     LinkedHashMap(int n = 32): table_(n) {}
+
+    void setRemoveCallback(const RemoveCallback& cb) 
+    { table_.setRemoveCallback(cb); }
 
     std::pair<Iterator, bool> insert(const Object& obj)
     { return table_.insert(obj); }
@@ -41,14 +45,14 @@ public:
 
     Iterator erase(Iterator it) { return table_.erase(it); }
     
-    void removeFirst() { return table_.removeFirst();) }
+    void removeFirst() { table_.removeFirst(); }
 
     bool remove(const KeyType& key) { return table_.remove(key); }
 
 
     void clear() { table_.clear(); }
 
-    int nodeCount() const { return table_.nodeCount(); }
+    int count() const { return table_.count(); }
 
     ConstIterator begin() const { return table_.begin(); }
     Iterator begin() { return table_.begin(); }
@@ -67,22 +71,26 @@ int main()
 {
     using namespace std;
     LinkedHashMap<int, int> map;
+    map.setRemoveCallback([&map]{ return map.count() > 3; });
+
     map.insert({298, 153});
     map.insert({190, 123});
     map.insert({892, 132});
     map.insert({92, 456});
     map.insert({122, 125});
 
-    cout << map.nodeCount() << endl;
+    cout << map.count() << endl;
 
-    cout << (map.find(298) != map.end()) << endl;
+    cout << (map.find(92) != map.end()) << endl;
     cout << (map.find(10) != map.end()) << endl;
 
     cout << map[20] << endl;
     cout << map[122] << endl;
 
     map.remove(92);
-    map.erase(map.find(190));
+
+    auto it = map.find(190);
+    if (it != map.end()) map.erase(it);
 
     for (const auto& x : map) cout << x.second << " ";
     cout << endl;
