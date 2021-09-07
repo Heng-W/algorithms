@@ -29,6 +29,8 @@ make
 - hash_table.hpp：哈希表
 - hash_set.cpp：哈希表实现的集合
 - hash_map.cpp：哈希表实现的map
+- linked_hash_table.hpp：结合链表实现的hashtable
+- linked_hash_map.cpp：结合链表实现的hashmap
 
 
 #### 排序（sort）

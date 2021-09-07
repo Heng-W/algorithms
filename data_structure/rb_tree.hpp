@@ -34,6 +34,31 @@ public:
         ::free(nil_);
     }
 
+    RBTree(RBTree&& tree):
+        RBTree()
+    {
+        swap(tree);
+    }
+
+    RBTree& operator=(RBTree&& tree) noexcept
+    {
+        if (this != &tree)
+        {
+            clear();
+            swap(tree);
+        }
+        return *this;
+    }
+
+    void swap(RBTree& tree)
+    {
+        using std::swap;
+        swap(root_, tree.root_);
+        swap(nil_, tree.nil_);
+        swap(nodeCount_, tree.nodeCount_);
+        swap(comp_, tree.comp_);
+    }
+
     //批量插入（拷贝）
     void insertRange(const Object* begin, const Object* end)
     {
