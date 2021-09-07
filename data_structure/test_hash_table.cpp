@@ -1,12 +1,17 @@
+
 #include "hash_table.hpp"
+#include <iostream>
 
 int main()
 {
     using namespace std;
-    HashTable<int, std::hash<int>, std::_Identity<int>> ht(20);
-    ht.insertUnique(10);
-    ht.insertUnique(15);
-    cout << ht.nodeCnt() << endl;
-    cout << ht << endl;
+    HashTable<int> ht;
+    ht.insert(10);
+    ht.insert(15);
+    cout << ht.nodeCount() << endl;
+
+    for (const auto& x : ht) cout << x << " ";
+    cout << endl;
+
     return 0;
 }
