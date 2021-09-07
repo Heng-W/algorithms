@@ -25,7 +25,7 @@ public:
 
     LinkedHashMap(int n = 32): table_(n) {}
 
-    void setRemoveCallback(const RemoveCallback& cb) 
+    void setRemoveCallback(const RemoveCallback& cb)
     { table_.setRemoveCallback(cb); }
 
     std::pair<Iterator, bool> insert(const Object& obj)
@@ -44,7 +44,7 @@ public:
 
 
     Iterator erase(Iterator it) { return table_.erase(it); }
-    
+
     void removeFirst() { table_.removeFirst(); }
 
     bool remove(const KeyType& key) { return table_.remove(key); }
@@ -71,7 +71,7 @@ int main()
 {
     using namespace std;
     LinkedHashMap<int, int> map;
-    map.setRemoveCallback([&map]{ return map.count() > 3; });
+    map.setRemoveCallback([&map] { return map.count() > 3; });
 
     map.insert({298, 153});
     map.insert({190, 123});
