@@ -31,7 +31,8 @@ public:
         head_->before = head_;
     }
 
-    ~LinkedHashTable(){
+    ~LinkedHashTable()
+    {
         clear();
         ::free(head_);
     }
