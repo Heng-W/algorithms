@@ -11,6 +11,7 @@ public:
         root_.resize(size);
         for (int i = 0; i < size; ++i)
             root_[i] = i;
+        rank_.resize(size, 1);
     }
 
     void join(int x, int y)
@@ -18,7 +19,22 @@ public:
         int root1 = find(x);
         int root2 = find(y);
         if (root1 != root2)
-            root_[root1] = root2;
+        {
+            if (rank_[root1] < rank_[root2])
+            {
+                root_[root1] = root2;
+            }
+            else if (rank_[root2] < rank_[root1])
+            {
+                root_[root2] = root1;
+            }
+            else
+            {
+                root_[root1] = root2;
+                ++rank_[root2];
+            }
+        }
+
     }
 
     int find(int x)
@@ -35,11 +51,19 @@ public:
         return root;
     }
 
+    //递归写法
+    int findR(int x)
+    {
+        if (x == root_[x]) return x;
+        return root_[x] = findR(root_[x]);
+    }
+
     bool isConnected(int x, int y)
     { return find(x) == find(y); }
 
 private:
     std::vector<int> root_;
+    std::vector<int> rank_;
 };
 
 
@@ -51,9 +75,13 @@ int main()
     DisjointSet set(10);
     set.join(0, 1);
     set.join(3, 1);
+    set.join(8, 3);
+    set.join(3, 7);
     set.join(2, 4);
+    set.join(2, 5);
 
-    cout << set.find(3) << endl;
+    //cout << set.find(3) << endl;
+    cout << set.findR(3) << endl;
 
     cout << set.isConnected(0, 3) << endl;
     cout << set.isConnected(0, 2) << endl;
