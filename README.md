@@ -31,6 +31,7 @@ make
 - hash_map.cpp：哈希表实现的map
 - linked_hash_table.hpp：HashTable与双向链表结合，可实现缓存机制
 - linked_hash_map.cpp：HashMap与双向链表结合
+- disjoint_set.cpp：并查集
 - skip_list.cpp：跳跃表
 
 
