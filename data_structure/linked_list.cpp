@@ -23,17 +23,9 @@ class LinkedList
         return out;
     }
 
+    struct Node;
+
 public:
-
-    struct Node
-    {
-        T data;
-        Node* prev;
-        Node* next;
-
-        Node(const T& _data): data(_data) {}
-        Node(T&& _data): data(std::move(_data)) {}
-    };
 
     LinkedList(): size_(0)
     {
@@ -172,6 +164,16 @@ private:
         ++size_;
         return tmp;
     }
+
+    struct Node
+    {
+        T data;
+        Node* prev;
+        Node* next;
+
+        Node(const T& _data): data(_data) {}
+        Node(T&& _data): data(std::move(_data)) {}
+    };
 
     Node* head_; //头结点
     int size_; //元素个数
