@@ -5,7 +5,7 @@
 template <class T>
 class BinarySearchTree
 {
-    class Node;
+    struct Node;
 public:
     BinarySearchTree(): root_(nullptr) {}
 
