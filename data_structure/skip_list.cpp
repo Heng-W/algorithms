@@ -1,6 +1,5 @@
 
 #include <cstdlib>
-#include <ctime>
 #include <functional>
 #include <vector>
 
@@ -228,11 +227,14 @@ private:
 };
 
 
+#include <ctime>
 #include <iostream>
 
 int main()
 {
     using namespace std;
+    srand(time(nullptr));
+
     SkipList<int> list;
     list.insert(298);
     list.insert(190);

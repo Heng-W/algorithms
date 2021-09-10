@@ -33,6 +33,8 @@ make
 - linked_hash_map.cpp：HashMap与双向链表结合
 - disjoint_set.cpp：并查集
 - skip_list.cpp：跳跃表
+- hash_tree.cpp：哈希树
+- b_tree.cpp：B树
 
 
 #### 排序（sort）
