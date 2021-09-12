@@ -35,6 +35,7 @@ make
 - skip_list.cpp：跳跃表
 - hash_tree.cpp：哈希树
 - b_tree.cpp：B树
+- b_plus_tree.cpp：B+树
 
 
 #### 排序（sort）
