@@ -34,6 +34,7 @@ make
 - disjoint_set.cpp：并查集
 - skip_list.cpp：跳跃表
 - hash_tree.cpp：哈希树
+- trie_tree.cpp：字典树
 - b_tree.cpp：B树
 - b_plus_tree.cpp：B+树
 
@@ -47,7 +48,8 @@ make
 - insert_sort.cpp：插入排序
 - select_sort.cpp：选择排序
 - bubble_sort.cpp：冒泡排序
-
+#### 字符串（string）
+- kmp.cpp：kmp模式匹配
 
 #### 数值计算（numerical）
 

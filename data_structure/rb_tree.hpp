@@ -21,24 +21,17 @@ public:
     {
         nil_ = (Node*)::malloc(sizeof(Node));
         nil_->color = BLACK;
-        nil_->left = nil_->right = nullptr;
+        nil_->left = nil_->right = nil_;
         root_ = nil_;
     }
 
     RBTree(const Object* begin, const Object* end): RBTree()
     { insertRange(begin, end); }
 
-    ~RBTree()
-    {
-        clear();
-        ::free(nil_);
-    }
+    ~RBTree() { clear(); ::free(nil_); }
 
-    RBTree(RBTree&& tree):
-        RBTree()
-    {
-        swap(tree);
-    }
+    RBTree(RBTree&& tree): RBTree()
+    { swap(tree); }
 
     RBTree& operator=(RBTree&& tree) noexcept
     {
@@ -53,10 +46,7 @@ public:
     void swap(RBTree& tree)
     {
         using std::swap;
-        swap(root_, tree.root_);
-        swap(nil_, tree.nil_);
-        swap(nodeCount_, tree.nodeCount_);
-        swap(comp_, tree.comp_);
+        swap(this, tree);
     }
 
     //批量插入（拷贝）
@@ -137,10 +127,8 @@ private:
 
     void setParentPtr(Node* node, Node* child);
 
-
-    static const KeyType&
-    getKey(const Object& obj) { return ExtractKey()(obj);}
-
+    static const KeyType& getKey(const Object& obj)
+    { return ExtractKey()(obj);}
 
     //递归删除子树节点
     void deleteTree(Node*& node)
@@ -193,7 +181,6 @@ private:
         void increase();
         void decrease();
     };
-
 
     enum Color : char {RED, BLACK};
 

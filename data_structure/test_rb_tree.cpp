@@ -5,6 +5,7 @@
 #include <ctime>
 #include <vector>
 #include <iostream>
+#include <iomanip>
 
 
 int main()
@@ -20,15 +21,24 @@ int main()
 
     RBTree<int> tree(&*vec.cbegin(), &*vec.cend());
 
-    for (const auto& x : tree) cout << x << " ";
+    for (const auto& x : tree) cout << setw(3) << x;
+    cout << endl;
+    for (auto it = tree.begin(); it != tree.end(); ++it)
+    {
+        cout << setw(3) << it.node->color;
+    }
     cout << endl;
 
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < vec.size(); ++i)
     {
         tree.remove(vec[i]);
+        for (const auto& x : tree) cout << setw(3) << x;
+        cout << endl;
+        for (auto it = tree.begin(); it != tree.end(); ++it)
+        {
+            cout << setw(3) << it.node->color;
+        }
+        cout << endl;
     }
-    for (const auto& x : tree) cout << x << " ";
-    cout << endl;
-
     return 0;
 }
