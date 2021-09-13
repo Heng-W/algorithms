@@ -281,6 +281,38 @@ public:
         return res;
     }
 
+    std::vector<T> morrisInorder() const
+    {
+        std::vector<T> res;
+        Node* cur = root_;
+        while (cur)
+        {
+            if (cur->left == nullptr)
+            {
+                res.push_back(cur->data);
+                cur = cur->right; //将右孩子作为当前节点
+            }
+            else
+            {
+                Node* node = cur->left;
+                while (node->right != nullptr && cur != node->right)
+                    node = node->right;
+                if (node->right == nullptr) //还没有线索化，则建立线索
+                {
+                    node->right = cur;
+                    cur = cur->left;
+                }
+                else //已经线索化，则访问节点并删除线索
+                {
+                    res.push_back(cur->data);
+                    node->right = nullptr;
+                    cur = cur->right;
+                }
+            }
+        }
+        return res;
+    }
+
     //求深度
     int depth() const { return _depth(root_); }
 
@@ -437,8 +469,12 @@ void printInfo(const BinaryTree<T>& tree)
 {
     using namespace std;
     cout << "depth: " << tree.depth() << endl;
+    cout << "morris traversal: ";
+    auto res = tree.morrisInorder();
+    for (const auto& x : res) cout << x << " ";
+    cout << endl;
     cout << "preorder traversal: ";
-    auto res = tree.preorder();
+    res = tree.preorder();
     for (const auto& x : res) cout << x << " ";
     cout << endl;
     cout << "inorder traversal: ";
@@ -472,6 +508,7 @@ int main()
     cur = tree1.addright(root, 1);
     tree1.addleft(tree1.find(20), 10);
     tree1.addleft(tree1.find(2), 5);
+
     printInfo(tree1);
 
     auto pre = tree1.preorder();
