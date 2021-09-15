@@ -7,8 +7,8 @@ constexpr int MAX_VEC = 100;
 
 static bool visited[MAX_VEC];
 
-template <class Vertex>
-void DFS(const MGraph<Vertex>& graph, int i)
+template <class T>
+void DFS(const MGraph<T>& graph, int i)
 {    
     visited[i] = true;
     std::cout << graph.vexs[i] <<" ";
@@ -19,8 +19,8 @@ void DFS(const MGraph<Vertex>& graph, int i)
     }
 }
 
-template <class Vertex>
-void BFS(const MGraph<Vertex>& graph, int i)
+template <class T>
+void BFS(const MGraph<T>& graph, int i)
 {
     std::queue<int> vexQueue;
     visited[i] = true;
@@ -42,8 +42,8 @@ void BFS(const MGraph<Vertex>& graph, int i)
     }
 }
 
-template <class Vertex>
-void DFS(const ALGraph<Vertex>& graph, int i)
+template <class T>
+void DFS(const ALGraph<T>& graph, int i)
 {    
     visited[i] = true;
     std::cout << graph.vexs[i] <<" ";
@@ -58,8 +58,8 @@ void DFS(const ALGraph<Vertex>& graph, int i)
     }
 }
 
-template <class Vertex>
-void BFS(const ALGraph<Vertex>& graph, int i)
+template <class T>
+void BFS(const ALGraph<T>& graph, int i)
 {
     std::queue<int> vexQueue;
     visited[i] = true;

@@ -3,8 +3,8 @@
 
 ### 实现语言：C++
 
-### 构建方式：cmake
-#### 例如在Linux下编译：
+### 构建方式：CMake
+#### 例如Linux下编译
 ```shell
 mkdir build 
 cd build
