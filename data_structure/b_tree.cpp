@@ -89,9 +89,6 @@ bool BTree<Key, Value, M>::_insert(X&& obj)
     if (root_ == nullptr)
     {
         root_ = new Node();
-        root_->objects[0] = std::forward<X>(obj);
-        root_->keyCount = 1;
-        return true;
     }
     const KeyType& key = getKey(obj);
     Node* cur = root_;
@@ -113,28 +110,18 @@ bool BTree<Key, Value, M>::_insert(X&& obj)
         cur = cur->childs[pos];
     }
     cur = parent;
-    Node* sub = nullptr;
-    Object tmp = std::forward<X>(obj);
-    while (true)
+    for (int i = cur->keyCount; i > pos; --i)
     {
-        for (int i = cur->keyCount; i > pos; --i)
-        {
-            cur->objects[i] = std::move(cur->objects[i - 1]);
-            cur->childs[i + 1] = cur->childs[i];
-        }
-        cur->objects[pos] = std::move(tmp);
-        cur->childs[pos + 1] = sub;
-        if (sub)
-        {
-            sub->parent = cur;
-        }
-        if (++cur->keyCount < M)
-        {
-            return true;
-        }
+        cur->objects[i] = std::move(cur->objects[i - 1]);
+    }
+    cur->objects[pos] = std::forward<X>(obj);
+    ++cur->keyCount;
+
+    while (cur->keyCount > KEY_MAX)
+    {
         Node* brother = new Node();
         int mid = M / 2;
-        pos = 0;
+        int pos = 0;
         for (int i = mid + 1; i < cur->keyCount; ++i)
         {
             brother->objects[pos] = std::move(cur->objects[i]);
@@ -147,27 +134,31 @@ bool BTree<Key, Value, M>::_insert(X&& obj)
         brother->childs[pos] = cur->childs[cur->keyCount];
         if (brother->childs[pos])
             brother->childs[pos]->parent = brother;
-        cur->keyCount -= (brother->keyCount + 1);
-        if (cur->parent)
+
+        Node* parent = cur->parent;
+        if (parent == nullptr)
         {
-            tmp = std::move(cur->objects[mid]);
-            sub = brother;
-            cur = cur->parent;
-            pos = cur->keyCount;
-            while (pos > 0 && key < getKey(cur->objects[pos - 1])) --pos;
+            parent = new Node();
+            parent->childs[0] = cur;
+            cur->parent = parent;
+            root_ = parent;
         }
-        else
+        pos = parent->keyCount;
+        while (pos > 0 && key < getKey(parent->objects[pos - 1]))
         {
-            root_ = new Node();
-            root_->objects[0] = std::move(cur->objects[mid]);
-            root_->childs[0] = cur;
-            root_->childs[1] = brother;
-            root_->keyCount = 1;
-            cur->parent = root_;
-            brother->parent = root_;
-            return true;
+            parent->objects[pos] = std::move(parent->objects[pos - 1]);
+            parent->childs[pos + 1] = parent->childs[pos];
+            --pos;
         }
+        parent->objects[pos] = std::move(cur->objects[mid]);
+        parent->childs[pos + 1] = brother;
+        brother->parent = parent;
+        ++parent->keyCount;
+
+        cur->keyCount -= brother->keyCount + 1;
+        cur = cur->parent;
     }
+    return true;
 }
 
 
