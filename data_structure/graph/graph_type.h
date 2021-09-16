@@ -1,7 +1,16 @@
 #ifndef GRAPH_TYPE_H
 #define GRAPH_TYPE_H
 
+#include <limits.h>
 #include <vector>
+
+
+struct Arc
+{
+    int begin;
+    int end;
+    int weight = 1;
+};
 
 /** 邻接矩阵表示  **/
 template <class Vertex>
@@ -9,17 +18,18 @@ struct MGraph
 {
     using VertexType = Vertex;
     using VertexArray = std::vector<VertexType>;
-    using Matrix = std::vector<std::vector<int>>;
+    using ArcMat = std::vector<std::vector<int>>;
+    
 
     VertexArray vexs;
-    Matrix arcs;
-    int arcNum;
+    ArcMat arcs;
+    int _arcNum;
 
     //构造无向图
     MGraph(const VertexArray& _vexs,
-           const std::vector<std::tuple<int, int, int>>& _arcs)
+           const std::vector<Arc>& _arcs)
         : vexs(_vexs),
-          arcNum(_arcs.size())
+          _arcNum(_arcs.size())
     {
         arcs.resize(vexs.size(), std::vector<int>(vexs.size(), INT_MAX));
         for (int i = 0; i < arcs.size(); ++i)
@@ -28,15 +38,15 @@ struct MGraph
         }
         for (int k = 0; k < _arcs.size(); ++k)
         {
-            int i = std::get<0>(_arcs);
-            int j = std::get<1>(_arcs);
-            arcs[i][j] = std::get<2>(_arcs);
+            int i = _arcs[k].begin;
+            int j = _arcs[k].end;
+            arcs[i][j] = _arcs[k].weight;
             arcs[j][i] = arcs[i][j];
         }
     }
 
     int vexNum() const { return vexs.size(); }
-    int arcNum() const { return arcNum; }
+    int arcNum() const { return _arcNum; }
 };
 
 /** 邻接表  **/
@@ -44,7 +54,7 @@ struct MGraph
 struct ArcNode
 {
     int adjvex; //邻接序号
-    int weight;
+    int weight = 1;
     ArcNode* next;
 };
 
@@ -72,22 +82,22 @@ struct ALGraph
     using AdjList = std::vector<VertexNode<Vertex>>;
 
     AdjList adjList;
-    int arcNum;
+    int _arcNum;
 
     //构造无向图
     ALGraph(const std::vector<VertexType>& _vexs,
-            const std::vector<std::tuple<int, int, int>>& _arcs)
-        : arcNum(_arcs.size())
+            const std::vector<Arc>& _arcs)
+        : _arcNum(_arcs.size())
     {
-        adjList.reverse(_vexs.size());
+        adjList.reserve(_vexs.size());
         for (const auto& vex : _vexs)
             adjList.emplace_back(vex);
 
         for (int k = 0; k < _arcs.size(); ++k)
         {
-            int i = std::get<0>(_arcs);
-            int j = std::get<1>(_arcs);
-            int weight = std::get<2>(_arcs);
+            int i = _arcs[k].begin;
+            int j = _arcs[k].end;
+            int weight = _arcs[k].weight;
 
             ArcNode* arc = new ArcNode();
             arc->adjvex = j;
@@ -118,7 +128,7 @@ struct ALGraph
     }
 
     int vexNum() const { return adjList.size(); }
-    int arcNum() const { return arcNum; }
+    int arcNum() const { return _arcNum; }
 };
 
 #endif //GRAPH_TYPE_H

@@ -7,6 +7,7 @@ void prim(const MGraph<T>& graph)
 {
     std::vector<int> adjvex(graph.vexNum());
     std::vector<int> lowcost(graph.vexNum());
+
     for (int j = 1; j < graph.vexNum(); ++j)
     {
         lowcost[j] = graph.arcs[0][j];
@@ -36,4 +37,18 @@ void prim(const MGraph<T>& graph)
             }
         }
     }
+}
+
+
+int main()
+{
+    using namespace std;
+    MGraph<int> graph(vector<int>(9),
+    {
+        {0, 1, 10}, {0, 5, 11}, {1, 2, 18}, {1, 8, 12}, {1, 6, 16},
+        {2, 8, 8}, {2, 3, 22}, {3, 8, 21}, {3, 6, 24}, {3, 7, 16},
+        {3, 4, 20}, {4, 7, 7}, {4, 5, 26}, {5, 6, 17}, {6, 7, 19}
+    });
+    prim(graph);
+    return 0;
 }
