@@ -3,8 +3,8 @@
 
 ### 实现语言：C++
 
-### 构建方式：cmake
-#### 例如在Linux下编译：
+### 构建方式：CMake
+#### 例如Linux下编译
 ```shell
 mkdir build 
 cd build
@@ -12,7 +12,7 @@ cmake ..
 make
 ```
 ### 文件说明
-#### 数据结构（data_structure）
+#### data_structure（数据结构）
 
 - array_list.cpp：动态数组实现的线性表
 - linked_list.cpp：双向循环链表实现的线性表
@@ -38,8 +38,9 @@ make
 - b_tree.cpp：B树
 - b_plus_tree.cpp：B+树
 
+  ##### graph：图相关的算法
 
-#### 排序（sort）
+#### sort（排序）
 - quick_sort.cpp：快速排序
 - merge_sort.cpp：归并排序
 - heap_sort.cpp：堆排序
@@ -48,10 +49,10 @@ make
 - insert_sort.cpp：插入排序
 - select_sort.cpp：选择排序
 - bubble_sort.cpp：冒泡排序
-#### 字符串（string）
+#### string（字符串）
 - kmp.cpp：kmp模式匹配
 
-#### 数值计算（numerical）
+#### numerical（数值计算）
 
 - SOR.cpp：SOR迭代法（线性方程组求解）
 - gaussian_elimination.cpp：列主元高斯消元法（线性方程组求解）

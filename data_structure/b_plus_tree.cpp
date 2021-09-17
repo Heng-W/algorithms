@@ -181,20 +181,19 @@ bool BPlusTree<Key, Value, M>::_insert(const KeyType& key, X&& value)
     {
         IndexNode* brother = new IndexNode();
         int mid = M / 2;
+        int pos = 0;
         for (int i = mid + 1; i < cur->keyCount; ++i)
         {
-            brother->keys[i - mid - 1] = cur->keys[i];
-            brother->childs[i - mid - 1] = cur->childs[i];
-            brother->childs[i - mid - 1]->parent = brother;
+            brother->keys[pos] = cur->keys[i];
+            brother->childs[pos] = cur->childs[i];
+            brother->childs[pos]->parent = brother;
+            ++pos;
             ++brother->keyCount;
         }
-        brother->childs[brother->keyCount] = cur->childs[cur->keyCount];
-        brother->childs[brother->keyCount]->parent = brother;
-
-        cur->keyCount -= (brother->keyCount + 1);
+        brother->childs[pos] = cur->childs[cur->keyCount];
+        brother->childs[pos]->parent = brother;
 
         IndexNode* parent = cur->parent;
-
         if (parent == nullptr)
         {
             parent = new IndexNode();
@@ -202,7 +201,7 @@ bool BPlusTree<Key, Value, M>::_insert(const KeyType& key, X&& value)
             cur->parent = parent;
             root_ = parent;
         }
-        int pos = parent->keyCount;
+        pos = parent->keyCount;
         while (pos > 0 && key < parent->keys[pos - 1])
         {
             parent->keys[pos] = parent->keys[pos - 1];
@@ -214,6 +213,7 @@ bool BPlusTree<Key, Value, M>::_insert(const KeyType& key, X&& value)
         brother->parent = parent;
         ++parent->keyCount;
 
+        cur->keyCount -= brother->keyCount + 1;
         cur = cur->parent;
     }
     return true;
@@ -493,7 +493,7 @@ int main()
     srand(time(nullptr));
 
     vector<int> vec;
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 15; ++i)
     {
         vec.push_back(rand() % 100);
     }
