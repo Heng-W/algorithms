@@ -26,6 +26,8 @@ make
 
 - binary_heap.cpp：二叉堆，实现优先级队列
 
+- leftist_heap.cpp：左式堆
+
 - binary_tree.cpp：二叉树
 
 - binary_search_tree.cpp：二叉搜索树
