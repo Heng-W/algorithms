@@ -54,11 +54,7 @@ public:
         }
     }
 
-    void clear()
-    {
-        destroy(root_);
-        root_ = nullptr;
-    }
+    void clear() { destroy(root_); }
 
     const T& top() const { return root_->data; }
 
@@ -91,13 +87,14 @@ private:
     }
 
 
-    void destroy(Node* node)
+    void destroy(Node*& node)
     {
         if (node != nullptr)
         {
             destroy(node->left);
             destroy(node->right);
             delete node;
+            node = nullptr;
         }
     }
 

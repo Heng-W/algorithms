@@ -30,6 +30,8 @@ make
 
 - skew_heap.cpp：斜堆
 
+- binomial_heap.cpp：二项堆
+
 - binary_tree.cpp：二叉树
 
 - binary_search_tree.cpp：二叉搜索树
