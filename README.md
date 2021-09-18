@@ -28,6 +28,8 @@ make
 
 - leftist_heap.cpp：左式堆
 
+- skew_heap.cpp：斜堆
+
 - binary_tree.cpp：二叉树
 
 - binary_search_tree.cpp：二叉搜索树
