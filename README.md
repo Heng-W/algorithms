@@ -60,10 +60,11 @@ make
 - splay_tree.cpp：伸展树
 - [ ] **heap：堆**
    - binary_heap.cpp：二叉堆
+   - d_ary_heap.cpp：d路堆
    - leftist_heap.cpp：左式堆
    - skew_heap.cpp：斜堆
    - binomial_heap.cpp：二项堆
-
+   
 - [ ] **graph：图相关的算法**
 
 #### sort（排序）
