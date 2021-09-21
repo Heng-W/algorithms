@@ -1,4 +1,5 @@
 
+#include <assert.h>
 #include <functional>
 
 //左式堆
@@ -31,15 +32,16 @@ public:
         }
         return *this;
     }
-
+    
     void insert(const T& data)
-    { root_ = merge(new Node(data), root_); }
+    { root_ = merge(root_, new Node(data)); }
 
     void insert(T&& data)
-    { root_ = merge(new Node(std::move(data)), root_); }
+    { root_ = merge(root_, new Node(std::move(data))); }
 
     void pop()
     {
+        assert(!empty());
         Node* old = root_;
         root_ = merge(root_->left, root_->right);
         delete old;
@@ -56,7 +58,7 @@ public:
 
     void clear() { destroy(root_); }
 
-    const T& top() const { return root_->data; }
+    const T& top() const { assert(!empty()); return root_->data; }
 
     bool empty() const { return root_ == nullptr; }
 

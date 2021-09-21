@@ -33,10 +33,10 @@ public:
     }
 
     void insert(const T& data)
-    { root_ = merge(new Node(data), root_); }
+    { root_ = merge(root_, new Node(data)); }
 
     void insert(T&& data)
-    { root_ = merge(new Node(std::move(data)), root_); }
+    { root_ = merge(root_, new Node(std::move(data))); }
 
     void pop()
     {

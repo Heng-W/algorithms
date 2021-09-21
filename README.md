@@ -64,6 +64,7 @@ make
    - leftist_heap.cpp：左式堆
    - skew_heap.cpp：斜堆
    - binomial_heap.cpp：二项堆
+   - pairing_heap.cpp：配对堆
    
 - [ ] **graph：图相关的算法**
 

@@ -55,39 +55,39 @@ private:
         }
     }
 
-    void percolateUp(int holeIdx)
+    void percolateUp(int holeIndex)
     {
-        T value = std::move(data_[holeIdx]);
-        int parent = (holeIdx - 1) / 2;
-        while (holeIdx > 0 && comp_(value, data_[parent]))
+        T value = std::move(data_[holeIndex]);
+        int parent = (holeIndex - 1) / 2;
+        while (holeIndex > 0 && comp_(value, data_[parent]))
         {
-            data_[holeIdx] = std::move(data_[parent]);
-            holeIdx = parent;
-            parent = (holeIdx - 1) / 2;
+            data_[holeIndex] = std::move(data_[parent]);
+            holeIndex = parent;
+            parent = (holeIndex - 1) / 2;
         }
-        data_[holeIdx] = std::move(value);
+        data_[holeIndex] = std::move(value);
     }
 
-    void percolateDown(int holeIdx)
+    void percolateDown(int holeIndex)
     {
-        T value = std::move(data_[holeIdx]);
+        T value = std::move(data_[holeIndex]);
         //从左节点开始更新
-        for (int i = holeIdx * 2 + 1; i < data_.size(); i = i * 2 + 1)
+        for (int i = holeIndex * 2 + 1; i < data_.size(); i = i * 2 + 1)
         {
             //指向较小的子节点
             if (i + 1 < data_.size() && comp_(data_[i + 1], data_[i]))
                 ++i;
             if (comp_(data_[i], value))
             {
-                data_[holeIdx] = std::move(data_[i]);
-                holeIdx = i;
+                data_[holeIndex] = std::move(data_[i]);
+                holeIndex = i;
             }
             else
             {
                 break;
             }
         }
-        data_[holeIdx] = std::move(value);
+        data_[holeIndex] = std::move(value);
     }
 
     std::vector<T> data_;
