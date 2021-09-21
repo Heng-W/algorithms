@@ -12,11 +12,19 @@ public:
     PairingHeap(): root_(nullptr) {}
     ~PairingHeap() { clear(); }
 
-    void insert(const T& data)
-    { root_ = merge(root_, new Node(data)); }
+    Node* insert(const T& data)
+    {   
+        Node* newNode = new Node(data);
+        root_ = merge(root_, newNode); 
+        return newNode;
+    }
 
-    void insert(T&& data)
-    { root_ = merge(root_, new Node(std::move(data))); }
+    Node* insert(T&& data)
+    { 
+        Node* newNode = new Node(std::move(data));
+        root_ = merge(root_, newNode); 
+        return newNode;
+    }
 
     void merge(PairingHeap& rhs)
     {
