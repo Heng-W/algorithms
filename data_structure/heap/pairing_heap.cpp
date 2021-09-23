@@ -122,7 +122,7 @@ private:
     struct Node
     {
         T data;
-        Node* child = nullptr; //最左侧节点
+        Node* child = nullptr; //第一个子节点
         Node* sibling = nullptr; //右兄弟
         Node* prev = nullptr;
 
