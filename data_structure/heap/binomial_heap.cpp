@@ -25,7 +25,10 @@ public:
     }
 
     BinomialHeap(BinomialHeap&& rhs)
-        : roots_(std::move(rhs.roots_)), nodeCount_(rhs.nodeCount_) {}
+        : roots_(std::move(rhs.roots_)), nodeCount_(rhs.nodeCount_) 
+    {
+        rhs.nodeCount_ = 0;
+    }
 
     BinomialHeap& operator=(const BinomialHeap& rhs)
     {
@@ -58,7 +61,7 @@ public:
     {
         int minIndex = findMinIndex();
         Node* oldRoot = roots_[minIndex];
-        Node* child = oldRoot->left;
+        Node* child = oldRoot->child;
         delete oldRoot;
 
         BinomialHeap heap;
@@ -171,8 +174,8 @@ private:
     {
         if (comp(root2->data, root1->data))
             return combineTrees(root2, root1);
-        root2->next = root1->left;
-        root1->left = root2;
+        root2->next = root1->child;
+        root1->child = root2;
         return root1;
     }
 
@@ -182,7 +185,7 @@ private:
     {
         if (node != nullptr)
         {
-            destroy(node->left);
+            destroy(node->child);
             destroy(node->next);
             delete node;
             node = nullptr;
@@ -193,7 +196,7 @@ private:
     {
         if (node == nullptr)
             return nullptr;
-        return new Node(node->data, clone(node->left), clone(node->right));
+        return new Node(node->data, clone(node->child), clone(node->next));
     }
 
     static bool comp(const T& lhs, const T& rhs)
@@ -202,14 +205,14 @@ private:
     struct Node
     {
         T data;
-        Node* left; //左子节点
+        Node* child; //第一个子节点
         Node* next; //兄弟
 
-        Node(const T& _data, Node* _left = nullptr, Node* _next = nullptr)
-            : data(_data), left(_left), next(_next) {}
+        Node(const T& _data, Node* _child = nullptr, Node* _next = nullptr)
+            : data(_data), child(_child), next(_next) {}
 
-        Node(T&& _data, Node* _left = nullptr, Node* _next = nullptr)
-            : data(std::move(_data)), left(_left), next(_next) {}
+        Node(T&& _data, Node* _child = nullptr, Node* _next = nullptr)
+            : data(std::move(_data)), child(_child), next(_next) {}
     };
 
     std::vector<Node*> roots_;

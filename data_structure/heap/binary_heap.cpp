@@ -1,18 +1,12 @@
-//二叉堆
+
 #include <assert.h>
+#include <functional>
 #include <vector>
-#include <iostream>
 
-
+//二叉堆
 template <class T, class Compare = std::less<T>>
 class BinaryHeap
 {
-    friend std::ostream& operator<<(std::ostream& out, const BinaryHeap& heap)
-    {
-        for (const auto& x : heap.data_)
-            out << x << " ";
-        return out;
-    }
 public:
     using Sequence = std::vector<T>;
 
@@ -61,39 +55,39 @@ private:
         }
     }
 
-    void percolateUp(int holeIdx)
+    void percolateUp(int holeIndex)
     {
-        T value = std::move(data_[holeIdx]);
-        int parent = (holeIdx - 1) / 2;
-        while (holeIdx > 0 && comp_(data_[parent], value))
+        T value = std::move(data_[holeIndex]);
+        int parent = (holeIndex - 1) / 2;
+        while (holeIndex > 0 && comp_(value, data_[parent]))
         {
-            data_[holeIdx] = std::move(data_[parent]);
-            holeIdx = parent;
-            parent = (holeIdx - 1) / 2;
+            data_[holeIndex] = std::move(data_[parent]);
+            holeIndex = parent;
+            parent = (holeIndex - 1) / 2;
         }
-        data_[holeIdx] = std::move(value);
+        data_[holeIndex] = std::move(value);
     }
 
-    void percolateDown(int holeIdx)
+    void percolateDown(int holeIndex)
     {
-        T value = std::move(data_[holeIdx]);
+        T value = std::move(data_[holeIndex]);
         //从左节点开始更新
-        for (int i = holeIdx * 2 + 1; i < data_.size(); i = i * 2 + 1)
+        for (int i = holeIndex * 2 + 1; i < data_.size(); i = i * 2 + 1)
         {
-            //指向较大的子节点
-            if (i + 1 < data_.size() && comp_(data_[i], data_[i + 1]))
+            //指向较小的子节点
+            if (i + 1 < data_.size() && comp_(data_[i + 1], data_[i]))
                 ++i;
-            if (comp_(value, data_[i]))
+            if (comp_(data_[i], value))
             {
-                data_[holeIdx] = std::move(data_[i]);
-                holeIdx = i;
+                data_[holeIndex] = std::move(data_[i]);
+                holeIndex = i;
             }
             else
             {
                 break;
             }
         }
-        data_[holeIdx] = std::move(value);
+        data_[holeIndex] = std::move(value);
     }
 
     std::vector<T> data_;
@@ -103,17 +97,21 @@ private:
 
 #include <ctime>
 #include <cstdlib>
+#include <iterator>
+#include <iostream>
 
 int main()
 {
     using namespace std;
     srand(time(nullptr));
-    vector<int> v;
+    vector<int> vec;
     for (int i = 0; i < 10; ++i)
     {
-        v.push_back(1000.0 * rand() / RAND_MAX);
+        vec.push_back(rand() % 100);
     }
-    BinaryHeap<int, std::greater<int>> heap(std::move(v));
+    copy(vec.cbegin(), vec.cend(), ostream_iterator<int>(cout, " "));
+    cout << endl;
+    BinaryHeap<int, greater<int>> heap(std::move(vec));
     while (!heap.empty())
     {
         cout << heap.top() << " ";

@@ -23,15 +23,6 @@ make
 - stack.cpp：链表实现的堆栈
 
 - circular_queue.cpp：数组实现的环形队列
-
-- binary_heap.cpp：二叉堆，实现优先级队列
-
-- leftist_heap.cpp：左式堆
-
-- skew_heap.cpp：斜堆
-
-- binomial_heap.cpp：二项堆
-
 - binary_tree.cpp：二叉树
 
 - binary_search_tree.cpp：二叉搜索树
@@ -67,8 +58,16 @@ make
 - b_plus_tree.cpp：B+树
 
 - splay_tree.cpp：伸展树
-
-  ##### graph：图相关的算法
+- [ ] **heap：堆**
+   - binary_heap.cpp：二叉堆
+   - d_ary_heap.cpp：d堆
+   - leftist_heap.cpp：左式堆
+   - skew_heap.cpp：斜堆
+   - pairing_heap.cpp：配对堆
+   - binomial_heap.cpp：二项堆
+   - fibonacci_heap.cpp：斐波那契堆
+   
+- [ ] **graph：图相关的算法**
 
 #### sort（排序）
 - quick_sort.cpp：快速排序

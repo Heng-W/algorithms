@@ -3,26 +3,26 @@
 
 //左式堆
 template <class T, class Compare = std::less<T>>
-class LeftistHeap
+class SkewHeap
 {
 public:
-    LeftistHeap(): root_(nullptr) {}
-    ~LeftistHeap() { clear(); }
+    SkewHeap(): root_(nullptr) {}
+    ~SkewHeap() { clear(); }
 
-    LeftistHeap(const LeftistHeap& rhs)
+    SkewHeap(const SkewHeap& rhs)
     { root_ = clone(rhs.root_); }
 
-    LeftistHeap(LeftistHeap&& rhs): root_(rhs.root_)
+    SkewHeap(SkewHeap&& rhs): root_(rhs.root_)
     { rhs.root_ = nullptr; }
 
-    LeftistHeap& operator=(const LeftistHeap& rhs)
+    SkewHeap& operator=(const SkewHeap& rhs)
     {
-        LeftistHeap copy = rhs;
+        SkewHeap copy = rhs;
         std::swap(root_, copy.root_);
         return *this;
     }
 
-    LeftistHeap& operator=(LeftistHeap&& rhs)
+    SkewHeap& operator=(SkewHeap&& rhs)
     {
         if (this != &rhs)
         {
@@ -33,10 +33,10 @@ public:
     }
 
     void insert(const T& data)
-    { root_ = merge(new Node(data), root_); }
+    { root_ = merge(root_, new Node(data)); }
 
     void insert(T&& data)
-    { root_ = merge(new Node(std::move(data)), root_); }
+    { root_ = merge(root_, new Node(std::move(data))); }
 
     void pop()
     {
@@ -45,7 +45,7 @@ public:
         delete old;
     }
 
-    void merge(LeftistHeap& rhs)
+    void merge(SkewHeap& rhs)
     {
         if (this != &rhs)
         {
@@ -54,7 +54,11 @@ public:
         }
     }
 
-    void clear() { destroy(root_); }
+    void clear()
+    {
+        destroy(root_);
+        root_ = nullptr;
+    }
 
     const T& top() const { return root_->data; }
 
@@ -78,23 +82,18 @@ private:
             return root1;
         }
         root1->right = merge(root1->right, root2);
-        if (root1->left->npl < root1->right->npl)
-        {
-            std::swap(root1->left, root1->right);
-        }
-        root1->npl = root1->right->npl + 1;
+        //合并后直接交换
+        std::swap(root1->left, root1->right);
         return root1;
     }
 
-
-    void destroy(Node*& node)
+    void destroy(Node* node)
     {
         if (node != nullptr)
         {
             destroy(node->left);
             destroy(node->right);
             delete node;
-            node = nullptr;
         }
     }
 
@@ -102,7 +101,7 @@ private:
     {
         if (node == nullptr)
             return nullptr;
-        return new Node(node->data, clone(node->left), clone(node->right), node->npl);
+        return new Node(node->data, clone(node->left), clone(node->right));
     }
 
     static bool comp(const T& lhs, const T& rhs) {
@@ -114,15 +113,12 @@ private:
         T data;
         Node* left;
         Node* right;
-        int npl; //零路径长
 
-        Node(const T& _data, Node* _left = nullptr,
-             Node* _right = nullptr, int _npl = 0)
-            : data(_data), left(_left), right(_right), npl(_npl) {}
+        Node(const T& _data, Node* _left = nullptr, Node* _right = nullptr)
+            : data(_data), left(_left), right(_right){}
 
-        Node(T&& _data, Node* _left = nullptr,
-             Node* _right = nullptr, int _npl = 0)
-            : data(std::move(_data)), left(_left), right(_right), npl(_npl) {}
+        Node(T&& _data, Node* _left = nullptr, Node* _right = nullptr)
+            : data(std::move(_data)), left(_left), right(_right) {}
     };
 
     Node* root_;
@@ -151,10 +147,10 @@ int main(){
     copy(vec2.cbegin(), vec2.cend(), ostream_iterator<int>(cout, " "));
     cout << endl;
 
-    LeftistHeap<int, greater<int>> heap1;
+    SkewHeap<int, greater<int>> heap1;
     for (const auto& x : vec1) heap1.insert(x);
 
-    LeftistHeap<int, greater<int>> heap2;
+    SkewHeap<int, greater<int>> heap2;
     for (const auto& x : vec2) heap2.insert(x);
 
     heap1.merge(heap2);
