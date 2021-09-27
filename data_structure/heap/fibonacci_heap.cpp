@@ -49,7 +49,6 @@ public:
     void pop()
     {
         assert(root_ != nullptr);
-
         //从根链表中移除最小节点
         root_->prev->next = root_->next;
         root_->next->prev = root_->prev;
@@ -82,13 +81,10 @@ public:
                 }
                 //cur合并到root
                 if (root->child == nullptr)
-                {
                     root->child = cur;
-                }
                 else
-                {
                     splice(root->child, cur, cur);
-                }
+                    
                 ++root->degree;
                 cur = root;//继续迭代
                 if (cur->degree >= roots.size())
@@ -147,7 +143,7 @@ public:
         }
     }
 
-    const T& top() const { assert(root_); return root_->data; }
+    const T& top() const { assert(root_ != nullptr); return root_->data; }
 
     bool empty() const { return nodeCount_ == 0; }
 

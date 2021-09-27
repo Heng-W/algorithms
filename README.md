@@ -15,48 +15,29 @@ make
 #### data_structure（数据结构）
 
 - array_list.cpp：动态数组实现的线性表
-
 - linked_list.cpp：双向循环链表实现的线性表
-
 - queue.cpp：链表实现的队列
-
 - stack.cpp：链表实现的堆栈
-
 - circular_queue.cpp：数组实现的环形队列
 - binary_tree.cpp：二叉树
-
+- threaded_binary_tree.cpp：线索二叉树
 - binary_search_tree.cpp：二叉搜索树
-
 - avl_tree.cpp：avl树
-
 - rb_tree.hpp：红黑树
-
 - set.cpp：红黑树实现的集合
-
 - map.cpp：红黑树实现的map
-
 - hash_table.hpp：哈希表
-
 - hash_set.cpp：哈希表实现的集合
-
 - hash_map.cpp：哈希表实现的map
-
 - linked_hash_table.hpp：HashTable与双向链表结合，可实现缓存机制
-
 - linked_hash_map.cpp：HashMap与双向链表结合
-
 - disjoint_set.cpp：并查集
-
 - skip_list.cpp：跳跃表
-
+- treap.cpp：树堆
 - hash_tree.cpp：哈希树
-
 - trie_tree.cpp：字典树
-
 - b_tree.cpp：B树
-
 - b_plus_tree.cpp：B+树
-
 - splay_tree.cpp：伸展树
 - [ ] **heap：堆**
    - binary_heap.cpp：二叉堆
@@ -66,7 +47,6 @@ make
    - pairing_heap.cpp：配对堆
    - binomial_heap.cpp：二项堆
    - fibonacci_heap.cpp：斐波那契堆
-   
 - [ ] **graph：图相关的算法**
 
 #### sort（排序）

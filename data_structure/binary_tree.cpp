@@ -318,7 +318,7 @@ public:
 
     void clear() { deleteTree(root_); }
 
-    //中序遍历方式删除
+    //层序遍历方式删除
     void clear2()
     {
         if (root_ == nullptr) return;
