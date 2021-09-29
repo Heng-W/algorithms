@@ -32,17 +32,17 @@ public:
 
     void insert(const T& data)
     {
-        Node* newNode = new Node(data);
-        newNode->prev = newNode->next = newNode;
-        root_ = merge(root_, newNode);
+        Node* node = new Node(data);
+        node->prev = node->next = node;
+        root_ = merge(root_, node);
         ++nodeCount_;
     }
 
     void insert(T&& data)
     {
-        Node* newNode = new Node(std::move(data));
-        newNode->prev = newNode->next = newNode;
-        root_ = merge(root_, newNode);
+        Node* node = new Node(std::move(data));
+        node->prev = node->next = node;
+        root_ = merge(root_, node);
         ++nodeCount_;
     }
 
@@ -94,6 +94,7 @@ public:
             cur = next;
             if (cur == begin) break;
         }
+        //合并串联到根链表上
         for (int i = 0; i < roots.size(); ++i)
         {
             if (roots[i]) root_ = merge(root_, roots[i]);
@@ -151,6 +152,7 @@ private:
 
     struct Node;
 
+    //合并串联到根链表上
     Node* merge(Node* root1, Node* root2)
     {
         if (root1 == nullptr) return root2;

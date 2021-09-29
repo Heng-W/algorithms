@@ -19,7 +19,9 @@ int main()
         vec.push_back(rand() % 100);
     }
 
-    RBTree<int> tree(&*vec.cbegin(), &*vec.cend());
+    RBTree<int> tree;
+
+    for (const auto& x : vec) tree.insert(x);
 
     for (const auto& x : tree) cout << setw(3) << x;
     cout << endl;

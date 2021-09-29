@@ -35,7 +35,7 @@ public:
         }
     }
 
-    bool setValue(Node* node, const T& newValue)
+    bool updateKey(Node* node, const T& newValue)
     {
         if (comp(node->data, newValue))
             return false;

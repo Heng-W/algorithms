@@ -70,10 +70,13 @@ public:
 
     void clear()
     {
-        while (!empty())
+        unsigned int pos = front_;
+        while (pos != rear_)
         {
-            pop();
+            alloc_.destroy(&data_[pos++]);
+            pos &= capacity_ - 1;
         }
+        front_ = rear_ = 0;
     }
 
     const T& front() const { return data_[front_]; }

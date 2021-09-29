@@ -1,4 +1,5 @@
 
+#include <assert.h>
 #include <functional>
 #include <vector>
 
@@ -7,13 +8,7 @@ template <class T, class Compare = std::less<T>>
 class BinomialHeap
 {
 public:
-    BinomialHeap(): roots_(1), nodeCount_(0) {}
-
-    BinomialHeap(const T& data): roots_(1), nodeCount_(1)
-    { roots_[0] = new Node(data); }
-
-    BinomialHeap(T&& data) : roots_(1), nodeCount_(1)
-    { roots_[0] = new Node(std::move(data)); }
+    BinomialHeap():nodeCount_(0) {}
 
     ~BinomialHeap() { clear(); }
 
@@ -25,7 +20,7 @@ public:
     }
 
     BinomialHeap(BinomialHeap&& rhs)
-        : roots_(std::move(rhs.roots_)), nodeCount_(rhs.nodeCount_) 
+        : roots_(std::move(rhs.roots_)), nodeCount_(rhs.nodeCount_)
     {
         rhs.nodeCount_ = 0;
     }
@@ -59,22 +54,22 @@ public:
 
     void pop()
     {
-        int minIndex = findMinIndex();
-        Node* oldRoot = roots_[minIndex];
-        Node* child = oldRoot->child;
-        delete oldRoot;
+        int pos = findMinIndex();
+        Node* child = roots_[pos]->child;
+        delete roots_[pos];
+        roots_[pos] = nullptr;
 
         BinomialHeap heap;
-        heap.roots_.resize(minIndex + 1);
-        heap.nodeCount_ = (1 << minIndex) - 1;
-        for (int i = minIndex - 1; i >= 0; --i)
+        heap.roots_.resize(pos); //pos等于度数
+        //反转得到二项堆
+        for (int i = pos - 1; i >= 0; --i)
         {
             heap.roots_[i] = child;
             child = child->next;
-            heap.roots_[i]->next = nullptr;
         }
-        roots_[minIndex] = nullptr;
+        heap.nodeCount_ = (1 << pos) - 1;
         nodeCount_ -= heap.nodeCount_ + 1;
+        //将heap合并到当前
         merge(heap);
     }
 
@@ -83,36 +78,24 @@ public:
 
     void merge(BinomialHeap&& rhs)
     {
-        if (this == &rhs)
-            return;
+        if (this == &rhs) return;
 
-        nodeCount_ += rhs.nodeCount_;
+        if (rhs.roots_.size() > roots_.size())
+            roots_.resize(rhs.roots_.size());
 
-        if (nodeCount_ > capacity())
-        {
-            int oldNum = roots_.size();
-            int newNum = std::max(roots_.size(), rhs.roots_.size()) + 1;
-            roots_.resize(newNum);
-            for (int i = oldNum; i < newNum; ++i)
-                roots_[i] = nullptr;
-        }
-
-        Node* carry = nullptr;
-        for (int i = 0, j = 1; j <= nodeCount_; ++i, j *= 2)
+        Node* carry = nullptr; //进位
+        for (int i = 0; i < roots_.size(); ++i)
         {
             Node* root1 = roots_[i];
-            Node* root2 = i < rhs.roots_.size() ? rhs.roots_[i] : nullptr;
-            int caseNum = root1 == nullptr ? 0 : 1;
-            caseNum += root2 == nullptr ? 0 : 2;
-            caseNum += carry == nullptr ? 0 : 4;
-
+            Node* root2 =  i < rhs.roots_.size() ? rhs.roots_[i] : nullptr;
+            int caseNum = (root1 ? 1 : 0) | (root2 ? 2 : 0) | (carry ? 4 : 0);
             switch (caseNum)
             {
-                case 0: //no trees
+                case 0: //none
                 case 1: //only this
                     break;
-                case 2:
-                    roots_[i] = root2; //only rhs
+                case 2: //only rhs
+                    roots_[i] = root2; 
                     rhs.roots_[i] = nullptr;
                     break;
                 case 4: //only carry
@@ -131,22 +114,26 @@ public:
                     carry = combineTrees(root2, carry);
                     rhs.roots_[i] = nullptr;
                     break;
-                case 7: //all three
+                case 7: //this, rhs and carry
                     roots_[i] = carry;
                     carry = combineTrees(root1, root2);
                     rhs.roots_[i] = nullptr;
                     break;
             }
         }
-        for (auto& root : rhs.roots_)
-            root = nullptr;
+        //最后有carry
+        if (carry) roots_.push_back(carry);
+        
+        nodeCount_ += rhs.nodeCount_;
+        //清空rhs
+        rhs.roots_.clear();
         rhs.nodeCount_ = 0;
     }
 
+
     void clear()
     {
-        for (auto& root : roots_)
-            destroy(root);
+        for (auto& root : roots_) destroy(root);
         nodeCount_ = 0;
     }
 
@@ -155,31 +142,37 @@ public:
     bool empty() const { return nodeCount_ == 0; }
 
 private:
-
     struct Node;
 
-    int findMinIndex() const
-    {
-        int pos = 0;
-        int minIndex;
-        while (roots_[pos] == nullptr) ++pos;
-        for (minIndex = pos; pos < roots_.size(); ++pos)
-            if (roots_[pos] != nullptr &&
-                    comp(roots_[pos]->data, roots_[minIndex]->data))
-                minIndex = pos;
-        return minIndex;
-    }
+    template <class X>
+    BinomialHeap(X&& x): nodeCount_(1)
+    { roots_.push_back(new Node(std::forward<X>(x))); }
 
     Node* combineTrees(Node* root1, Node* root2)
     {
         if (comp(root2->data, root1->data))
-            return combineTrees(root2, root1);
+        {
+            std::swap(root1, root2);
+        }
         root2->next = root1->child;
         root1->child = root2;
         return root1;
     }
 
-    int capacity() const { return (1 << roots_.size()) - 1; }
+
+    int findMinIndex() const
+    {
+        assert(nodeCount_ > 0);
+        int pos = 0;
+        while (!roots_[pos]) ++pos;
+        for (int i = pos + 1; i < roots_.size(); ++i) 
+        {
+            if (roots_[i] && comp(roots_[i]->data, roots_[pos]->data))
+                pos = i;
+        }
+        return pos;
+    }
+    
 
     void destroy(Node*& node)
     {
@@ -206,7 +199,7 @@ private:
     {
         T data;
         Node* child; //第一个子节点
-        Node* next; //兄弟
+        Node* next; //右兄弟
 
         Node(const T& _data, Node* _child = nullptr, Node* _next = nullptr)
             : data(_data), child(_child), next(_next) {}
