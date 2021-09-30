@@ -13,17 +13,17 @@ public:
     ~BinomialHeap() { clear(); }
 
     BinomialHeap(const BinomialHeap& rhs)
-        : roots_(rhs.roots_.size()), nodeCount_(rhs.nodeCount_)
+        : roots_(rhs.roots_.size()), 
+        nodeCount_(rhs.nodeCount_)
     {
         for (int i = 0; i < rhs.roots_.size(); ++i)
             roots_[i] = clone(rhs.roots_[i]);
     }
 
     BinomialHeap(BinomialHeap&& rhs)
-        : roots_(std::move(rhs.roots_)), nodeCount_(rhs.nodeCount_)
-    {
-        rhs.nodeCount_ = 0;
-    }
+        : roots_(std::move(rhs.roots_)), 
+        nodeCount_(rhs.nodeCount_)
+    { rhs.nodeCount_ = 0; }
 
     BinomialHeap& operator=(const BinomialHeap& rhs)
     {

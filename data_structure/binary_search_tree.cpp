@@ -43,10 +43,10 @@ public:
     Node* findByIter(const T& data);
 
     //删除（递归）
-    bool deleteData(const T& data) { return deleteData(root_, data); }
+    bool remove(const T& data) { return remove(root_, data); }
 
     //删除（非递归）
-    bool deleteDataByIter(const T& data);
+    bool removeByIter(const T& data);
 
     //中序遍历
     std::vector<T> inorder() const
@@ -58,7 +58,7 @@ public:
 
     int depth() const { return depth(root_); }
 
-    void clear() { deleteTree(root_); }
+    void clear() { destroy(root_); }
 
 private:
     template <class X>
@@ -69,9 +69,9 @@ private:
 
     Node* _find(Node* node, const T& data);
 
-    bool deleteData(Node*& node, const T& data);
+    bool remove(Node*& node, const T& data);
 
-    void deleteNode(Node*& node);
+    void removeNode(Node*& node);
 
 
     int depth(Node* node) const
@@ -90,13 +90,13 @@ private:
         }
     }
 
-    //递归删除子树节点
-    void deleteTree(Node*& node)
+    //销毁
+    void destroy(Node*& node)
     {
         if (node)
         {
-            deleteTree(node->left);
-            deleteTree(node->right);
+            destroy(node->left);
+            destroy(node->right);
             delete node;
             node = nullptr;
         }
@@ -190,21 +190,21 @@ auto BinarySearchTree<T>::findByIter(const T& data) ->Node*
 }
 
 template <class T>
-bool BinarySearchTree<T>::deleteData(Node*& node, const T& data)
+bool BinarySearchTree<T>::remove(Node*& node, const T& data)
 {
     if (node == nullptr)
         return false;//未找到
     else if (data < node->data)
-        return deleteData(node->left, data);
+        return remove(node->left, data);
     else if (node->data < data)
-        return deleteData(node->right, data);
+        return remove(node->right, data);
     else
-        deleteNode(node);//删除节点
+        removeNode(node);//删除节点
     return true;
 }
 
 template <class T>
-bool BinarySearchTree<T>::deleteDataByIter(const T& data)
+bool BinarySearchTree<T>::removeByIter(const T& data)
 {
     Node* cur = root_;
     Node* parent = nullptr;
@@ -220,16 +220,16 @@ bool BinarySearchTree<T>::deleteDataByIter(const T& data)
     }
     if (cur == nullptr) return false;
     if (cur == root_)
-        deleteNode(root_);
+        removeNode(root_);
     else if (parent->left == cur)
-        deleteNode(parent->left);
+        removeNode(parent->left);
     else
-        deleteNode(parent->right);
+        removeNode(parent->right);
     return true;
 }
 
 template <class T>
-void BinarySearchTree<T>::deleteNode(Node*& node)
+void BinarySearchTree<T>::removeNode(Node*& node)
 {
     if (node->left && node->right)
     {
@@ -279,7 +279,7 @@ int main()
 
     for (int i = 0; i < 5; ++i)
     {
-        tree.deleteData(vec[i]);
+        tree.remove(vec[i]);
     }
     res = tree.inorder();
     copy(res.cbegin(), res.cend(), ostream_iterator<int>(cout, " "));

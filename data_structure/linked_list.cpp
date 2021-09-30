@@ -1,7 +1,7 @@
 
 #include <memory>
 
-// 双向循环链表实现的线性表
+//双向循环链表实现的线性表
 template <class T>
 class LinkedList
 {
@@ -11,6 +11,7 @@ public:
     using Iterator = Iterator_<Node*>;
     using ConstIterator = Iterator_<const Node*>;
 
+    //默认构造函数
     LinkedList(): size_(0)
     {
         head_ = (Node*)::malloc(sizeof(Node));
@@ -18,14 +19,16 @@ public:
         head_->prev = head_;
     }
 
+    //析构函数
     ~LinkedList()
     {
         clear();
         ::free(head_);
     }
 
-    LinkedList(const LinkedList& rhs):
-        LinkedList()
+    //拷贝构造函数
+    LinkedList(const LinkedList& rhs)
+        : LinkedList()
     {
         auto src = rhs.begin();
         while (src != rhs.end())
@@ -35,20 +38,19 @@ public:
         }
     }
 
-    LinkedList(LinkedList&& rhs):
-        LinkedList()
-    {
-        swap(rhs);
-    }
+    //移动构造函数
+    LinkedList(LinkedList&& rhs)
+        : LinkedList() { swap(rhs); }
 
-
+    //拷贝赋值运算符
     LinkedList& operator=(const LinkedList& rhs)
     {
-        LinkedList tmp = rhs;
-        swap(tmp);
+        LinkedList copy = rhs;
+        swap(copy);
         return *this;
     }
 
+    //移动赋值运算符
     LinkedList& operator=(LinkedList&& rhs) noexcept
     {
         if (this != &rhs)
@@ -59,25 +61,12 @@ public:
         return *this;
     }
 
-
+    //交换
     void swap(LinkedList& rhs)
     {
         using std::swap;
         swap(head_, rhs.head_);
         swap(size_, rhs.size_);
-    }
-
-    void clear()
-    {
-        Node* cur = head_->next;
-        while (cur != head_)
-        {
-            cur = cur->next;
-            delete cur->prev;
-        }
-        head_->next = head_;
-        head_->prev = head_;
-        size_ = 0;
     }
 
     //表头插入
@@ -92,6 +81,13 @@ public:
     Iterator insert(Iterator pos, const T& x) { return _insert(pos, x); }
     Iterator insert(Iterator pos, T&& x) { return _insert(pos, std::move(x)); }
 
+    //查找
+    ConstIterator find(const T& data) const
+    { return _find(data); }
+
+    Iterator find(const T& data)
+    { return const_cast<Node*>(_find(data)); }
+
     //删除
     Iterator remove(Iterator pos)
     {
@@ -104,13 +100,19 @@ public:
         return next;
     }
 
-    //查找
-    ConstIterator find(const T& data) const
-    { return _find(data); }
-
-    Iterator find(const T& data)
-    { return const_cast<Node*>(_find(data)); }
-
+    //清空
+    void clear()
+    {
+        Node* cur = head_->next;
+        while (cur != head_)
+        {
+            cur = cur->next;
+            delete cur->prev;
+        }
+        head_->next = head_;
+        head_->prev = head_;
+        size_ = 0;
+    }
 
     Iterator begin() { return head_->next; }
     ConstIterator begin() const { return head_->next; }
@@ -118,15 +120,17 @@ public:
     Iterator end() { return head_; }
     ConstIterator end() const { return head_; }
 
+    const T& front() const { return head_->next->data; }
+    T& front() { return head_->next->data; }
+
+    const T& back() const { return head_->prev->data; }
+    T& back() { return head_->prev->data; }
 
     int size() const { return size_; }
     bool empty() const { return size_ == 0;}
 
-    T& front() const { return head_->next->data; }
-    T& back() const { return head_->prev->data; }
-
 private:
-    //查找
+
     const Node* _find(const T& data) const
     {
         const Node* cur = head_->next;
@@ -138,7 +142,6 @@ private:
         return nullptr;
     }
 
-    //插入
     template <class X>
     Iterator _insert(Iterator pos, X&& x)
     {
@@ -171,10 +174,10 @@ private:
         ObjectRef operator*() const { return node->data; }
         ObjectPtr operator->() const { return &*this; }
 
-        Self& operator++() 
-        { 
+        Self& operator++()
+        {
             node = node->next;
-            return *this; 
+            return *this;
         }
         Self operator++(int)
         {
@@ -184,9 +187,9 @@ private:
         }
 
         Self& operator--()
-        { 
+        {
             node = node->prev;
-            return *this; 
+            return *this;
         }
         Self operator--(int)
         {
@@ -196,6 +199,7 @@ private:
         }
     };
 
+    //定义节点
     struct Node
     {
         T data;
@@ -222,7 +226,6 @@ int main()
     srand(time(nullptr));
 
     float a[5];
-    cout << "origin: ";
     for (int i = 0; i < 5; i++)
     {
         a[i] = rand() % 100;
@@ -243,7 +246,7 @@ int main()
 
     auto list2 = std::move(list);
 
-    for (const auto& x : list) cout << x << " "; 
+    for (const auto& x : list) cout << x << " ";
     cout << endl;
 
     *list2.find(a[4]) = 12;

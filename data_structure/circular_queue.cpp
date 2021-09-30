@@ -7,17 +7,20 @@ template <class T>
 class CircularQueue
 {
 public:
+    //构造函数，参数为初始容量
     CircularQueue(int capacity = 32)
-    :front_(0), rear_(0)
+        : front_(0), rear_(0)
     {
         capacity_ = roundupPowerOfTwo(capacity);
         data_ = alloc_.allocate(capacity_);
     }
 
+    //析构函数
     ~CircularQueue() { free(); }
 
+    //拷贝构造函数
     CircularQueue(const CircularQueue& rhs)
-    :front_(0), rear_(0), capacity_(rhs.capacity_)
+        : front_(0), rear_(0), capacity_(rhs.capacity_)
     {
         data_ = alloc_.allocate(capacity_);
         unsigned int src = rhs.front_;
@@ -28,39 +31,44 @@ public:
         }
     }
 
-    CircularQueue(CircularQueue&& rhs)
-    :CircularQueue(1) { swap(rhs); }
+    //移动构造函数
+    CircularQueue(CircularQueue&& rhs) noexcept
+        : data_(rhs.data_), front_(rhs.front_), rear_(rhs.rear_),
+          capacity_(rhs.capacity_)
+    {
+        rhs.data_ = nullptr;
+        rhs.front_ = rhs.rear_ = rhs.capacity_ = 0;
+    }
 
-
+    //拷贝赋值运算符
     CircularQueue& operator=(const CircularQueue& rhs)
     {
         CircularQueue copy = rhs;
-        swap(copy);
-        return *this;
+        return *this = std::move(copy);
     }
 
+    //移动赋值运算符
     CircularQueue& operator=(CircularQueue&& rhs) noexcept
     {
         if (this != &rhs)
         {
             clear();
-            swap(rhs);
+            data_ = rhs.data_;
+            front_ = rhs.front_;
+            rear_ = rhs.rear_;
+            capacity_ = rhs.capacity_;
+
+            rhs.data_ = nullptr;
+            rhs.front_ = rhs.rear_ = rhs.capacity_ = 0;
         }
         return *this;
     }
 
-    void swap(CircularQueue& rhs) 
-    {
-        using std::swap;
-        swap(data_,rhs.data_);
-        swap(capacity_, rhs.capacity_);
-        swap(front_, rhs.front_);
-        swap(rear_, rhs.rear_);
-    }
-
+    //压入
     void push(const T& x) { _push(x); }
     void push(T&& x) { _push(std::move(x)); }
 
+    //弹出
     void pop()
     {
         assert(!empty());
@@ -68,6 +76,7 @@ public:
         front_ &= capacity_ - 1;
     }
 
+    //清空
     void clear()
     {
         unsigned int pos = front_;
@@ -81,7 +90,9 @@ public:
 
     const T& front() const { return data_[front_]; }
 
-    int count() const { return (rear_ - front_ + capacity_) & (capacity_ - 1); }
+    //元素数量
+    int size() const { return (rear_ - front_ + capacity_) & (capacity_ - 1); }
+    //容量
     int capacity() const { return capacity_; }
 
     bool empty() const { return front_ == rear_; }
@@ -162,8 +173,8 @@ int main()
     que.push(40);
     que.push(50);
     que.push(60);
-    cout << que.count() <<endl;
-    cout << que.capacity() <<endl;
+    cout << que.size() << endl;
+    cout << que.capacity() << endl;
     while (!que.empty())
     {
         cout << que.front() << " deQueue" << endl;

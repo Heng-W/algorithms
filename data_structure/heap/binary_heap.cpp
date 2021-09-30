@@ -28,14 +28,13 @@ public:
         if (!data_.empty()) percolateDown(0);
     }
 
-    T& top() { return data_.front(); }
     const T& top() const { return data_.front(); }
 
     void clear() { std::vector<T>().swap(data_); }
 
     bool empty() const { return data_.empty(); }
 
-    int size() const { return data_.size(); }
+    int count() const { return data_.size(); }
 
 private:
 

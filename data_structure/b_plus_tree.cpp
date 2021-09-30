@@ -4,11 +4,10 @@
 #include <iostream>
 
 //B+树
+//Key：键类型，Value：值类型，M：阶数
 template <class Key, class Value, int M>
 class BPlusTree
 {
-    struct NodeBase;
-    struct IndexNode;
     struct LeafNode;
 public:
     using KeyType = Key;
@@ -29,13 +28,17 @@ public:
 
     bool remove(const KeyType& key);
 
+    //层序遍历整棵树
     void levelOrder() const;
 
+    //遍历叶子节点的数据
     void traversal() const;
 
-    void clear() { if (root_) deleteTree(root_); }
+    void clear() { if (root_) destroy(root_); }
 
 private:
+    struct NodeBase;
+    struct IndexNode;
 
     template <class X>
     bool _insert(const KeyType& key, X&& value);
@@ -44,7 +47,7 @@ private:
     void mergeIndexNode(IndexNode* parent, int pos);
 
 
-    void deleteTree(NodeBase* node);
+    void destroy(NodeBase* node);
 
 
     LeafNode* minimum() const
@@ -55,11 +58,11 @@ private:
         return (LeafNode*)cur;
     }
 
-
+    //键数量的最小值和最大值
     static constexpr int KEY_MIN = (M + 1) / 2 - 1;
     static constexpr int KEY_MAX = M - 1;
 
-
+    //定义节点基类
     struct NodeBase
     {
         KeyType keys[M];
@@ -72,6 +75,7 @@ private:
         bool isLeaf() const { return leaf; }
     };
 
+    //索引节点，包含child指针域
     struct IndexNode : NodeBase
     {
         NodeBase* childs[M + 1] = {nullptr};
@@ -79,6 +83,7 @@ private:
         IndexNode(): NodeBase(false) {}
     };
 
+    //叶子节点，包含value及next指针域
     struct LeafNode : NodeBase
     {
         ValueType values[M];
@@ -86,7 +91,8 @@ private:
 
         LeafNode(): NodeBase(true) {}
     };
-    NodeBase* root_;
+
+    NodeBase* root_; //根节点
 };
 
 
@@ -466,7 +472,7 @@ void BPlusTree<Key, Value, M>::traversal() const
 
 
 template <class Key, class Value, int M>
-void BPlusTree<Key, Value, M>::deleteTree(NodeBase* cur)
+void BPlusTree<Key, Value, M>::destroy(NodeBase* cur)
 {
     if (cur->isLeaf())
     {
@@ -477,7 +483,7 @@ void BPlusTree<Key, Value, M>::deleteTree(NodeBase* cur)
     int pos = 0;
     while (pos <= node->keyCount)
     {
-        deleteTree(node->childs[pos++]);
+        destroy(node->childs[pos++]);
     }
     delete node;
 }

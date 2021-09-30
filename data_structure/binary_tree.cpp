@@ -336,16 +336,18 @@ public:
     }
 
 private:
-    struct Node
-    {
-        T data;
-        Node* left;
-        Node* right;
-        Node* parent;
+    struct Node;
 
-        Node(const T& _data): data(_data) {}
-        Node(T&& _data): data(std::move(_data)) {}
-    };
+    //克隆
+    Node* clone(Node* node)
+    {
+        if (node == nullptr) return nullptr;
+        Node* p = new Node(node->data);
+        p->height = node->height;
+        p->left = clone(node->left);
+        p->right = clone(node->right);
+        return p;
+    }
 
     int _depth(Node* node) const
     {
@@ -456,6 +458,18 @@ private:
             node = nullptr;
         }
     }
+
+    //定义节点
+    struct Node
+    {
+        T data;
+        Node* left;
+        Node* right;
+        Node* parent;
+
+        Node(const T& _data): data(_data) {}
+        Node(T&& _data): data(std::move(_data)) {}
+    };
 
     Node* root_;
 };
