@@ -57,14 +57,10 @@ public:
 
 
     Object& findOrInsert(const Object& obj)
-    {
-        return *insert(obj).first;
-    }
+    { return *insert(obj).first; }
 
     Object& findOrInsert(Object&& obj)
-    {
-        return *insert(std::move(obj)).first;
-    }
+    { return *insert(std::move(obj)).first; }
 
     void removeFirst() { erase(begin()); }
 
@@ -271,7 +267,6 @@ private:
             node = node->after;
             return *this;
         }
-
         Self operator++(int)
         {
             Self tmp = *this;
@@ -284,7 +279,6 @@ private:
             node = node->before;
             return *this;
         }
-
         Self operator--(int)
         {
             Self tmp = *this;

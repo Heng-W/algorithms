@@ -31,45 +31,73 @@ public:
     }
 
     ~BinaryTree() { clear(); }
+    
+    //拷贝构造函数
+    BinaryTree(const BinaryTree& rhs) { root_ = clone(rhs.root_); }
+
+    //移动构造函数
+    BinaryTree(BinaryTree&& rhs) noexcept: root_(rhs.root_)
+    { rhs.root_ = nullptr; }
+
+    //拷贝赋值运算符
+    BinaryTree& operator=(const BinaryTree& rhs)
+    {
+        Node* newRoot = clone(rhs.root_);
+        clear();
+        root_ = newRoot;
+        return *this;
+    }
+
+    //移动赋值运算符
+    BinaryTree& operator=(BinaryTree&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            clear();
+            root_ = rhs.root_;
+            rhs.root_ = nullptr;
+        }
+        return *this;
+    }
 
 
-    Node* createByPreAndIn(const T* preorder, const T* inorder, int n)
+    Node* createByPreAndIn(const T* preOrder, const T* inOrder, int n)
     {
         if (n == 0)
             return nullptr;
-        Node* node = new Node(preorder[0]);
-        int mid = std::find(inorder, inorder + n, node->data) - inorder;
+        Node* node = new Node(preOrder[0]);
+        int mid = std::find(inOrder, inOrder + n, node->data) - inOrder;
         assert(mid != n);
-        node->left = createByPreAndIn(preorder + 1, inorder, mid);
-        node->right = createByPreAndIn(preorder + mid + 1, inorder + mid + 1, n - mid - 1);
+        node->left = createByPreAndIn(preOrder + 1, inOrder, mid);
+        node->right = createByPreAndIn(preOrder + mid + 1, inOrder + mid + 1, n - mid - 1);
         return node;
     }
 
-    Node* createByInAndPost(const T* inorder, const T* postorder, int n)
+    Node* createByInAndPost(const T* inOrder, const T* postOrder, int n)
     {
         if (n == 0)
             return nullptr;
-        Node* node = new Node(postorder[n - 1]);
-        int mid = std::find(inorder, inorder + n, node->data) - inorder;
+        Node* node = new Node(postOrder[n - 1]);
+        int mid = std::find(inOrder, inOrder + n, node->data) - inOrder;
         assert(mid != n);
-        node->left = createByInAndPost(inorder, postorder, mid);
-        node->right = createByInAndPost(inorder + mid + 1, postorder + mid, n - mid - 1);
+        node->left = createByInAndPost(inOrder, postOrder, mid);
+        node->right = createByInAndPost(inOrder + mid + 1, postOrder + mid, n - mid - 1);
         return node;
     }
 
-    Node* createByLevelAndIn(const T* levelorder, const T* inorder, int n)
+    Node* createByLevelAndIn(const T* levelOrder, const T* inOrder, int n)
     {
         std::vector<T> level(n);
-        std::copy_n(levelorder, n, level.begin());
-        return createByLevelAndIn(level, inorder, n);
+        std::copy_n(levelOrder, n, level.begin());
+        return createByLevelAndIn(level, inOrder, n);
     }
 
-    Node* createByLevelAndIn(std::vector<T>& levelorder, const T* inorder, int n)
+    Node* createByLevelAndIn(std::vector<T>& levelOrder, const T* inOrder, int n)
     {
         if (n == 0)
             return nullptr;
-        Node* node = new Node(levelorder[0]);
-        int mid = std::find(inorder, inorder + n, node->data) - inorder;
+        Node* node = new Node(levelOrder[0]);
+        int mid = std::find(inOrder, inOrder + n, node->data) - inOrder;
         assert(mid != n);
         // 划分左右子树
         std::vector<T> left;
@@ -79,35 +107,60 @@ public:
             bool inLeft = false;
             for (int j = 0; j < mid; ++j)
             {
-                if (levelorder[i] == inorder[j])
+                if (levelOrder[i] == inOrder[j])
                 {
                     inLeft = true;
                     break;
                 }
             }
             if (inLeft)
-                left.push_back(levelorder[i]);
+                left.push_back(levelOrder[i]);
             else
-                right.push_back(levelorder[i]);
+                right.push_back(levelOrder[i]);
         }
-        std::vector<T>().swap(levelorder);
-        node->left = createByLevelAndIn(left, inorder, mid);
-        node->right = createByLevelAndIn(right, inorder + mid + 1, n - mid - 1);
+        std::vector<T>().swap(levelOrder);
+        node->left = createByLevelAndIn(left, inOrder, mid);
+        node->right = createByLevelAndIn(right, inOrder + mid + 1, n - mid - 1);
         return node;
     }
 
 
-    Node* setroot(const T& x) { return _setroot(x); }
-    Node* setroot(T&& x) { return _setroot(std::move(x)); }
+    //设置根结点
+    Node* setRoot(const T& data)
+    {
+        clear();
+        root_ = new Node(data);
+        root_->left = root_->right = nullptr;
+        root_->parent = nullptr;
+        return root_;
+    }
 
-    Node* addleft(Node* node, const T& x) { return _addleft(node, x); }
-    Node* addleft(Node* node, T&& x) { return _addleft(node, std::move(x)); }
+    //添加左孩子结点
+    Node* addLeft(Node* pos, const T& data)
+    {
+        Node* node = new Node(data);
+        node->left = node->right = nullptr;
+        node->parent = pos;
+        pos->left = node;
+        return node;
+    }
 
-    Node* addright(Node* node, const T& x) { return _addright(node, x); }
-    Node* addright(Node* node, T&& x) { return _addright(node, std::move(x)); }
+    //添加右孩子结点
+    Node* addRight(Node* pos, const T& data)
+    {
+        Node* node = new Node(data);
+        node->left = node->right = nullptr;
+        node->parent = pos;
+        pos->right = node;
+        return node;
+    }
 
+    //查找
+    const Node* find(const T& data) const 
+    { return _find(root_, data); }
 
-    Node* find(const T& data) { return _find(root_, data); }
+    Node* find(const T& data) 
+    { return const_cast<Node*>(_find(root_, data)); }
 
 
     void mirror(Node* node)
@@ -120,27 +173,27 @@ public:
         }
     }
 
-    std::vector<T> preorder() const
+    std::vector<T> preOrder() const
     {
         std::vector<T> res;
-        preorder(root_, res);
+        preOrder(root_, res);
         return res;
     }
-    std::vector<T> inorder() const
+    std::vector<T> inOrder() const
     {
         std::vector<T> res;
-        inorder(root_, res);
+        inOrder(root_, res);
         return res;
     }
-    std::vector<T> postorder() const
+    std::vector<T> postOrder() const
     {
         std::vector<T> res;
-        postorder(root_, res);
+        postOrder(root_, res);
         return res;
     }
 
     //先序遍历（非递归1）
-    std::vector<T> preorderI1() const
+    std::vector<T> preOrderI1() const
     {
         std::vector<T> res;
         std::stack<Node*> sta;
@@ -164,7 +217,7 @@ public:
     }
 
     //先序遍历（非递归2）
-    std::vector<T> preorderI2() const
+    std::vector<T> preOrderI2() const
     {
         if (root_ == nullptr) return {};
         std::vector<T> res;
@@ -182,7 +235,7 @@ public:
     }
 
     //中序遍历（非递归）
-    std::vector<T> inorderI(Node* t) const
+    std::vector<T> inOrderI(Node* t) const
     {
         std::vector<T> res;
         std::stack<Node*> sta;
@@ -206,7 +259,7 @@ public:
     }
 
     //后序遍历（非递归1）
-    std::vector<T> postorderI1() const
+    std::vector<T> postOrderI1() const
     {
         std::vector<T> res;
         std::stack<Node*> sta;
@@ -236,7 +289,7 @@ public:
     }
 
     //后序遍历（非递归2）
-    std::vector<T> postorderI2() const
+    std::vector<T> postOrderI2() const
     {
         if (root_ == nullptr) return {};
         std::vector<T> res;
@@ -316,7 +369,7 @@ public:
     //求深度
     int depth() const { return _depth(root_); }
 
-    void clear() { deleteTree(root_); }
+    void clear() { destroy(root_); }
 
     //层序遍历方式删除
     void clear2()
@@ -342,50 +395,15 @@ private:
     Node* clone(Node* node)
     {
         if (node == nullptr) return nullptr;
-        Node* p = new Node(node->data);
-        p->height = node->height;
-        p->left = clone(node->left);
-        p->right = clone(node->right);
-        return p;
+        Node* copy = new Node(node->data);
+        copy->left = clone(node->left);
+        copy->right = clone(node->right);
+        return copy;
     }
 
     int _depth(Node* node) const
     {
         return node ? std::max(_depth(node->left), _depth(node->right)) + 1 : 0;
-    }
-
-
-    //设置根结点
-    template <class X>
-    Node* _setroot(X&& x)
-    {
-        clear();
-        root_ = new Node(std::forward<X>(x));
-        root_->left = root_->right = nullptr;
-        root_->parent = nullptr;
-        return root_;
-    }
-
-    //添加左孩子结点
-    template <class X>
-    Node* _addleft(Node* node, X&& x)
-    {
-        Node* newNode = new Node(std::forward<X>(x));
-        newNode->left = newNode->right = nullptr;
-        newNode->parent = node;
-        node->left = newNode;
-        return newNode;
-    }
-
-    //添加右孩子结点
-    template <class X>
-    Node* _addright(Node* node, X&& x)
-    {
-        Node* newNode = new Node(std::forward<X>(x));
-        newNode->left = newNode->right = nullptr;
-        newNode->parent = node;
-        node->right = newNode;
-        return newNode;
     }
 
     Node* _find(Node* node, const T& data)
@@ -402,58 +420,45 @@ private:
     }
 
     //前序遍历（递归）
-    void preorder(Node* node, std::vector<T>& res) const
+    void preOrder(Node* node, std::vector<T>& res) const
     {
         if (node)
         {
             res.push_back(node->data);
-            preorder(node->left, res);
-            preorder(node->right, res);
+            preOrder(node->left, res);
+            preOrder(node->right, res);
         }
     }
 
     //中序遍历（递归）
-    void inorder(Node* node, std::vector<T>& res) const
+    void inOrder(Node* node, std::vector<T>& res) const
     {
         if (node)
         {
-            inorder(node->left, res);
+            inOrder(node->left, res);
             res.push_back(node->data);
-            inorder(node->right, res);
+            inOrder(node->right, res);
         }
     }
 
     //后序遍历（递归）
-    void postorder(Node* node, std::vector<T>& res) const
+    void postOrder(Node* node, std::vector<T>& res) const
     {
         if (node)
         {
-            postorder(node->left, res);
-            postorder(node->right, res);
+            postOrder(node->left, res);
+            postOrder(node->right, res);
             res.push_back(node->data);
         }
     }
 
-    Node*& parentPtr(Node* node)
-    {
-        Node* parent = node->parent;
-        if (parent->left == node)
-        {
-            return parent->left;
-        }
-        else
-        {
-            return parent->right;
-        }
-    }
-
     //递归删除子树节点
-    void deleteTree(Node*& node)
+    void destroy(Node*& node)
     {
         if (node)
         {
-            deleteTree(node->left);
-            deleteTree(node->right);
+            destroy(node->left);
+            destroy(node->right);
             delete node;
             node = nullptr;
         }
@@ -475,37 +480,7 @@ private:
 };
 
 
-
-
-
-template <class T>
-void printInfo(const BinaryTree<T>& tree)
-{
-    using namespace std;
-    cout << "depth: " << tree.depth() << endl;
-    cout << "morris traversal: ";
-    auto res = tree.morrisInorder();
-    for (const auto& x : res) cout << x << " ";
-    cout << endl;
-    cout << "preorder traversal: ";
-    res = tree.preorder();
-    for (const auto& x : res) cout << x << " ";
-    cout << endl;
-    cout << "inorder traversal: ";
-    res = tree.inorder();
-    for (const auto& x : res) cout << x << " ";
-    cout << endl;
-    cout << "postorder traversal: ";
-    res = tree.postorder();
-    for (const auto& x : res) cout << x << " ";
-    cout << endl;
-    cout << "levelOrder traversal: ";
-    res = tree.levelOrder();
-    for (const auto& x : res) cout << x << " ";
-    cout << endl;
-}
-
-
+//测试
 #include <cstdlib>
 #include <ctime>
 
@@ -515,20 +490,30 @@ int main()
     srand(time(nullptr));
 
     BinaryTree<int> tree1;
-    auto root = tree1.setroot(4);
-    auto cur = tree1.addleft(root, 7);
-    tree1.addright(cur, 2);
-    tree1.addleft(cur, 20);
-    cur = tree1.addright(root, 1);
-    tree1.addleft(tree1.find(20), 10);
-    tree1.addleft(tree1.find(2), 5);
+    auto root = tree1.setRoot(4);
+    auto cur = tree1.addLeft(root, 7);
+    tree1.addRight(cur, 2);
+    tree1.addLeft(cur, 20);
+    cur = tree1.addRight(root, 1);
+    tree1.addLeft(tree1.find(20), 10);
+    tree1.addLeft(tree1.find(2), 5);
 
-    printInfo(tree1);
-
-    auto pre = tree1.preorder();
-    auto in = tree1.inorder();
-    auto post = tree1.postorder();
+    auto morris = tree1.morrisInorder();
+    auto pre = tree1.preOrder();
+    auto in = tree1.inOrder();
+    auto post = tree1.postOrder();
     auto level = tree1.levelOrder();
+
+    auto println = [](const auto& vec) 
+    {
+        for (const auto& x : vec) cout << x << " ";
+        cout << endl;
+    };
+    
+    println(pre);
+    println(in);
+    println(post);
+    println(level);
 
     BinaryTree<int> tree2(pre.data(), in.data(), in.size(), 0);
     BinaryTree<int> tree3(in.data(), post.data(), in.size(), 1);

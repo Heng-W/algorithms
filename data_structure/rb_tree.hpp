@@ -91,7 +91,7 @@ public:
     Object& findOrInsert(Object&& obj) { return *insert(std::move(obj)).first; }
 
     //清除
-    void clear() { destroyTree(root_); }
+    void clear() { destroy(root_); }
 
     //元素数量
     int count() const { return nodeCount_; }
@@ -140,27 +140,27 @@ private:
     }
 
     //销毁
-    void destroyTree(Node*& node)
+    void destroy(Node*& node)
     {
         if (node != nil_)
         {
-            destroyTree(node->left);
-            destroyTree(node->right);
+            destroy(node->left);
+            destroy(node->right);
             delete node;
             node = nil_;
         }
     }
 
     //克隆
-    Node* clone(const RBTree& tree, Node* src, Node* parent) const
+    Node* clone(const RBTree& tree, Node* cur, Node* parent) const
     {
-        if (src == tree.nil_) return nil_;
-        Node* node = new Node(src->obj);
-        node->color = src->color;
-        node->parent = parent;
-        node->left = clone(tree, src->left, node);
-        node->right = clone(tree, src->right, node);
-        return node;
+        if (cur == tree.nil_) return nil_;
+        Node* copy = new Node(cur->obj);
+        copy->color = cur->color;
+        copy->parent = parent;
+        copy->left = clone(tree, cur->left, copy);
+        copy->right = clone(tree, cur->right, copy);
+        return copy;
     }
 
     //迭代器定义
@@ -266,24 +266,6 @@ decrease()
 
 
 template <class Object, class KeyType, class ExtractKey, class Compare>
-auto RBTree<Object, KeyType, ExtractKey, Compare>::
-_find(const KeyType& key) const ->  const Node*
-{
-    const Node* cur = root_;
-    while (cur != nil_)
-    {
-        if (comp(key, getKey(cur->obj)))
-            cur = cur->left;
-        else if (comp(getKey(cur->obj), key))
-            cur = cur->right;
-        else
-            break;
-    }
-    return cur;
-}
-
-
-template <class Object, class KeyType, class ExtractKey, class Compare>
 inline void RBTree<Object, KeyType, ExtractKey, Compare>::
 setParentPtr(Node* node, Node* child)
 {
@@ -326,6 +308,24 @@ rightRotation(Node* node)
 
     lchild->right = node;
     node->parent = lchild;
+}
+
+
+template <class Object, class KeyType, class ExtractKey, class Compare>
+auto RBTree<Object, KeyType, ExtractKey, Compare>::
+_find(const KeyType& key) const ->  const Node*
+{
+    const Node* cur = root_;
+    while (cur != nil_)
+    {
+        if (comp(key, getKey(cur->obj)))
+            cur = cur->left;
+        else if (comp(getKey(cur->obj), key))
+            cur = cur->right;
+        else
+            break;
+    }
+    return cur;
 }
 
 

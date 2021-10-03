@@ -10,9 +10,7 @@ public:
     struct select1st
     {
         const typename Pair::first_type& operator()(const Pair& pair) const
-        {
-            return pair.first;
-        }
+        { return pair.first; }
     };
 
     using Object = std::pair<const Key, Value>;

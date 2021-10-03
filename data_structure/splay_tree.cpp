@@ -1,7 +1,6 @@
 
 #include <iostream>
 
-
 //伸展树（自顶向下）
 template <class T>
 class SplayTree
@@ -11,22 +10,24 @@ public:
     SplayTree(): root_(nullptr) {}
     ~SplayTree() { clear(); }
 
-
+    //插入
     bool insert(const T& data) { return _insert(data); }
     bool insert(T&& data) { return _insert(std::move(data)); }
 
+    //删除
     bool remove(const T& data);
 
+    //伸展调整
     void splay(const T& data) { splay(root_, data); }
 
+    //清除
+    void clear() { destroy(root_); }
 
-    void clear() { destroyTree(root_); }
-
+    //打印
     void print() const { if (root_) print(root_); }
 
 private:
 
-    //伸展调整
     void splay(Node*& node, const T& data);
 
     template <class X>
@@ -35,12 +36,12 @@ private:
     void print(Node* node, Node* parent = nullptr) const;
 
     //销毁子树
-    void destroyTree(Node*& node)
+    void destroy(Node*& node)
     {
         if (node)
         {
-            destroyTree(node->left);
-            destroyTree(node->right);
+            destroy(node->left);
+            destroy(node->right);
             delete node;
             node = nullptr;
         }
@@ -119,33 +120,33 @@ template <class T>
 template <class X>
 bool SplayTree<T>::_insert(X&& x)
 {
-    Node* newNode = new Node();
-    newNode->data = std::forward<X>(x);
+    Node* node = new Node();
+    node->data = std::forward<X>(x);
 
     if (root_ == nullptr)
     {
-        newNode->left = newNode->right = nullptr;
-        root_ = newNode;
+        node->left = node->right = nullptr;
+        root_ = node;
         return true;
     }
     splay(root_, x);
     if (x < root_->data)
     {
-        newNode->left = root_->left; //root左子树小于关键字
-        newNode->right = root_; //root及其右子树都大于关键字
+        node->left = root_->left; //root左子树小于关键字
+        node->right = root_; //root及其右子树都大于关键字
         root_->left = nullptr;
-        root_ = newNode; //新插入的节点作为root
+        root_ = node; //新插入的节点作为root
     }
     else if (root_->data < x)
     {
-        newNode->right = root_->right;
-        newNode->left = root_;
+        node->right = root_->right;
+        node->left = root_;
         root_->right = nullptr;
-        root_ = newNode;
+        root_ = node;
     }
     else
     {
-        delete newNode;
+        delete node;
         return false;  //元素重复
     }
     return true;

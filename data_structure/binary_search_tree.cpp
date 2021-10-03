@@ -1,7 +1,7 @@
-// 二叉搜索树
-#include <vector>
 
+#include <iostream>
 
+//二叉搜索树
 template <class T>
 class BinarySearchTree
 {
@@ -14,6 +14,34 @@ public:
 
     ~BinarySearchTree() { clear(); }
 
+    //拷贝构造函数
+    BinarySearchTree(const BinarySearchTree& rhs) { root_ = clone(rhs.root_); }
+
+    //移动构造函数
+    BinarySearchTree(BinarySearchTree&& rhs) noexcept: root_(rhs.root_)
+    { rhs.root_ = nullptr; }
+
+    //拷贝赋值运算符
+    BinarySearchTree& operator=(const BinarySearchTree& rhs)
+    {
+        Node* newRoot = clone(rhs.root_);
+        clear();
+        root_ = newRoot;
+        return *this;
+    }
+
+    //移动赋值运算符
+    BinarySearchTree& operator=(BinarySearchTree&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            clear();
+            root_ = rhs.root_;
+            rhs.root_ = nullptr;
+        }
+        return *this;
+    }
+
     //插入节点（递归）
     bool insert(const T& x) { return _insert(root_, x); }
     bool insert(T&& x) { return _insert(root_, std::move(x)); }
@@ -21,20 +49,6 @@ public:
     //插入节点（非递归）
     bool insertByIter(const T& x) { return _insertByIter(x); }
     bool insertByIter(T&& x)  { return _insertByIter(std::move(x)); }
-
-    //批量插入（拷贝）
-    void insertRange(const T* begin, const T* end)
-    {
-        for (auto p = begin; p != end; ++p)
-            insert(*p);
-    }
-
-    //批量插入（移动）
-    void emplaceRange(T* begin, T* end)
-    {
-        for (auto p = begin; p != end; ++p)
-            insert(std::move(*p));
-    }
 
     //查找节点（递归）
     Node* find(const T& data) { return _find(root_, data); }
@@ -49,12 +63,7 @@ public:
     bool removeByIter(const T& data);
 
     //中序遍历
-    std::vector<T> inorder() const
-    {
-        std::vector<T> res;
-        inorder(root_, res);
-        return res;
-    }
+    void inOrder() const { inOrder(root_); }
 
     int depth() const { return depth(root_); }
 
@@ -80,13 +89,13 @@ private:
     }
 
     //中序遍历
-    void inorder(Node* node, std::vector<T>& res) const
+    void inOrder(Node* node) const
     {
         if (node)
         {
-            inorder(node->left, res);
-            res.push_back(node->data);
-            inorder(node->right, res);
+            inOrder(node->left);
+            std::cout << node->data << " ";
+            inOrder(node->right);
         }
     }
 
@@ -100,6 +109,16 @@ private:
             delete node;
             node = nullptr;
         }
+    }
+
+    //克隆
+    Node* clone(Node* node)
+    {
+        if (node == nullptr) return nullptr;
+        Node* copy = new Node(node->data);
+        copy->left = clone(node->left);
+        copy->right = clone(node->right);
+        return copy;
     }
 
     struct Node
@@ -256,9 +275,10 @@ void BinarySearchTree<T>::removeNode(Node*& node)
 }
 
 
+//测试
 #include <cstdlib>
 #include <ctime>
-#include <iostream>
+#include <vector>
 #include <iterator>
 
 int main()
@@ -272,18 +292,13 @@ int main()
         vec.push_back(rand() % 100);
     }
 
-    BinarySearchTree<int> tree(&*vec.cbegin(), &*vec.cend());
-    auto res = tree.inorder();
-    copy(res.cbegin(), res.cend(), ostream_iterator<int>(cout, " "));
+    BinarySearchTree<int> tree;
+    for (const auto& x: vec) tree.insert(x);
+
+    tree.inOrder();
     cout << endl;
 
-    for (int i = 0; i < 5; ++i)
-    {
-        tree.remove(vec[i]);
-    }
-    res = tree.inorder();
-    copy(res.cbegin(), res.cend(), ostream_iterator<int>(cout, " "));
-    cout << endl;
+    for (const auto& x: vec) tree.remove(x);
 
     return 0;
 }

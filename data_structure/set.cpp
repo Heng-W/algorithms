@@ -10,8 +10,6 @@ public:
     using ConstIterator = typename Tree::ConstIterator;
     using KeyType = typename Tree::KeyType;
 
-    Set() {}
-
     std::pair<Iterator, bool> insert(const Object& obj)
     { return tree_.insert(obj); }
 

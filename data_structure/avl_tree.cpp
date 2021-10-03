@@ -15,7 +15,7 @@ public:
     AVLTree(const AVLTree& rhs) { root_ = clone(rhs.root_); }
 
     //移动构造函数
-    AVLTree(AVLTree&& rhs): root_(rhs.root_)
+    AVLTree(AVLTree&& rhs) noexcept: root_(rhs.root_)
     { rhs.root_ = nullptr; }
 
     //拷贝赋值运算符
