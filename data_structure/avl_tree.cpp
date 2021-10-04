@@ -124,11 +124,11 @@ private:
     Node* clone(Node* node)
     {
         if (node == nullptr) return nullptr;
-        Node* p = new Node(node->data);
-        p->height = node->height;
-        p->left = clone(node->left);
-        p->right = clone(node->right);
-        return p;
+        Node* copy = new Node(node->data);
+        copy->height = node->height;
+        copy->left = clone(node->left);
+        copy->right = clone(node->right);
+        return copy;
     }
 
     //定义节点
