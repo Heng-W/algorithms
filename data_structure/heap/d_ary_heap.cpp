@@ -10,8 +10,6 @@ class DaryHeap
 public:
     using Sequence = std::vector<T>;
 
-    DaryHeap() = default;
-
     DaryHeap(const Sequence& data): data_(data) { build(); }
     DaryHeap(Sequence&& data): data_(std::move(data)) { build(); }
 

@@ -13,6 +13,18 @@ public:
     FibonacciHeap(): root_(nullptr), nodeCount_(0) {}
     ~FibonacciHeap() { clear(); }
 
+    FibonacciHeap(const FibonacciHeap& rhs)
+    {
+        Node* cur = rhs.root_;
+        Node* copy = new Node(cur->data);
+        while(cur->next != rhs.root_->prev)
+        {
+            copy->next = clone(cur->next);
+            cur = cur->next;
+            copy = copy->next;
+        }
+    }
+
     FibonacciHeap(FibonacciHeap&& rhs) noexcept
         : root_(rhs.root_), nodeCount_(rhs.nodeCount_)
     {
@@ -189,6 +201,26 @@ private:
             delete node;
             node = nullptr;
         }
+    }
+
+    static Node* clone(Node* node, Node* parent, 
+                        Node*& first, Node*& prev,int count)
+    {
+        if(node == nullptr) return nullptr;
+
+        Node* copy = new Node(node->data);
+        copy->degree = node->degree;
+        if (count == 0) first = prev = copy;
+        copy->prev = prev;
+        if(++count == parent->degree) 
+        {
+            copy->next = first;
+            first->prev = copy;
+            return first;
+        }
+        copy->next = clone(node->next, parent, first, copy, count + 1);
+        first = prev = nullptr;
+        copy->child = clone(node->child, copy, first, prev, 0);
     }
 
     static bool comp(const T& lhs, const T& rhs)
