@@ -17,6 +17,39 @@ public:
     BPlusTree(): root_(nullptr) {}
 
     ~BPlusTree() { clear(); }
+    
+    //拷贝构造函数
+    BPlusTree(const BPlusTree& rhs) 
+    { 
+        LeafNode* prev = nullptr;
+        root_ = clone(rhs.root_, nullptr, prev); 
+    }
+
+    //移动构造函数
+    BPlusTree(BPlusTree&& rhs) noexcept: root_(rhs.root_)
+    { rhs.root_ = nullptr; }
+
+    //拷贝赋值运算符
+    BPlusTree& operator=(const BPlusTree& rhs)
+    {
+        BPlusTree copy = rhs;
+        std::swap(root_, copy.root_);
+        return *this;
+    }
+
+    //移动赋值运算符
+    BPlusTree& operator=(BPlusTree&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            clear();
+            root_ = rhs.root_;
+            rhs.root_ = nullptr;
+        }
+        return *this;
+    }
+
+    
 
     std::tuple<LeafNode*, int, bool> find(const KeyType& key) const;
 
@@ -48,6 +81,8 @@ private:
 
 
     void destroy(NodeBase* node);
+
+    static NodeBase* clone(NodeBase* node, IndexNode* parent, LeafNode*& prev);
 
 
     LeafNode* minimum() const
@@ -489,6 +524,48 @@ void BPlusTree<Key, Value, M>::destroy(NodeBase* cur)
 }
 
 
+template <class Key, class Value, int M>
+auto BPlusTree<Key, Value, M>::
+clone(NodeBase* node, IndexNode* parent, LeafNode*& prev) -> NodeBase*
+{
+    if (node == nullptr) return nullptr;
+
+    auto initNode = [&](NodeBase* copy)
+    {
+        copy->keyCount = node->keyCount;
+        copy->parent = parent;
+        for(int i = 0; i < node->keyCount; ++i)
+        {
+            copy->keys[i] = node->keys[i];
+        }  
+    };
+    if(!node->isLeaf())
+    {
+        IndexNode* copy = new IndexNode();
+        initNode(copy);
+        for(int i = 0; i <= node->keyCount; ++i)
+        {
+            copy->childs[i] = clone(((IndexNode*)node)->childs[i], copy, prev);
+        }
+        return copy;
+    }
+    else
+    {
+        LeafNode* copy = new LeafNode();
+        initNode(copy);
+        for(int i = 0; i < node->keyCount; ++i)
+        {
+            copy->values[i] = ((LeafNode*)node)->values[i];
+        }
+        copy->next = nullptr;
+        if(prev) prev->next = copy;
+        prev = copy;
+        return copy;
+    }
+}
+
+
+
 #include <cstdlib>
 #include <ctime>
 #include <vector>
@@ -521,9 +598,11 @@ int main()
         auto res = tree.find(vec[i]);
         cout << std::get<2>(res) << " ";
     }
-
     cout << endl;
 
+    auto tree2 = tree;
+    tree2.traversal();
+    cout << endl;
 
     for (int i = 0; i < vec.size(); ++i)
     {

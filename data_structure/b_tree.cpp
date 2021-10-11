@@ -17,6 +17,34 @@ public:
     BTree(): root_(nullptr) {}
 
     ~BTree() { clear(); }
+    
+    //拷贝构造函数
+    BTree(const BTree& rhs) { root_ = clone(rhs.root_); }
+
+    //移动构造函数
+    BTree(BTree&& rhs) noexcept: root_(rhs.root_)
+    { rhs.root_ = nullptr; }
+
+    //拷贝赋值运算符
+    BTree& operator=(const BTree& rhs)
+    {
+        Node* newRoot = clone(rhs.root_);
+        clear();
+        root_ = newRoot;
+        return *this;
+    }
+
+    //移动赋值运算符
+    BTree& operator=(BTree&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            clear();
+            root_ = rhs.root_;
+            rhs.root_ = nullptr;
+        }
+        return *this;
+    }
 
     std::pair<Node*, int> find(const KeyType& key) const;
 
@@ -29,7 +57,7 @@ public:
 
     void inorder() const { _inorder(root_); }
 
-    void clear() { deleteTree(root_); }
+    void clear() { destroyTree(root_); }
 
 private:
 
@@ -40,7 +68,9 @@ private:
 
     void _inorder(Node* node) const;
 
-    void deleteTree(Node* node);
+    void destroyTree(Node* node);
+
+    static Node* clone(Node* node, Node* parent);
 
 
     static const KeyType& getKey(const Object& obj)
@@ -56,6 +86,7 @@ private:
         Node* parent = nullptr;
         int keyCount = 0;
     };
+
     Node* root_;
 };
 
@@ -331,16 +362,34 @@ void BTree<Key, Value, M>::_inorder(Node* node) const
 
 
 template <class Key, class Value, int M>
-void BTree<Key, Value, M>::deleteTree(Node* node)
+void BTree<Key, Value, M>::destroyTree(Node* node)
 {
-    if (node == nullptr)
-        return;
-    int pos = 0;
-    while (pos <= node->keyCount)
+    if (node)
     {
-        deleteTree(node->childs[pos++]);
+        for (int i = 0; i <= node->keyCount; ++i)
+        {
+            destroyTree(node->childs[i]);
+        }
+        delete node;
     }
-    delete node;
+}
+
+template <class Key, class Value, int M>
+auto BTree<Key, Value, M>::clone(Node* node, Node* parent) -> Node*
+{
+    if (node == nullptr) return nullptr;
+    Node* copy = new Node();
+    copy->keyCount = node->keyCount;
+    copy->parent = parent;
+    for(int i = 0; i < node->keyCount; ++i)
+    {
+        copy->objects[i] = node->objects[i];
+    }
+    for(int i = 0; i <= node->keyCount; ++i)
+    {
+        copy->childs[i] = clone(node->childs[i], copy);
+    }
+    return copy;
 }
 
 

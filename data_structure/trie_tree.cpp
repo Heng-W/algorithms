@@ -7,7 +7,33 @@ class TrieTree
 public:
 
     TrieTree() { root_ = new Node(); }
-    ~TrieTree() { clear(); }
+    ~TrieTree() { clear(); ::free(root_); }
+
+    // 拷贝构造函数
+    TrieTree(const TrieTree& rhs) { root_ = clone(rhs.root_); }
+
+    //移动构造函数
+    TrieTree(TrieTree&& rhs): TrieTree()
+    { std::swap(root_, rhs.root_); }
+
+    //拷贝赋值运算符
+    TrieTree& operator=(const TrieTree& rhs)
+    {
+        TrieTree copy = rhs;
+        std::swap(root_, copy.root_);
+        return *this;
+    }
+
+    //移动赋值运算符
+    TrieTree& operator=(TrieTree&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            clear();
+            std::swap(root_, rhs.root_);
+        }
+        return *this;
+    }
 
     void insert(const std::string& word)
     {
@@ -36,7 +62,7 @@ public:
             cur->childs[pos]->prefixCount -= count;
             if (cur->childs[pos]->prefixCount == 0)
             {
-                deleteTree(cur->childs[pos]);
+                destroyTree(cur->childs[pos]);
                 cur->childs[pos] = nullptr;
                 return;
             }
@@ -56,7 +82,7 @@ public:
             cur->childs[pos]->prefixCount -= count;
             if (cur->childs[pos]->prefixCount == 0)
             {
-                deleteTree(cur->childs[pos]);
+                destroyTree(cur->childs[pos]);
                 cur->childs[pos] = nullptr;
                 return;
             }
@@ -88,21 +114,38 @@ public:
         return cur->prefixCount;
     }
 
-    void clear() { deleteTree(root_); }
+    void clear() { destroyTree(root_); }
 
 private:
     static constexpr int CHILD_NUM = 26;
 
     struct Node;
 
-    void deleteTree(Node* node)
+    void destroyTree(Node* node)
     {
         for (int i = 0; i < CHILD_NUM; ++i)
         {
-            if (node->childs[i])
-                deleteTree(node->childs[i]);
+            if (node->childs[i]) 
+            {
+                destroyTree(node->childs[i]);
+                delete node->childs[i];
+            }
         }
-        delete node;
+    }
+
+    Node* clone(Node* node)
+    {
+        Node* copy = new Node();
+        copy->wordCount = node->wordCount;
+        copy->prefixCount = node->prefixCount;
+        for (int i = 0; i < CHILD_NUM; ++i)
+        {
+            if (node->childs[i] != nullptr)
+            {
+                copy->childs[i] = clone(node->childs[i]);
+            }
+        }
+        return copy;
     }
 
     struct Node

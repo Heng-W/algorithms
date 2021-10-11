@@ -2,9 +2,10 @@
 #include <cstdlib>
 #include <functional>
 #include <vector>
+#include <unordered_map> // for copy SkipList
 
 
-//跳跃表
+// 跳跃表
 template <class Object, class Key = Object,
           class ExtractKey = std::_Identity<Object>,
           class Compare = std::less<Key>>
@@ -27,6 +28,68 @@ public:
     {
         clear();
         ::free(head_);
+    }
+    
+    // 拷贝构造函数
+    SkipList(const SkipList& rhs):SkipList(rhs.maxLevel_)
+    {
+        std::unordered_map<const Node*, Node*> created;
+        for (int i = rhs.level_; i >= 0; --i)
+        {
+            const Node* cur = rhs.head_;
+            Node* copy = head_;
+            
+            while (cur->forward[i])
+            {
+                cur = cur->forward[i];
+                auto it = created.find(cur);
+                if (it == created.end()) // 节点未创建
+                {
+                    copy->forward[i] = createNode(cur->obj, i);
+                    created[cur] = copy->forward[i]; // 插入map，标识已创建
+                }
+                else // 节点已创建
+                {
+                    copy->forward[i] = it->second;
+                }
+                copy = copy->forward[i];
+            }
+        }
+        level_ = rhs.level_;
+        nodeCount_ = rhs.nodeCount_;
+    }
+
+    //移动构造函数
+    SkipList(SkipList&& rhs)
+        : SkipList() { swap(rhs); }
+
+    //拷贝赋值运算符
+    SkipList& operator=(const SkipList& rhs)
+    {
+        SkipList copy = rhs;
+        swap(copy);
+        return *this;
+    }
+
+    //移动赋值运算符
+    SkipList& operator=(SkipList&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            clear();
+            swap(rhs);
+        }
+        return *this;
+    }
+
+    //交换
+    void swap(SkipList& rhs)
+    {
+        using std::swap;
+        swap(head_, rhs.head_);
+        swap(level_, rhs.level_);
+        swap(maxLevel_, rhs.maxLevel_);
+        swap(nodeCount_, rhs.nodeCount_);
     }
 
     //插入元素
@@ -204,7 +267,6 @@ private:
             node = node->forward[0];
             return *this;
         }
-
         Self operator++(int)
         {
             Self tmp = *this;
@@ -227,6 +289,7 @@ private:
 };
 
 
+// 测试
 #include <ctime>
 #include <iostream>
 
@@ -246,6 +309,10 @@ int main()
 
     cout << (list.find(298) != list.end()) << endl;
     cout << (list.find(10) != list.end()) << endl;
+
+    auto list2 = list;
+    for (const auto& x : list2) cout << x << " ";
+    cout << endl;
 
     list.remove(92);
 

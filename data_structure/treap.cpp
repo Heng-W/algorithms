@@ -11,6 +11,34 @@ public:
     Treap():root_(nullptr) {}
     ~Treap() { clear(); }
 
+    //拷贝构造函数
+    Treap(const Treap& rhs) { root_ = clone(rhs.root_); }
+
+    //移动构造函数
+    Treap(Treap&& rhs) noexcept: root_(rhs.root_)
+    { rhs.root_ = nullptr; }
+
+    //拷贝赋值运算符
+    Treap& operator=(const Treap& rhs)
+    {
+        Node* newRoot = clone(rhs.root_);
+        clear();
+        root_ = newRoot;
+        return *this;
+    }
+
+    //移动赋值运算符
+    Treap& operator=(Treap&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            clear();
+            root_ = rhs.root_;
+            rhs.root_ = nullptr;
+        }
+        return *this;
+    }
+
     bool insert(const T& data) { return insert(root_, data); }
     bool insert(T&& data) { return insert(root_, std::move(data)); }
 
@@ -67,6 +95,17 @@ private:
             node = nullptr;
         }
     }
+
+    //克隆
+    Node* clone(Node* node)
+    {
+        if (node == nullptr) return nullptr;
+        Node* copy = new Node(node->data, node->priority);
+        copy->left = clone(node->left);
+        copy->right = clone(node->right);
+        return copy;
+    }
+
 
     struct Node
     {
