@@ -18,8 +18,7 @@ public:
     SkewHeap& operator=(const SkewHeap& rhs)
     {
         SkewHeap copy = rhs;
-        std::swap(root_, copy.root_);
-        return *this;
+        return *this = std::move(copy);
     }
 
     SkewHeap& operator=(SkewHeap&& rhs)
@@ -27,7 +26,8 @@ public:
         if (this != &rhs)
         {
             clear();
-            std::swap(root_, rhs.root_);
+            root_ = rhs.root_;
+            rhs.root_ = nullptr;
         }
         return *this;
     }

@@ -12,6 +12,30 @@ public:
     PairingHeap(): root_(nullptr) {}
     ~PairingHeap() { clear(); }
 
+    
+    PairingHeap(const PairingHeap& rhs)
+    { root_ = clone(rhs.root_); }
+
+    PairingHeap(PairingHeap&& rhs): root_(rhs.root_)
+    { rhs.root_ = nullptr; }
+
+    PairingHeap& operator=(const PairingHeap& rhs)
+    {
+        PairingHeap copy = rhs;
+        return *this = std::move(copy);
+    }
+
+    PairingHeap& operator=(PairingHeap&& rhs)
+    {
+        if (this != &rhs)
+        {
+            clear();
+            root_ = rhs.root_;
+            rhs.root_ = nullptr;
+        }
+        return *this;
+    }
+
     Node* insert(const T& data)
     {   
         Node* newNode = new Node(data);
@@ -43,12 +67,12 @@ public:
         if (node == root_) return true;
 
         if (node == node->prev->child)
-            node->prev->child = node->sibling;
+            node->prev->child = node->next;
         else
-            node->prev->sibling = node->sibling;
-        if (node->sibling != nullptr)
-            node->sibling->prev = node->prev;
-        node->sibling = node->prev = nullptr;
+            node->prev->next = node->next;
+        if (node->next != nullptr)
+            node->next->prev = node->prev;
+        node->next = node->prev = nullptr;
         root_ = merge(root_, node);
         return true;
     }
@@ -57,7 +81,7 @@ public:
     {
         assert(!empty());
         std::queue<Node*> que;
-        for (Node* cur = root_->child; cur; cur = cur->sibling)
+        for (Node* cur = root_->child; cur; cur = cur->next)
         {
             que.push(cur);
         }
@@ -76,7 +100,7 @@ public:
             return;
         }
         root_ = que.front();
-        root_->sibling = root_->prev = nullptr;
+        root_->next = root_->prev = nullptr;
     }
 
     void clear() { destroy(root_); }
@@ -95,9 +119,9 @@ private:
         {
             std::swap(root1, root2);
         }
-        root2->sibling = root1->child;
-        if (root2->sibling)
-            root2->sibling->prev = root2;
+        root2->next = root1->child;
+        if (root2->next)
+            root2->next->prev = root2;
         root1->child = root2;
         root2->prev = root1;
         return root1;
@@ -108,22 +132,30 @@ private:
         if (node != nullptr)
         {
             destroy(node->child);
-            destroy(node->sibling);
+            destroy(node->next);
             delete node;
             node = nullptr;
         }
     }
 
     static bool comp(const T& lhs, const T& rhs)
+    { return Compare()(lhs, rhs); }
+    
+    
+    static Node* clone(Node* node, Node* prev = nullptr)
     {
-        return Compare()(lhs, rhs);
+        if (node == nullptr) return nullptr;
+        Node* copy = new Node(node->data);
+        copy->prev = prev;
+        copy->next = clone(node->next, copy);
+        copy->child = clone(node->child, copy);
     }
 
     struct Node
     {
         T data;
         Node* child = nullptr; //第一个子节点
-        Node* sibling = nullptr; //右兄弟
+        Node* next = nullptr; //右兄弟
         Node* prev = nullptr;
 
         Node(const T& _data): data(_data) {}

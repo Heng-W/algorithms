@@ -33,8 +33,7 @@ public:
     BPlusTree& operator=(const BPlusTree& rhs)
     {
         BPlusTree copy = rhs;
-        std::swap(root_, copy.root_);
-        return *this;
+        return *this = std::move(copy);
     }
 
     //移动赋值运算符
@@ -565,7 +564,7 @@ clone(NodeBase* node, IndexNode* parent, LeafNode*& prev) -> NodeBase*
 }
 
 
-
+// 测试
 #include <cstdlib>
 #include <ctime>
 #include <vector>

@@ -2,8 +2,8 @@
 #include <assert.h>
 #include <functional>
 #include <vector>
-#include <queue>
-#include <iostream>
+#include <queue> // for print heap
+#include <iostream> // for std::cout
 
 //斐波那契堆
 template <class T, class Compare = std::less<T>>
@@ -80,9 +80,8 @@ public:
     void pop()
     {
         assert(root_ != nullptr);
-        
-        Node* begin;
-        //子节点添加进根链表
+        // 子节点添加进根链表
+        Node* begin; // 指向合并后的根链表
         if (root_->next == root_) // 根链表只有root节点
         {
             begin = root_->child;
@@ -95,26 +94,26 @@ public:
             if (root_->child) 
                 splice(begin, root_->child, root_->child->prev);
         } 
-
         delete root_;
         root_ = nullptr;
         --nodeCount_;
 
-        if (begin == nullptr) return;
+        if (begin == nullptr) return; // 堆已经为空
 
-        std::vector<Node*> roots;
+        std::vector<Node*> roots; // 合并得到的不同度数的树
         Node* cur = begin;
         while (true)
         {
-            Node* next = cur->next;
-            cur->prev = cur->next = cur;
+            Node* next = cur->next; // 保存next节点
+            cur->prev = cur->next = cur; // 断开节点
             if (cur->degree >= roots.size())
                 roots.resize(cur->degree + 1);
-            while (roots[cur->degree])
+            // 合并度数相同的树
+            while (roots[cur->degree]) 
             {
                 Node* root = roots[cur->degree];
                 roots[cur->degree] = nullptr;
-                if (comp(cur->data, root->data))
+                if (comp(cur->data, root->data)) // 使root小于cur
                 {
                     std::swap(cur, root);
                 }
@@ -125,7 +124,7 @@ public:
                     splice(root->child, cur, cur);
                     
                 ++root->degree;
-                cur = root;//继续迭代
+                cur = root; // 继续迭代
                 if (cur->degree >= roots.size())
                     roots.resize(cur->degree + 1);
             }
@@ -133,7 +132,7 @@ public:
             cur = next;
             if (cur == begin) break;
         }
-        //合并串联到根链表上
+        // 合并串联到根链表上
         for (int i = 0; i < roots.size(); ++i)
         {
             if (roots[i]) root_ = merge(root_, roots[i]);
