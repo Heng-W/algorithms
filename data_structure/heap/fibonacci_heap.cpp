@@ -14,14 +14,24 @@ public:
     ~FibonacciHeap() { clear(); }
 
     FibonacciHeap(const FibonacciHeap& rhs)
+    : root_(nullptr), nodeCount_(rhs.nodeCount_) 
     {
-        Node* cur = rhs.root_;
-        Node* copy = new Node(cur->data);
-        while(cur->next != rhs.root_->prev)
+        if(rhs.root_) 
         {
-            copy->next = clone(cur->next);
-            cur = cur->next;
-            copy = copy->next;
+            Node* cur = rhs.root_;
+            Node* copy = new Node(cur->data);
+            root_ = copy;
+            while(cur->next != rhs.root_)
+            {
+                copy->next = new Node(cur->next->data);
+                copy->next->prev = copy;
+                cur = cur->next;
+                copy = copy->next;
+                Node* first, *prev;
+                copy->child = clone(cur->child, copy, first, prev, 0);
+            }
+            copy->next = root_;
+            root_->prev = copy;
         }
     }
 
@@ -32,12 +42,21 @@ public:
         rhs.nodeCount_ = 0;
     }
 
+    FibonacciHeap& operator=(const FibonacciHeap& rhs)
+    {
+        FibonacciHeap copy = rhs;
+        return *this = std::move(copy);
+    }
+
     FibonacciHeap& operator=(FibonacciHeap&& rhs) noexcept
     {
         if (this != &rhs)
         {
             clear();
-            std::swap(*this, rhs);
+            root_ = rhs.root_;
+            nodeCount_ = rhs.nodeCount_;
+            rhs.root_ = nullptr;
+            rhs.nodeCount_ = 0;
         }
         return *this;
     }
@@ -61,19 +80,27 @@ public:
     void pop()
     {
         assert(root_ != nullptr);
-        //从根链表中移除最小节点
-        root_->prev->next = root_->next;
-        root_->next->prev = root_->prev;
-
-        Node* begin = root_->next;
-        Node* child = root_->child;
+        
+        Node* begin;
+        //子节点添加进根链表
+        if (root_->next == root_) // 根链表只有root节点
+        {
+            begin = root_->child;
+        }
+        else 
+        {
+            begin = root_->next;
+            root_->prev->next = root_->next;
+            root_->next->prev = root_->prev;
+            if (root_->child) 
+                splice(begin, root_->child, root_->child->prev);
+        } 
 
         delete root_;
         root_ = nullptr;
-        if (--nodeCount_ == 0) return;
+        --nodeCount_;
 
-        //子节点添加进根链表
-        if (child) splice(begin, child, child->prev);
+        if (begin == nullptr) return;
 
         std::vector<Node*> roots;
         Node* cur = begin;
@@ -206,8 +233,7 @@ private:
     static Node* clone(Node* node, Node* parent, 
                         Node*& first, Node*& prev,int count)
     {
-        if(node == nullptr) return nullptr;
-
+        if (node == nullptr) return nullptr;
         Node* copy = new Node(node->data);
         copy->degree = node->degree;
         if (count == 0) first = prev = copy;
@@ -218,8 +244,7 @@ private:
             first->prev = copy;
             return first;
         }
-        copy->next = clone(node->next, parent, first, copy, count + 1);
-        first = prev = nullptr;
+        copy->next = clone(node->next, parent, first, copy, count);
         copy->child = clone(node->child, copy, first, prev, 0);
     }
 
@@ -274,10 +299,19 @@ int main()
 
     heap1.merge(heap2);
 
+    auto heap3 = heap1;
+
     while (!heap1.empty())
     {
         cout << heap1.top() << " ";
         heap1.pop();
+    }
+    cout << endl;
+
+    while (!heap3.empty())
+    {
+        cout << heap3.top() << " ";
+        heap3.pop();
     }
     cout << endl;
     return 0;
