@@ -5,7 +5,6 @@
 class TrieTree
 {
 public:
-
     TrieTree() { root_ = new Node(); }
     ~TrieTree() { clear(); ::free(root_); }
 
@@ -35,6 +34,7 @@ public:
         return *this;
     }
 
+    // 插入单词
     void insert(const std::string& word)
     {
         Node* cur = root_;
@@ -51,6 +51,7 @@ public:
         ++cur->wordCount;
     }
 
+    // 删除单词
     void remove(const std::string& word)
     {
         int count = findCount(word);
@@ -71,6 +72,7 @@ public:
         cur->wordCount = 0;
     }
 
+    // 删除某前缀的所有单词
     void removePrefix(const std::string& prefix)
     {
         int count = findPrefix(prefix);
@@ -90,6 +92,7 @@ public:
         }
     }
 
+    // 查找单词出现的次数
     int findCount(const std::string& word) const
     {
         Node* cur = root_;
@@ -125,7 +128,7 @@ private:
     {
         for (int i = 0; i < CHILD_NUM; ++i)
         {
-            if (node->childs[i]) 
+            if (node->childs[i])
             {
                 destroyTree(node->childs[i]);
                 delete node->childs[i];
@@ -150,14 +153,16 @@ private:
 
     struct Node
     {
-        int wordCount = 0;
-        int prefixCount = 0;
+        int wordCount = 0; // 单词出现的次数
+        int prefixCount = 0; // 此前缀的所有单词数量
         Node* childs[CHILD_NUM] = {nullptr};
     };
-    Node* root_;
+
+    Node* root_; // 根节点
 };
 
 
+// 测试
 #include <iostream>
 
 int main()

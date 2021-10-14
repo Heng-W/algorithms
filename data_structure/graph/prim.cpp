@@ -2,6 +2,7 @@
 #include "graph_type.h"
 #include <iostream>
 
+// 最小生成树，prim算法
 template <class T>
 void prim(const MGraph<T>& graph)
 {
@@ -17,7 +18,7 @@ void prim(const MGraph<T>& graph)
     {
         int min = INT_MAX;
         int index = 0;
-        //找到权值最小的边
+        // 找到权值最小的边
         for (int j = 1; j < graph.vexNum(); ++j)
         {
             if (lowcost[j] != 0 && lowcost[j] < min)
@@ -26,8 +27,8 @@ void prim(const MGraph<T>& graph)
                 index = j;
             }
         }
-        std::cout << adjvex[index] << " - " << index <<std::endl;
-        lowcost[index] = 0; //标记完成
+        std::cout << adjvex[index] << " - " << index << std::endl;
+        lowcost[index] = 0; // 标记完成
         for (int j = 1; j < graph.vexNum(); ++j)
         {
             if (lowcost[j] != 0 && graph.arcs[index][j] < lowcost[j])

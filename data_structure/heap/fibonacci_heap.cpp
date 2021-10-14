@@ -5,7 +5,7 @@
 #include <queue> // for print heap
 #include <iostream> // for std::cout
 
-//斐波那契堆
+// 斐波那契堆
 template <class T, class Compare = std::less<T>>
 class FibonacciHeap
 {
@@ -13,15 +13,16 @@ public:
     FibonacciHeap(): root_(nullptr), nodeCount_(0) {}
     ~FibonacciHeap() { clear(); }
 
+    // 拷贝构造函数
     FibonacciHeap(const FibonacciHeap& rhs)
-    : root_(nullptr), nodeCount_(rhs.nodeCount_) 
+        : root_(nullptr), nodeCount_(rhs.nodeCount_)
     {
-        if(rhs.root_) 
+        if (rhs.root_)
         {
             Node* cur = rhs.root_;
             Node* copy = new Node(cur->data);
             root_ = copy;
-            while(cur->next != rhs.root_)
+            while (cur->next != rhs.root_)
             {
                 copy->next = new Node(cur->next->data);
                 copy->next->prev = copy;
@@ -35,6 +36,7 @@ public:
         }
     }
 
+    // 移动构造函数
     FibonacciHeap(FibonacciHeap&& rhs) noexcept
         : root_(rhs.root_), nodeCount_(rhs.nodeCount_)
     {
@@ -42,12 +44,14 @@ public:
         rhs.nodeCount_ = 0;
     }
 
+    // 拷贝赋值运算符
     FibonacciHeap& operator=(const FibonacciHeap& rhs)
     {
         FibonacciHeap copy = rhs;
         return *this = std::move(copy);
     }
 
+    // 移动赋值运算符
     FibonacciHeap& operator=(FibonacciHeap&& rhs) noexcept
     {
         if (this != &rhs)
@@ -61,39 +65,28 @@ public:
         return *this;
     }
 
-    void insert(const T& data)
-    {
-        Node* node = new Node(data);
-        node->prev = node->next = node;
-        root_ = merge(root_, node);
-        ++nodeCount_;
-    }
+    // 压入
+    void push(const T& data) { merge(data); }
+    void push(T&& data) { merge(std::move(data)); }
 
-    void insert(T&& data)
-    {
-        Node* node = new Node(std::move(data));
-        node->prev = node->next = node;
-        root_ = merge(root_, node);
-        ++nodeCount_;
-    }
-
+    // 弹出
     void pop()
     {
-        assert(root_ != nullptr);
+        assert(!empty());
         // 子节点添加进根链表
         Node* begin; // 指向合并后的根链表
         if (root_->next == root_) // 根链表只有root节点
         {
             begin = root_->child;
         }
-        else 
+        else
         {
             begin = root_->next;
             root_->prev->next = root_->next;
             root_->next->prev = root_->prev;
-            if (root_->child) 
+            if (root_->child)
                 splice(begin, root_->child, root_->child->prev);
-        } 
+        }
         delete root_;
         root_ = nullptr;
         --nodeCount_;
@@ -109,7 +102,7 @@ public:
             if (cur->degree >= roots.size())
                 roots.resize(cur->degree + 1);
             // 合并度数相同的树
-            while (roots[cur->degree]) 
+            while (roots[cur->degree])
             {
                 Node* root = roots[cur->degree];
                 roots[cur->degree] = nullptr;
@@ -122,7 +115,7 @@ public:
                     root->child = cur;
                 else
                     splice(root->child, cur, cur);
-                    
+
                 ++root->degree;
                 cur = root; // 继续迭代
                 if (cur->degree >= roots.size())
@@ -135,29 +128,31 @@ public:
         // 合并串联到根链表上
         for (int i = 0; i < roots.size(); ++i)
         {
-            if (roots[i]) root_ = merge(root_, roots[i]);
+            if (roots[i]) root_ = _merge(root_, roots[i]);
         }
     }
 
+    // 合并
     void merge(FibonacciHeap& rhs) { merge(std::move(rhs)); }
 
     void merge(FibonacciHeap&& rhs)
     {
-        if (this == &rhs)
-            return;
-        root_ = merge(root_, rhs.root_);
+        if (this == &rhs) return;
+        root_ = _merge(root_, rhs.root_);
         nodeCount_ += rhs.nodeCount_;
 
         rhs.root_ = nullptr;
         rhs.nodeCount_ = 0;
     }
 
+    // 清除
     void clear()
     {
         destroy(root_);
         nodeCount_ = 0;
     }
 
+    // 打印
     void print() const
     {
         std::queue<Node*> que;
@@ -182,16 +177,22 @@ public:
         }
     }
 
-    const T& top() const { assert(root_ != nullptr); return root_->data; }
+    const T& top() const { assert(!empty()); return root_->data; }
 
-    bool empty() const { return nodeCount_ == 0; }
+    bool empty() const { return root_ == nullptr; }
 
 private:
-
     struct Node;
 
-    //合并串联到根链表上
-    Node* merge(Node* root1, Node* root2)
+    // 构造包含一个元素的堆
+    FibonacciHeap(const T& data): nodeCount_(1)
+    { root_ = new Node(data); }
+
+    FibonacciHeap(T&& data): nodeCount_(1)
+    { root_ = new Node(std::move(data)); }
+
+    // 合并串联到根链表上
+    Node* _merge(Node* root1, Node* root2)
     {
         if (root1 == nullptr) return root2;
         if (root2 == nullptr) return root1;
@@ -204,7 +205,7 @@ private:
         return root1;
     }
 
-    //[first,last]内元素接合于pos位置之前
+    // [first,last]内元素接合于pos位置之前
     void splice(Node* pos, Node* first, Node* last)
     {
         pos->prev->next = first;
@@ -213,6 +214,7 @@ private:
         pos->prev = last;
     }
 
+    // 销毁
     void destroy(Node*& node)
     {
         if (node != nullptr)
@@ -229,15 +231,16 @@ private:
         }
     }
 
-    static Node* clone(Node* node, Node* parent, 
-                        Node*& first, Node*& prev,int count)
+    // 克隆
+    static Node* clone(Node* node, Node* parent,
+                       Node*& first, Node*& prev, int count)
     {
         if (node == nullptr) return nullptr;
         Node* copy = new Node(node->data);
         copy->degree = node->degree;
         if (count == 0) first = prev = copy;
         copy->prev = prev;
-        if(++count == parent->degree) 
+        if (++count == parent->degree)
         {
             copy->next = first;
             first->prev = copy;
@@ -250,6 +253,7 @@ private:
     static bool comp(const T& lhs, const T& rhs)
     { return Compare()(lhs, rhs); }
 
+    // 定义节点
     struct Node
     {
         T data;
@@ -258,16 +262,16 @@ private:
         Node* next; //兄弟（后继）
         Node* prev; //兄弟（前驱）
 
-        Node(const T& _data): data(_data) {}
-        Node(T&& _data): data(std::move(_data)) {}
+        Node(const T& _data): data(_data) { prev = next = this; }
+        Node(T&& _data): data(std::move(_data)) { prev = next = this; }
     };
 
-    Node* root_;
-    int nodeCount_;
+    Node* root_; // 根节点，指向根链表上最小元素
+    int nodeCount_; // 节点数量
 };
 
 
-//测试
+// 测试
 #include <cstdlib>
 #include <ctime>
 #include <vector>
@@ -291,10 +295,10 @@ int main()
     cout << endl;
 
     FibonacciHeap<int, greater<int>> heap1;
-    for (const auto& x : vec1) heap1.insert(x);
+    for (const auto& x : vec1) heap1.push(x);
 
     FibonacciHeap<int, greater<int>> heap2;
-    for (const auto& x : vec2) heap2.insert(x);
+    for (const auto& x : vec2) heap2.push(x);
 
     heap1.merge(heap2);
 

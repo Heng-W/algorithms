@@ -2,12 +2,12 @@
 #include <assert.h>
 #include <memory>
 
-//数组实现的环形队列
+// 数组实现的环形队列
 template <class T>
 class CircularQueue
 {
 public:
-    //构造函数，参数为初始容量
+    // 构造函数，参数为初始容量
     CircularQueue(int capacity = 32)
         : front_(0), rear_(0)
     {
@@ -15,10 +15,10 @@ public:
         data_ = alloc_.allocate(capacity_);
     }
 
-    //析构函数
+    // 析构函数
     ~CircularQueue() { free(); }
 
-    //拷贝构造函数
+    // 拷贝构造函数
     CircularQueue(const CircularQueue& rhs)
         : front_(0), rear_(0), capacity_(rhs.capacity_)
     {
@@ -31,7 +31,7 @@ public:
         }
     }
 
-    //移动构造函数
+    // 移动构造函数
     CircularQueue(CircularQueue&& rhs) noexcept
         : data_(rhs.data_), front_(rhs.front_), rear_(rhs.rear_),
           capacity_(rhs.capacity_)
@@ -40,14 +40,14 @@ public:
         rhs.front_ = rhs.rear_ = rhs.capacity_ = 0;
     }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     CircularQueue& operator=(const CircularQueue& rhs)
     {
         CircularQueue copy = rhs;
         return *this = std::move(copy);
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     CircularQueue& operator=(CircularQueue&& rhs) noexcept
     {
         if (this != &rhs)
@@ -64,11 +64,11 @@ public:
         return *this;
     }
 
-    //压入
+    // 压入
     void push(const T& x) { _push(x); }
     void push(T&& x) { _push(std::move(x)); }
 
-    //弹出
+    // 弹出
     void pop()
     {
         assert(!empty());
@@ -76,7 +76,7 @@ public:
         front_ &= capacity_ - 1;
     }
 
-    //清空
+    // 清空
     void clear()
     {
         unsigned int pos = front_;
@@ -90,9 +90,9 @@ public:
 
     const T& front() const { return data_[front_]; }
 
-    //元素数量
+    // 元素数量
     int size() const { return (rear_ - front_ + capacity_) & (capacity_ - 1); }
-    //容量
+    // 容量
     int capacity() const { return capacity_; }
 
     bool empty() const { return front_ == rear_; }
@@ -103,15 +103,12 @@ private:
     template <class X>
     void _push(X&& x)
     {
-        if (full())
-        {
-            resize();
-        }
+        if (full()) resize();
         alloc_.construct(&data_[rear_++], std::forward<X>(x));
         rear_ &= capacity_ - 1;
     }
 
-    //扩容
+    // 扩容
     void resize()
     {
         unsigned int newCap = capacity_ * 2;
@@ -137,7 +134,7 @@ private:
         if (data_) alloc_.deallocate(data_, capacity_);
     }
 
-    //取整为2的幂次方
+    // 取整为2的幂次方
     static unsigned int roundupPowerOfTwo(unsigned int i)
     {
         --i;
@@ -151,19 +148,18 @@ private:
 
     static std::allocator<T> alloc_;
     T* data_;
-    unsigned int capacity_;//容量
-    unsigned int front_;
-    unsigned int rear_;
+    unsigned int capacity_; // 容量
+    unsigned int front_; // 队头索引
+    unsigned int rear_; // 队尾索引
 };
 
 
-//测试
+// 测试
 #include <iostream>
 
 int main()
 {
     using namespace std;
-
     CircularQueue<int> que(4);
     que.push(10);
     que.push(20);

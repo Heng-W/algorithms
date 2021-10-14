@@ -1,24 +1,23 @@
 
 #include <iostream>
 
-//AVL树
+// AVL树
 template <class T>
 class AVLTree
 {
     class Node;
 public:
-
     AVLTree(): root_(nullptr) {}
     ~AVLTree() { clear(); }
 
-    //拷贝构造函数
+    // 拷贝构造函数
     AVLTree(const AVLTree& rhs) { root_ = clone(rhs.root_); }
 
-    //移动构造函数
-    AVLTree(AVLTree&& rhs) noexcept: root_(rhs.root_)
-    { rhs.root_ = nullptr; }
+    // 移动构造函数
+    AVLTree(AVLTree&& rhs) noexcept
+    :root_(rhs.root_) { rhs.root_ = nullptr; }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     AVLTree& operator=(const AVLTree& rhs)
     {
         Node* newRoot = clone(rhs.root_);
@@ -27,7 +26,7 @@ public:
         return *this;
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     AVLTree& operator=(AVLTree&& rhs) noexcept
     {
         if (this != &rhs)
@@ -39,21 +38,21 @@ public:
         return *this;
     }
 
-    //查找
+    // 查找
     const Node* find(const T& data) const { return _find(data); }
     Node* find(const T& data) { return const_cast<Node*>(_find(data)); }
 
-    //插入
+    // 插入
     bool insert(const T& data) { return _insert(root_, data); }
     bool insert(T&& data) { return _insert(root_, std::move(data)); }
 
-    //删除
+    // 删除
     bool remove(const T& data) { return _remove(root_, data); }
 
-    //中序遍历
+    // 中序遍历
     void inOrder() const { inOrder(root_); }
 
-    //清除
+    // 清除
     void clear() { destroy(root_); }
 
 private:
@@ -71,7 +70,7 @@ private:
     static void updateHeight(Node* node)
     { node->height = std::max(height(node->left), height(node->right)) + 1; }
 
-    //左旋
+    // 左旋
     void leftRotation(Node*& node)
     {
         Node* rchild = node->right;
@@ -84,7 +83,7 @@ private:
         node = rchild;
     }
 
-    //右旋
+    // 右旋
     void rightRotation(Node*& node)
     {
         Node* lchild = node->left;
@@ -97,7 +96,7 @@ private:
         node = lchild;
     }
 
-    //中序遍历
+    // 中序遍历
     void inOrder(Node* node) const
     {
         if (node)
@@ -108,7 +107,7 @@ private:
         }
     }
 
-    //销毁
+    // 销毁
     void destroy(Node*& node)
     {
         if (node)
@@ -120,7 +119,7 @@ private:
         }
     }
 
-    //克隆
+    // 克隆
     Node* clone(Node* node)
     {
         if (node == nullptr) return nullptr;
@@ -131,19 +130,19 @@ private:
         return copy;
     }
 
-    //定义节点
+    // 定义节点
     struct Node
     {
         T data;
         Node* left;
         Node* right;
-        int height; //高度
+        int height; // 高度
 
         Node(const T& _data): data(_data) {}
         Node(T&& _data): data(std::move(_data)) {}
     };
 
-    Node* root_; //根节点
+    Node* root_; // 根节点
 };
 
 
@@ -199,7 +198,7 @@ bool AVLTree<T>::_insert(Node*& node, X&& x)
     {
         return false;
     }
-    updateHeight(node); //更新高度
+    updateHeight(node); // 更新高度
     return true;
 }
 
@@ -208,7 +207,7 @@ template <class T>
 bool AVLTree<T>::_remove(Node*& node, const T& data)
 {
     if (node == nullptr)
-        return false;//未找到
+        return false; // 未找到
     if (data < node->data)
     {
         if (!_remove(node->left, data))
@@ -250,12 +249,12 @@ bool AVLTree<T>::_remove(Node*& node, const T& data)
             return true;
         }
     }
-    updateHeight(node); //更新高度
+    updateHeight(node); // 更新高度
     return true;
 }
 
 
-//测试
+// 测试
 #include <cstdlib>
 #include <ctime>
 #include <vector>
@@ -283,7 +282,7 @@ int main()
     tree.inOrder();
     cout << endl;
 
-    for (const auto& x : vec) 
+    for (const auto& x : vec)
     {
         tree.remove(x);
         tree.inOrder();

@@ -10,9 +10,7 @@ public:
     struct select1st
     {
         const typename Pair::first_type& operator()(const Pair& pair) const
-        {
-            return pair.first;
-        }
+        { return pair.first; }
     };
 
     using Object = std::pair<const Key, Value>;
@@ -34,16 +32,14 @@ public:
     ConstIterator find(const KeyType& key) const {return table_.find(key);}
 
     Value& operator[](const KeyType& key)
-    {
-        return table_.findOrInsert({key, Value()}).second;
-    }
+    { return table_.findOrInsert({key, Value()}).second; }
 
 
     bool remove(const KeyType& key) { return table_.remove(key); }
 
     void clear() { table_.clear(); }
 
-    int nodeCount() const { return table_.nodeCount(); }
+    int size() const { return table_.size(); }
 
     ConstIterator begin() const { return table_.begin(); }
     Iterator begin() { return table_.begin(); }
@@ -56,6 +52,7 @@ private:
 };
 
 
+// 测试
 #include <iostream>
 
 int main()
@@ -68,7 +65,7 @@ int main()
     map.insert({92, 456});
     map.insert({122, 125});
 
-    cout << map.nodeCount() << endl;
+    cout << map.size() << endl;
 
     cout << (map.find(298) != map.end()) << endl;
     cout << (map.find(10) != map.end()) << endl;

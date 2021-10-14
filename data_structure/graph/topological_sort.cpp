@@ -35,7 +35,7 @@ struct ALGraph
 {
     using VertexType = Vertex;
     using AdjList = std::vector<VertexNode<Vertex>>;
-    
+
     struct Arc
     {
         int begin;

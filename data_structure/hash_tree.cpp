@@ -7,7 +7,7 @@ static constexpr int PRIME_NUMS[] =
     31, 37, 41, 43, 47, 53
 };
 
-//哈希树
+// 哈希树
 template <class Key, class Value>
 class HashTree
 {
@@ -23,15 +23,15 @@ public:
     HashTree() { root_ = createNode(PRIME_NUMS[0]); }
 
     ~HashTree() { clear(); ::free(root_); }
-    
-    //拷贝构造函数
+
+    // 拷贝构造函数
     HashTree(const HashTree& rhs) { root_ = clone(rhs.root_); }
 
-    //移动构造函数
+    // 移动构造函数
     HashTree(HashTree&& rhs): HashTree()
     { std::swap(root_, rhs.root_); }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     HashTree& operator=(const HashTree& rhs)
     {
         HashTree copy = rhs;
@@ -39,7 +39,7 @@ public:
         return *this;
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     HashTree& operator=(HashTree&& rhs) noexcept
     {
         if (this != &rhs)
@@ -50,20 +50,21 @@ public:
         return *this;
     }
 
-
+    // 查找
     const Node* find(KeyType key) const
     { return _find(root_, 0, key); }
 
     Node* find(KeyType key)
     { return const_cast<Node*>(_find(root_, 0, key)); }
 
+    // 插入
     std::pair<Node*, bool> insert(KeyType key, const ValueType& value)
     { return _insert(root_, 0, key, value); }
 
     std::pair<Node*, bool> insert(KeyType key, ValueType&& value)
     { return _insert(root_, 0, key, std::move(value)); }
 
-
+    // 删除
     bool remove(KeyType key) { return _remove(root_, 0, key); }
 
     void clear() { destroyTree(root_, 0); }
@@ -122,7 +123,7 @@ private:
         return _remove(node->childs[index], level + 1, key);
     }
 
-    // 销毁node子树
+    //  销毁node子树
     void destroyTree(Node* node, int level)
     {
         if (node->occupied)
@@ -171,7 +172,7 @@ private:
     {
         KeyType key;
         ValueType value;
-        bool occupied; //节点是否被占据
+        bool occupied; // 节点是否被占据
         Node* childs[1];
     };
 
@@ -187,13 +188,13 @@ int main()
 {
     using namespace std;
     HashTree<int, string> tree;
-    tree.insert(30,"hello");
-    tree.insert(10,"test");
+    tree.insert(30, "hello");
+    tree.insert(10, "test");
 
     auto res = tree.find(30);
     if (res) cout << res->value << endl;
 
-    cout << tree.remove(30) <<endl;
+    cout << tree.remove(30) << endl;
     res = tree.find(30);
     if (res) cout << res->value << endl;
 

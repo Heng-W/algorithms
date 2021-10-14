@@ -1,11 +1,10 @@
 
 #include <vector>
 
-//并查集
+// 并查集
 class DisjointSet
 {
 public:
-
     DisjointSet(int size)
     {
         root_.resize(size);
@@ -41,7 +40,7 @@ public:
     {
         int root = x;
         while (root != root_[root]) root = root_[root];
-        //路径压缩优化
+        // 路径压缩优化
         while (root != x)
         {
             int tmp = root_[x];
@@ -51,7 +50,7 @@ public:
         return root;
     }
 
-    //递归写法
+    // 递归写法
     int findR(int x)
     {
         if (x == root_[x]) return x;
@@ -80,7 +79,7 @@ int main()
     set.join(2, 4);
     set.join(2, 5);
 
-    //cout << set.find(3) << endl;
+    // cout << set.find(3) << endl;
     cout << set.findR(3) << endl;
 
     cout << set.isConnected(0, 3) << endl;

@@ -29,16 +29,16 @@ public:
         clear();
         ::free(head_);
     }
-    
+
     // 拷贝构造函数
-    SkipList(const SkipList& rhs):SkipList(rhs.maxLevel_)
+    SkipList(const SkipList& rhs): SkipList(rhs.maxLevel_)
     {
         std::unordered_map<const Node*, Node*> created;
         for (int i = rhs.level_; i >= 0; --i)
         {
             const Node* cur = rhs.head_;
             Node* copy = head_;
-            
+
             while (cur->forward[i])
             {
                 cur = cur->forward[i];
@@ -122,7 +122,7 @@ public:
 
         if (!cur || comp(key, getKey(cur->obj)))
             return nullptr;
-            
+
         for (int i = 0; i <= level_; ++i)
         {
             if (cur != update[i]->forward[i])
@@ -262,11 +262,7 @@ private:
         ObjectRef operator*() const { return node->obj; }
         ObjectPtr operator->() const { return &*this; }
 
-        Self& operator++()
-        {
-            node = node->forward[0];
-            return *this;
-        }
+        Self& operator++() { node = node->forward[0]; return *this; }
         Self operator++(int)
         {
             Self tmp = *this;

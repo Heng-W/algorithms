@@ -29,6 +29,7 @@ public:
         return node;
     }
 
+    // 前序线索化
     void preThreading(Node* node, Node*& prev)
     {
         if (node == nullptr) return;
@@ -50,6 +51,7 @@ public:
         preThreading(node->right, prev);
     }
 
+    // 前序遍历
     void preOrder() const
     {
         Node* cur = root_;
@@ -65,6 +67,7 @@ public:
         }
     }
 
+    // 中序线索化
     void inThreading(Node* node, Node*& prev)
     {
         if (node == nullptr) return;
@@ -83,6 +86,7 @@ public:
         inThreading(node->right, prev);
     }
 
+    // 中序遍历
     void inOrder() const
     {
         Node* cur = root_;
@@ -136,7 +140,6 @@ private:
     };
 
     Node* root_;
-
 };
 
 int main()

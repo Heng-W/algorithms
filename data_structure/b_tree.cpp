@@ -3,7 +3,7 @@
 #include <queue>
 #include <iostream>
 
-//B树
+// B树
 template <class Key, class Value, int M>
 class BTree
 {
@@ -17,15 +17,15 @@ public:
     BTree(): root_(nullptr) {}
 
     ~BTree() { clear(); }
-    
-    //拷贝构造函数
+
+    // 拷贝构造函数
     BTree(const BTree& rhs) { root_ = clone(rhs.root_); }
 
-    //移动构造函数
+    // 移动构造函数
     BTree(BTree&& rhs) noexcept: root_(rhs.root_)
     { rhs.root_ = nullptr; }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     BTree& operator=(const BTree& rhs)
     {
         Node* newRoot = clone(rhs.root_);
@@ -34,7 +34,7 @@ public:
         return *this;
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     BTree& operator=(BTree&& rhs) noexcept
     {
         if (this != &rhs)
@@ -55,7 +55,7 @@ public:
 
     void levelOrder() const;
 
-    void inorder() const { _inorder(root_); }
+    void inOrder() const { _inOrder(root_); }
 
     void clear() { destroyTree(root_); }
 
@@ -66,7 +66,7 @@ private:
 
     void mergeNode(Node* parent, int pos);
 
-    void _inorder(Node* node) const;
+    void _inOrder(Node* node) const;
 
     void destroyTree(Node* node);
 
@@ -206,12 +206,12 @@ bool BTree<Key, Value, M>::remove(const KeyType& key)
         Node* sub = cur->childs[pos + 1];
         while (sub->childs[0])
             sub = sub->childs[0];
-        //后继节点替换
+        // 后继节点替换
         cur->objects[pos] = std::move(sub->objects[0]);
         cur = sub;
         pos = 0;
     }
-    //删除节点
+    // 删除节点
     for (int i = pos; i < cur->keyCount - 1; ++i)
     {
         cur->objects[i] = std::move(cur->objects[i + 1]);
@@ -282,9 +282,9 @@ bool BTree<Key, Value, M>::remove(const KeyType& key)
         else
         {
             if (childPos > 0)
-                mergeNode(parent, childPos - 1); //合并到左子树
+                mergeNode(parent, childPos - 1); // 合并到左子树
             else
-                mergeNode(parent, childPos); //右子树合并到当前
+                mergeNode(parent, childPos); // 右子树合并到当前
             cur = parent;
         }
     }
@@ -346,18 +346,18 @@ void BTree<Key, Value, M>::levelOrder() const
 
 
 template <class Key, class Value, int M>
-void BTree<Key, Value, M>::_inorder(Node* node) const
+void BTree<Key, Value, M>::_inOrder(Node* node) const
 {
     if (node == nullptr)
         return;
     int pos = 0;
     while (pos < node->keyCount)
     {
-        _inorder(node->childs[pos]);
+        _inOrder(node->childs[pos]);
         std::cout << getKey(node->objects[pos]) << " ";
         ++pos;
     }
-    _inorder(node->childs[pos]);
+    _inOrder(node->childs[pos]);
 }
 
 
@@ -381,11 +381,11 @@ auto BTree<Key, Value, M>::clone(Node* node, Node* parent) -> Node*
     Node* copy = new Node();
     copy->keyCount = node->keyCount;
     copy->parent = parent;
-    for(int i = 0; i < node->keyCount; ++i)
+    for (int i = 0; i < node->keyCount; ++i)
     {
         copy->objects[i] = node->objects[i];
     }
-    for(int i = 0; i <= node->keyCount; ++i)
+    for (int i = 0; i <= node->keyCount; ++i)
     {
         copy->childs[i] = clone(node->childs[i], copy);
     }
@@ -414,7 +414,7 @@ int main()
         tree.insert({vec[i], i});
     }
 
-    tree.inorder();
+    tree.inOrder();
     cout << endl;
     tree.levelOrder();
     cout << endl;
@@ -424,7 +424,7 @@ int main()
     for (int i = 0; i < 15; ++i)
     {
         tree.remove(vec[i]);
-        tree.inorder();
+        tree.inOrder();
         cout << endl;
     }
 

@@ -31,11 +31,11 @@ public:
     ~RBTree() { clear(); ::free(nil_); }
 
     //拷贝构造函数
-    RBTree(const RBTree& rhs):RBTree()
+    RBTree(const RBTree& rhs): RBTree()
     { root_ = clone(rhs, rhs.root_, nil_); }
 
     //移动构造函数
-    RBTree(RBTree&& rhs):RBTree() { swap(rhs); }
+    RBTree(RBTree&& rhs): RBTree() { swap(rhs); }
 
     //拷贝赋值运算符
     RBTree& operator=(const RBTree& rhs)

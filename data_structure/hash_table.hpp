@@ -78,7 +78,7 @@ public:
     void clear();
 
 
-    int nodeCount() const { return nodeCount_; }
+    int size() const { return nodeCount_; }
 
     int bucketCount() const { return buckets_.size(); }
 

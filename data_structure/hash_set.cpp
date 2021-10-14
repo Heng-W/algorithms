@@ -26,7 +26,7 @@ public:
 
     void clear() { table_.clear(); }
 
-    int nodeCount() const { return table_.nodeCount(); }
+    int size() const { return table_.size(); }
 
     ConstIterator begin() const { return table_.begin(); }
     Iterator begin() { return table_.begin(); }
@@ -51,7 +51,7 @@ int main()
     set.insert(92);
     set.insert(122);
 
-    cout << set.nodeCount() << endl;
+    cout << set.size() << endl;
 
     cout << (set.find(298) != set.end()) << endl;
     cout << (set.find(10) != set.end()) << endl;
@@ -60,7 +60,7 @@ int main()
     cout << endl;
 
     set.remove(92);
-    
+
     for (const auto& x : set) cout << x << " ";
     cout << endl;
 

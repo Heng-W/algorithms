@@ -2,23 +2,23 @@
 #include <cstdlib>
 #include <functional>
 
-//树堆
+// 树堆
 template <class T>
 class Treap
 {
     struct Node;
 public:
-    Treap():root_(nullptr) {}
+    Treap(): root_(nullptr) {}
     ~Treap() { clear(); }
 
-    //拷贝构造函数
+    // 拷贝构造函数
     Treap(const Treap& rhs) { root_ = clone(rhs.root_); }
 
-    //移动构造函数
-    Treap(Treap&& rhs) noexcept: root_(rhs.root_)
-    { rhs.root_ = nullptr; }
+    // 移动构造函数
+    Treap(Treap&& rhs) noexcept
+    :root_(rhs.root_) { rhs.root_ = nullptr; }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     Treap& operator=(const Treap& rhs)
     {
         Node* newRoot = clone(rhs.root_);
@@ -27,7 +27,7 @@ public:
         return *this;
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     Treap& operator=(Treap&& rhs) noexcept
     {
         if (this != &rhs)
@@ -39,11 +39,14 @@ public:
         return *this;
     }
 
+    // 插入
     bool insert(const T& data) { return insert(root_, data); }
     bool insert(T&& data) { return insert(root_, std::move(data)); }
 
+    // 删除
     bool remove(const T& data) { return remove(root_, data); }
 
+    // 查找
     Node* find(const T& data) const
     {
         Node* cur = root_;
@@ -59,7 +62,7 @@ public:
         return nullptr;
     }
 
-    void clear() { destroyTree(root_); }
+    void clear() { destroy(root_); }
 
 private:
 
@@ -68,7 +71,7 @@ private:
 
     bool remove(Node*& node, const T& data);
 
-    void leftRotate(Node*& node)
+    void leftRotation(Node*& node)
     {
         Node* rchild = node->right;
         node->right = rchild->left;
@@ -76,7 +79,7 @@ private:
         node = rchild;
     }
 
-    void rightRotate(Node*& node)
+    void rightRotation(Node*& node)
     {
         Node* lchild = node->left;
         node->left = lchild->right;
@@ -84,19 +87,19 @@ private:
         node = lchild;
     }
 
-    //销毁子树
-    void destroyTree(Node*& node)
+    // 销毁
+    void destroy(Node*& node)
     {
         if (node)
         {
-            destroyTree(node->left);
-            destroyTree(node->right);
+            destroy(node->left);
+            destroy(node->right);
             delete node;
             node = nullptr;
         }
     }
 
-    //克隆
+    // 克隆
     Node* clone(Node* node)
     {
         if (node == nullptr) return nullptr;
@@ -114,11 +117,11 @@ private:
         Node* left;
         Node* right;
 
-        Node(const T& _data, int _priority) 
-        : data(_data), priority(_priority) {}
+        Node(const T& _data, int _priority)
+            : data(_data), priority(_priority) {}
 
-        Node(T&& _data, int _priority) 
-        : data(std::move(_data)), priority(_priority) {}
+        Node(T&& _data, int _priority)
+            : data(std::move(_data)), priority(_priority) {}
     };
 
     Node* root_;
@@ -140,14 +143,14 @@ bool Treap<T>::insert(Node*& node, X&& x)
         if (!insert(node->left, std::forward<X>(x)))
             return false;
         if (node->left->priority < node->priority)
-            rightRotate(node);
+            rightRotation(node);
     }
     else if (node->data < x)
     {
         if (!insert(node->right, std::forward<X>(x)))
             return false;
         if (node->right->priority < node->priority)
-            leftRotate(node);
+            leftRotation(node);
     }
     else
     {
@@ -160,12 +163,12 @@ template <class T>
 bool Treap<T>::remove(Node*& node, const T& data)
 {
     if (node == nullptr)
-        return false;//未找到
+        return false;// 未找到
     if (data < node->data)
         return remove(node->left, data);
     else if (node->data < data)
         return remove(node->right, data);
-    //找到元素
+    // 找到元素
     if (!node->left || !node->right)
     {
         Node* tmp = node;
@@ -176,12 +179,12 @@ bool Treap<T>::remove(Node*& node, const T& data)
     {
         if (node->left->priority < node->right->priority)
         {
-            rightRotate(node);
+            rightRotation(node);
             remove(node->right, data);
         }
         else
         {
-            leftRotate(node);
+            leftRotation(node);
             remove(node->left, data);
         }
     }
@@ -189,7 +192,7 @@ bool Treap<T>::remove(Node*& node, const T& data)
 }
 
 
-//测试
+// 测试
 #include <ctime>
 #include <vector>
 #include <iostream>
@@ -209,11 +212,11 @@ int main()
     cout << endl;
 
     Treap<int> treap;
-    for (const auto& x:vec) treap.insert(x);
+    for (const auto& x : vec) treap.insert(x);
 
     cout << (treap.find(vec[0]) != nullptr) << endl;
 
-    for (const auto& x:vec) treap.remove(x);
+    for (const auto& x : vec) treap.remove(x);
 
     return 0;
 }

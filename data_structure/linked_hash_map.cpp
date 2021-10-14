@@ -1,18 +1,16 @@
 
 #include "linked_hash_table.hpp"
 
-
 template <class Key, class Value, class HashFunc = std::hash<Key>>
 class LinkedHashMap
 {
 public:
+    // 定义用于extractKey的函数对象
     template <class Pair>
     struct select1st
     {
         const typename Pair::first_type& operator()(const Pair& pair) const
-        {
-            return pair.first;
-        }
+        { return pair.first; }
     };
 
     using Object = std::pair<const Key, Value>;
@@ -21,7 +19,6 @@ public:
     using ConstIterator = typename Container::ConstIterator;
     using KeyType = typename Container::KeyType;
     using RemoveCallback = typename Container::RemoveCallback;
-
 
     LinkedHashMap(int n = 32): table_(n) {}
 
@@ -38,10 +35,7 @@ public:
     ConstIterator find(const KeyType& key) const {return table_.find(key);}
 
     Value& operator[](const KeyType& key)
-    {
-        return table_.findOrInsert({key, Value()}).second;
-    }
-
+    { return table_.findOrInsert({key, Value()}).second; }
 
     Iterator erase(Iterator it) { return table_.erase(it); }
 

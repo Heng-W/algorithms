@@ -31,7 +31,7 @@ public:
     }
 
     ~BinaryTree() { clear(); }
-    
+
     //拷贝构造函数
     BinaryTree(const BinaryTree& rhs) { root_ = clone(rhs.root_); }
 
@@ -156,10 +156,10 @@ public:
     }
 
     //查找
-    const Node* find(const T& data) const 
+    const Node* find(const T& data) const
     { return _find(root_, data); }
 
-    Node* find(const T& data) 
+    Node* find(const T& data)
     { return const_cast<Node*>(_find(root_, data)); }
 
 
@@ -504,12 +504,12 @@ int main()
     auto post = tree1.postOrder();
     auto level = tree1.levelOrder();
 
-    auto println = [](const auto& vec) 
+    auto println = [](const auto & vec)
     {
         for (const auto& x : vec) cout << x << " ";
         cout << endl;
     };
-    
+
     println(pre);
     println(in);
     println(post);

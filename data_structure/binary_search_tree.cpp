@@ -293,12 +293,12 @@ int main()
     }
 
     BinarySearchTree<int> tree;
-    for (const auto& x: vec) tree.insert(x);
+    for (const auto& x : vec) tree.insert(x);
 
     tree.inOrder();
     cout << endl;
 
-    for (const auto& x: vec) tree.remove(x);
+    for (const auto& x : vec) tree.remove(x);
 
     return 0;
 }

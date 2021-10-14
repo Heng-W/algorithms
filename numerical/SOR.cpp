@@ -18,7 +18,7 @@ VectorXd SOR(const MatrixXd& A, const VectorXd& b, double w)
 {
     assert(A.size() == A[0].size());
     assert(A.size() == b.size());
-    
+
     int n = b.size();
     VectorXd x(n);
     int k = 0;

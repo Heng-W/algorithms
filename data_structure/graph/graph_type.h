@@ -19,7 +19,7 @@ struct MGraph
     using VertexType = Vertex;
     using VertexArray = std::vector<VertexType>;
     using ArcMat = std::vector<std::vector<int>>;
-    
+
 
     VertexArray vexs;
     ArcMat arcs;

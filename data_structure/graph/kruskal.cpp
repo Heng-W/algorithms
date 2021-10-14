@@ -4,20 +4,21 @@
 #include <iostream>
 
 
-//并查集查找
+// 并查集查找
 int find(std::vector<int>& parent, int x)
 {
     if (parent[x] == 0) return x;
     return parent[x] = find(parent, parent[x]);
 }
 
+// 最小生成树，kruskal算法
 template <class T>
 void kruskal(const MGraph<T>& graph)
 {
-    std::vector<int> parent(graph.vexNum()); //用来判断边是否形成环路
-    std::vector<Arc> arcs;  //边集数组
+    std::vector<int> parent(graph.vexNum()); // 用来判断边是否形成环路
+    std::vector<Arc> arcs;  // 边集数组
 
-    //构建边集数组
+    // 构建边集数组
     for (int i = 0; i < graph.vexNum() - 1; ++i)
     {
         for (int j = i + 1; j < graph.vexNum(); ++j)
@@ -26,8 +27,8 @@ void kruskal(const MGraph<T>& graph)
                 arcs.push_back({i, j, graph.arcs[i][j]});
         }
     }
-    //将边按照权值进行排序
-    std::sort(arcs.begin(), arcs.end(), [](const auto& arc1, const auto& arc2)
+    // 将边按照权值进行排序
+    std::sort(arcs.begin(), arcs.end(), [](const auto & arc1, const auto & arc2)
     { return arc1.weight < arc2.weight; });
 
     for (int i = 0; i < graph.arcNum(); ++i)

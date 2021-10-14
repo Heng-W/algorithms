@@ -1,7 +1,8 @@
 
+#include <assert.h>
 #include <functional>
 
-//左式堆
+// 斜堆
 template <class T, class Compare = std::less<T>>
 class SkewHeap
 {
@@ -9,19 +10,23 @@ public:
     SkewHeap(): root_(nullptr) {}
     ~SkewHeap() { clear(); }
 
+    // 拷贝构造函数
     SkewHeap(const SkewHeap& rhs)
     { root_ = clone(rhs.root_); }
 
-    SkewHeap(SkewHeap&& rhs): root_(rhs.root_)
-    { rhs.root_ = nullptr; }
+    // 移动构造函数
+    SkewHeap(SkewHeap&& rhs) noexcept
+     : root_(rhs.root_) { rhs.root_ = nullptr; }
 
+    // 拷贝赋值运算符
     SkewHeap& operator=(const SkewHeap& rhs)
     {
         SkewHeap copy = rhs;
         return *this = std::move(copy);
     }
 
-    SkewHeap& operator=(SkewHeap&& rhs)
+    // 移动赋值运算符
+    SkewHeap& operator=(SkewHeap&& rhs) noexcept
     {
         if (this != &rhs)
         {
@@ -32,43 +37,42 @@ public:
         return *this;
     }
 
-    void insert(const T& data)
-    { root_ = merge(root_, new Node(data)); }
+    // 压入
+    void push(const T& data)
+    { root_ = _merge(root_, new Node(data)); }
 
-    void insert(T&& data)
-    { root_ = merge(root_, new Node(std::move(data))); }
+    void push(T&& data)
+    { root_ = _merge(root_, new Node(std::move(data))); }
 
+    // 弹出
     void pop()
     {
-        Node* old = root_;
-        root_ = merge(root_->left, root_->right);
-        delete old;
+        Node* newRoot = _merge(root_->left, root_->right);
+        delete root_;
+        root_ = newRoot;
     }
 
-    void merge(SkewHeap& rhs)
+    // 合并
+    void merge(SkewHeap& rhs) { merge(std::move(rhs)); }
+
+    void merge(SkewHeap&& rhs)
     {
         if (this != &rhs)
         {
-            root_ = merge(root_, rhs.root_);
+            root_ = _merge(root_, rhs.root_);
             rhs.root_ = nullptr;
         }
     }
 
-    void clear()
-    {
-        destroy(root_);
-        root_ = nullptr;
-    }
+    void clear() { destroy(root_); }
 
-    const T& top() const { return root_->data; }
-
+    const T& top() const { assert(!empty()); return root_->data; }
     bool empty() const { return root_ == nullptr; }
 
 private:
-
     struct Node;
 
-    Node* merge(Node* root1, Node* root2)
+    static Node* _merge(Node* root1, Node* root2)
     {
         if (root1 == nullptr)
             return root2;
@@ -81,33 +85,33 @@ private:
             root1->left = root2;
             return root1;
         }
-        root1->right = merge(root1->right, root2);
+        root1->right = _merge(root1->right, root2);
         //合并后直接交换
         std::swap(root1->left, root1->right);
         return root1;
     }
 
-    void destroy(Node* node)
+    void destroy(Node*& node)
     {
         if (node != nullptr)
         {
             destroy(node->left);
             destroy(node->right);
             delete node;
+            node = nullptr;
         }
     }
 
-    Node* clone(Node* node) const
+    static Node* clone(Node* node)
     {
-        if (node == nullptr)
-            return nullptr;
+        if (node == nullptr) return nullptr;
         return new Node(node->data, clone(node->left), clone(node->right));
     }
 
-    static bool comp(const T& lhs, const T& rhs) {
-        return Compare()(lhs, rhs);
-    }
+    static bool comp(const T& lhs, const T& rhs)
+    { return Compare()(lhs, rhs); }
 
+    // 定义节点
     struct Node
     {
         T data;
@@ -115,24 +119,25 @@ private:
         Node* right;
 
         Node(const T& _data, Node* _left = nullptr, Node* _right = nullptr)
-            : data(_data), left(_left), right(_right){}
+            : data(_data), left(_left), right(_right) {}
 
         Node(T&& _data, Node* _left = nullptr, Node* _right = nullptr)
             : data(std::move(_data)), left(_left), right(_right) {}
     };
 
-    Node* root_;
+    Node* root_; // 根节点
 };
 
 
-//测试
+// 测试
 #include <cstdlib>
 #include <ctime>
 #include <vector>
 #include <iostream>
 #include <iterator>
 
-int main(){
+int main()
+{
     using namespace std;
     srand(time(nullptr));
 
@@ -148,10 +153,10 @@ int main(){
     cout << endl;
 
     SkewHeap<int, greater<int>> heap1;
-    for (const auto& x : vec1) heap1.insert(x);
+    for (const auto& x : vec1) heap1.push(x);
 
     SkewHeap<int, greater<int>> heap2;
-    for (const auto& x : vec2) heap2.insert(x);
+    for (const auto& x : vec2) heap2.push(x);
 
     heap1.merge(heap2);
 
@@ -163,4 +168,3 @@ int main(){
     cout << endl;
     return 0;
 }
-
