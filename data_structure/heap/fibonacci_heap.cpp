@@ -248,6 +248,7 @@ private:
         }
         copy->next = clone(node->next, parent, first, copy, count);
         copy->child = clone(node->child, copy, first, prev, 0);
+        return copy;
     }
 
     static bool comp(const T& lhs, const T& rhs)

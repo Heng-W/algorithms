@@ -3,9 +3,9 @@
 
 #include <functional>
 
-//红黑树
-//Object：节点存储的对象，Key：键类型
-//ExtractKey：对象中提取键，Compare：比较方式
+// 红黑树
+// Object：节点存储的对象，Key：键类型
+// ExtractKey：键值提取，Compare：元素比较
 template <class Object, class Key = Object,
           class ExtractKey = std::_Identity<Object>,
           class Compare = std::less<Key>>
@@ -18,7 +18,7 @@ public:
     using ConstIterator = Iterator_<const Node*>;
     using KeyType = Key;
 
-    //默认构造函数
+    // 默认构造函数
     RBTree(): nodeCount_(0)
     {
         nil_ = (Node*)::malloc(sizeof(Node));
@@ -27,17 +27,17 @@ public:
         root_ = nil_;
     }
 
-    //析构函数
+    // 析构函数
     ~RBTree() { clear(); ::free(nil_); }
 
-    //拷贝构造函数
+    // 拷贝构造函数
     RBTree(const RBTree& rhs): RBTree()
     { root_ = clone(rhs, rhs.root_, nil_); }
 
-    //移动构造函数
+    // 移动构造函数
     RBTree(RBTree&& rhs): RBTree() { swap(rhs); }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     RBTree& operator=(const RBTree& rhs)
     {
         RBTree copy = rhs;
@@ -45,7 +45,7 @@ public:
         return *this;
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     RBTree& operator=(RBTree&& rhs) noexcept
     {
         if (this != &rhs)
@@ -56,7 +56,7 @@ public:
         return *this;
     }
 
-    //交换
+    // 交换
     void swap(RBTree& rhs)
     {
         using std::swap;
@@ -65,38 +65,38 @@ public:
         swap(nodeCount_, rhs.nodeCount_);
     }
 
-    //查找
+    // 查找
     ConstIterator find(const KeyType& key) const
     { return ConstIterator(_find(key), this); }
 
     Iterator find(const KeyType& key)
     { return Iterator(const_cast<Node*>(_find(key)), this); }
 
-    //插入
+    // 插入
     std::pair<Iterator, bool>
     insert(const Object& obj) { return _insert(obj); }
 
     std::pair<Iterator, bool>
     insert(Object&& obj) { return _insert(std::move(obj)); }
 
-    //插入（元素允许重复）
+    // 插入（元素允许重复）
     Iterator insertEqual(const Object& obj) { return _insertEqual(obj); }
     Iterator insertEqual(Object&& obj) { return _insertEqual(std::move(obj)); }
 
-    //删除
-    bool remove(const KeyType& key);
-
-    //查找（不存在则插入）
+    // 查找，不存在key则插入
     Object& findOrInsert(const Object& obj) { return *insert(obj).first; }
     Object& findOrInsert(Object&& obj) { return *insert(std::move(obj)).first; }
 
-    //清除
+    // 删除
+    bool remove(const KeyType& key);
+
+    // 清除
     void clear() { destroy(root_); }
 
-    //元素数量
-    int count() const { return nodeCount_; }
+    // 元素数量
+    int size() const { return nodeCount_; }
 
-    //首尾迭代器
+    // 首尾迭代器
     ConstIterator begin() const { return ConstIterator(minimum(), this); }
     Iterator begin() { return Iterator(const_cast<Node*>(minimum()), this); }
 
@@ -112,26 +112,20 @@ private:
     template <class X>
     Iterator _insertEqual(X&& x);
 
-    //插入平衡调整
+    // 插入平衡调整
     void insertRebalance(Node* cur);
 
-    //删除平衡调整
+    // 删除平衡调整
     void removeRebalance(Node* cur);
 
-    //左旋，右旋
+    // 左旋，右旋
     void leftRotation(Node* node);
     void rightRotation(Node* node);
 
-    //child接到node的parent节点
+    // child接到node的parent节点
     void setParentPtr(Node* node, Node* child);
 
-    static const KeyType& getKey(const Object& obj)
-    { return ExtractKey()(obj); }
-
-    static bool comp(const KeyType& key1, const KeyType& key2)
-    { return Compare()(key1, key2); }
-
-    //最小值
+    // 最小值
     const Node* minimum() const
     {
         const Node* cur = root_;
@@ -139,7 +133,7 @@ private:
         return cur;
     }
 
-    //销毁
+    // 销毁
     void destroy(Node*& node)
     {
         if (node != nil_)
@@ -151,7 +145,7 @@ private:
         }
     }
 
-    //克隆
+    // 克隆
     Node* clone(const RBTree& tree, Node* cur, Node* parent) const
     {
         if (cur == tree.nil_) return nil_;
@@ -163,12 +157,18 @@ private:
         return copy;
     }
 
-    //迭代器定义
+    static const KeyType& getKey(const Object& obj)
+    { return ExtractKey()(obj); }
+
+    static bool comp(const KeyType& key1, const KeyType& key2)
+    { return Compare()(key1, key2); }
+
+    // 迭代器定义
     template <class NodePtr>
     struct Iterator_
     {
-        NodePtr node; //封装的指针
-        const RBTree* tree; //用于获取nil节点
+        NodePtr node; // 封装的指针
+        const RBTree* tree; // 用于获取nil节点
 
         using Self = Iterator_;
         using ObjectRef = decltype((node->obj));
@@ -199,13 +199,13 @@ private:
             return tmp;
         }
     private:
-        void increase();
-        void decrease();
+        void increase(); // 前进
+        void decrease(); // 后退
     };
 
     enum Color : char {RED, BLACK};
 
-    //节点定义
+    // 节点定义
     struct Node
     {
         Object obj;
@@ -219,9 +219,9 @@ private:
         Node(Object&& _obj): obj(std::move(_obj)) {}
     };
 
-    Node* root_; //根节点
-    Node* nil_; //哨兵节点
-    int nodeCount_; //节点个数
+    Node* root_; // 根节点
+    Node* nil_; // 哨兵节点
+    int nodeCount_; // 节点数量
 };
 
 
@@ -349,7 +349,7 @@ _insert(X&& x) -> std::pair<Iterator, bool>
     Node* node = new Node(std::forward<X>(x));
     node->left = node->right = nil_;
     node->parent = parent;
-    node->color = RED; //新节点必为红色
+    node->color = RED; // 新节点必为红色
 
     if (root_ == nil_)
         root_ = node;
@@ -358,7 +358,7 @@ _insert(X&& x) -> std::pair<Iterator, bool>
     else
         parent->right = node;
     ++nodeCount_;
-    insertRebalance(node); //平衡调整
+    insertRebalance(node); // 平衡调整
     return {Iterator(node, this), true};
 }
 
@@ -434,9 +434,9 @@ insertRebalance(Node* cur)
 {
     while (cur->parent->color == RED)
     {
-        if (cur->parent == cur->parent->parent->left) //父节点为祖父节点左子
+        if (cur->parent == cur->parent->parent->left) // 父节点为祖父节点左子
         {
-            Node* uncle = cur->parent->parent->right; //伯父节点
+            Node* uncle = cur->parent->parent->right; // 伯父节点
             if (uncle->color == RED)
             {
                 cur->parent->color = BLACK;
@@ -456,7 +456,7 @@ insertRebalance(Node* cur)
                 rightRotation(cur->parent->parent);
             }
         }
-        else //父节点为祖父节点右子，情况对称处理
+        else // 父节点为祖父节点右子，情况对称处理
         {
             Node* uncle = cur->parent->parent->left;
             if (uncle->color == RED)
@@ -479,7 +479,7 @@ insertRebalance(Node* cur)
             }
         }
     }
-    root_->color = BLACK; //根节点始终为黑色
+    root_->color = BLACK; // 根节点始终为黑色
 }
 
 
@@ -489,10 +489,10 @@ removeRebalance(Node* cur)
 {
     while (cur != root_)
     {
-        if (cur == cur->parent->left) //当前平衡点为左子
+        if (cur == cur->parent->left) // 当前平衡点为左子
         {
             Node* brother = cur->parent->right;
-            if (brother->color == RED) //兄弟节点为红色，则先旋转调整为黑色
+            if (brother->color == RED) // 兄弟节点为红色，则先旋转调整为黑色
             {
                 brother->color = BLACK;
                 cur->parent->color = RED;
@@ -502,17 +502,17 @@ removeRebalance(Node* cur)
             if (brother->left->color == BLACK && brother->right->color == BLACK)
             {
                 brother->color = RED;
-                if (cur->parent->color == RED) //父节点为红色
+                if (cur->parent->color == RED) // 父节点为红色
                 {
                     cur->parent->color = BLACK;
-                    return; //父节点涂黑后平衡结束
+                    return; // 父节点涂黑后平衡结束
                 }
-                else //父节点为黑色
+                else // 父节点为黑色
                 {
-                    cur = cur->parent; //继续向上调整
+                    cur = cur->parent; // 继续向上调整
                 }
             }
-            else //兄弟的子节点不是全黑
+            else // 兄弟的子节点不是全黑
             {
                 if (brother->right->color == BLACK)
                 {
@@ -525,10 +525,10 @@ removeRebalance(Node* cur)
                 cur->parent->color = BLACK;
                 brother->right->color = BLACK;
                 leftRotation(cur->parent);
-                return; //平衡结束
+                return; // 平衡结束
             }
         }
-        else  //当前平衡点为右子，情况对称处理
+        else  // 当前平衡点为右子，情况对称处理
         {
             Node* brother = cur->parent->left;
             if (brother->color == RED)
@@ -570,4 +570,5 @@ removeRebalance(Node* cur)
     }
 }
 
-#endif //RB_TREE_HPP
+#endif // RB_TREE_HPP
+

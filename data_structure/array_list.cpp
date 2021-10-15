@@ -94,15 +94,15 @@ public:
         alloc_.destroy(data_ + size_);
     }
 
-    // 删除pos位置的连续count个元素
-    void remove(int pos, int count)
+    // 删除pos位置的连续n个元素
+    void remove(int pos, int n)
     {
-        std::copy(data_ + pos + count, data_ + size_, data_ + pos);
-        for (int i = size_ - count; i < size_; ++i)
+        std::copy(data_ + pos + n, data_ + size_, data_ + pos);
+        for (int i = size_ - n; i < size_; ++i)
         {
             alloc_.destroy(data_ + i);
         }
-        size_ -= count;
+        size_ -= n;
     }
 
     // 反转
@@ -122,7 +122,7 @@ public:
         alloc_.destroy(data_ + size_);
     }
 
-    // 清除元素
+    // 清除
     void clear()
     {
         for (int i = size_ - 1; i >= 0; --i)
@@ -175,7 +175,7 @@ private:
     {
         if (size_ < capacity_)
         {
-            alloc_.construct(data_ + size_, std::move(data_[size_ - 1]));// 末尾构造一个元素
+            alloc_.construct(data_ + size_, std::move(data_[size_ - 1])); // 末尾构造一个元素
             ++size_;
             // 元素后移
             for (int i = size_ - 2; i > pos; --i)
@@ -202,7 +202,7 @@ private:
         }
     }
 
-    // 清空元素并释放内存
+    // 清空并释放内存
     void free()
     {
         clear();
@@ -210,9 +210,9 @@ private:
     }
 
     static std::allocator<T> alloc_;
-    T* data_; // 指向数据
-    int size_; // 实际大小
-    int capacity_; // 容量
+    T* data_; // 数据
+    int size_; // 元素数量
+    int capacity_; // 已分配的内存大小
 };
 
 

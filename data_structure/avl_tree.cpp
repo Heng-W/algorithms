@@ -5,7 +5,7 @@
 template <class T>
 class AVLTree
 {
-    class Node;
+    struct Node;
 public:
     AVLTree(): root_(nullptr) {}
     ~AVLTree() { clear(); }
@@ -56,7 +56,6 @@ public:
     void clear() { destroy(root_); }
 
 private:
-
     const Node* _find(const T& data) const;
 
     template <class X>
@@ -64,9 +63,11 @@ private:
 
     bool _remove(Node*& node, const T& data);
 
+    // 获取节点高度
     static int height(const Node* node)
     { return node != nullptr ? node->height : 0; }
 
+    // 更新节点高度
     static void updateHeight(Node* node)
     { node->height = std::max(height(node->left), height(node->right)) + 1; }
 
@@ -167,15 +168,15 @@ template <class T>
 template <class X>
 bool AVLTree<T>::_insert(Node*& node, X&& x)
 {
-    if (node == nullptr)
+    if (node == nullptr) // 插入元素
     {
         node = new Node(std::forward<X>(x));
         node->left = node->right = nullptr;
     }
-    else if (x < node->data)
+    else if (x < node->data) // 进入左子树
     {
         if (!_insert(node->left, std::forward<X>(x)))
-            return false;
+            return false; // 未找到
         if (height(node->left) - height(node->right) == 2)
         {
             if (node->left->data < x)
@@ -183,10 +184,10 @@ bool AVLTree<T>::_insert(Node*& node, X&& x)
             rightRotation(node);
         }
     }
-    else if (node->data < x)
+    else if (node->data < x) // 进入右子树
     {
         if (!_insert(node->right, std::forward<X>(x)))
-            return false;
+            return false; // 未找到
         if (height(node->right) - height(node->left) == 2)
         {
             if (x < node->right->data)
@@ -208,7 +209,7 @@ bool AVLTree<T>::_remove(Node*& node, const T& data)
 {
     if (node == nullptr)
         return false; // 未找到
-    if (data < node->data)
+    if (data < node->data) // 进入左子树
     {
         if (!_remove(node->left, data))
             return false;
@@ -219,7 +220,7 @@ bool AVLTree<T>::_remove(Node*& node, const T& data)
             leftRotation(node);
         }
     }
-    else if (node->data < data)
+    else if (node->data < data) // 进入右子树
     {
         if (!_remove(node->right, data))
             return false;

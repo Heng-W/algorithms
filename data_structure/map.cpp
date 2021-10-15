@@ -38,7 +38,7 @@ public:
 
     void clear() { tree_.clear(); }
 
-    int count() const { return tree_.count(); }
+    int size() const { return tree_.size(); }
 
     ConstIterator begin() const { return tree_.begin(); }
     Iterator begin() { return tree_.begin(); }
@@ -64,7 +64,7 @@ int main()
     map.insert({120, make_unique<int>(134)});
     map.insert({356, make_unique<int>(232)});
 
-    cout << map.count() << endl;
+    cout << map.size() << endl;
 
     cout << (map.find(120) != map.end()) << endl;
     cout << (map.find(10) != map.end()) << endl;

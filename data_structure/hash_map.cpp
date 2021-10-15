@@ -1,7 +1,7 @@
 
 #include "hash_table.hpp"
 
-
+// 基于哈希表的无序map
 template <class Key, class Value, class HashFunc = std::hash<Key>>
 class HashMap
 {
@@ -22,25 +22,30 @@ public:
 
     HashMap(int n = 32): table_(n) {}
 
+    // 插入
     std::pair<Iterator, bool> insert(const Object& obj)
     { return table_.insert(obj); }
 
     std::pair<Iterator, bool> insert(Object&& obj)
     { return table_.insert(std::move(obj)); }
 
-    Iterator find(const KeyType& key) {return table_.find(key);}
-    ConstIterator find(const KeyType& key) const {return table_.find(key);}
+    // 查找
+    Iterator find(const KeyType& key) { return table_.find(key);}
+    ConstIterator find(const KeyType& key) const { return table_.find(key);}
 
     Value& operator[](const KeyType& key)
     { return table_.findOrInsert({key, Value()}).second; }
 
-
+    // 删除   
     bool remove(const KeyType& key) { return table_.remove(key); }
 
+    // 清除
     void clear() { table_.clear(); }
 
+    // 元素数量
     int size() const { return table_.size(); }
 
+    // 首尾迭代器
     ConstIterator begin() const { return table_.begin(); }
     Iterator begin() { return table_.begin(); }
 
@@ -48,7 +53,7 @@ public:
     Iterator end() { return table_.end(); }
 
 private:
-    MHashTable table_;
+    MHashTable table_; // 底层容器：哈希表
 };
 
 
