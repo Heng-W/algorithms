@@ -71,10 +71,10 @@ private:
     {
         T value = std::move(data_[holeIndex]);
         // 从左节点开始更新
-        for (int i = holeIndex * 2 + 1; i < data_.size(); i = i * 2 + 1)
+        for (int i = holeIndex * 2 + 1; i < (int)data_.size(); i = i * 2 + 1)
         {
             // 指向较小的子节点
-            if (i + 1 < data_.size() && comp(data_[i + 1], data_[i]))
+            if (i + 1 < (int)data_.size() && comp(data_[i + 1], data_[i]))
                 ++i;
             if (comp(data_[i], value))
             {

@@ -1,8 +1,8 @@
-//归并排序
+// 归并排序
 
 #include <vector>
 
-//合并两个有序序列
+// 合并两个有序序列
 template <class T>
 void merge(const T* first1, const T* last1,
            const T* first2, const T* last2,
@@ -21,7 +21,7 @@ void merge(const T* first1, const T* last1,
         *result++ = *first2++;
 }
 
-//归并排序（递归）
+// 归并排序（递归）
 template <class T>
 void mergeSort(T* first, T* last)
 {
@@ -62,7 +62,7 @@ void mergeSortI(std::vector<T>& data)
 {
     std::vector<T> tmp = data;
     //len：子序列长度
-    for (int len = 1; len < data.size(); len *= 2)
+    for (int len = 1; len < (int)data.size(); len *= 2)
     {
         T* cur = &*data.begin();
         T* end = &*data.end();
@@ -95,7 +95,7 @@ int main()
     {
         vec.push_back(rand() % 100);
     }
-    //mergeSort2(&*vec.begin(), &*vec.end());
+    // mergeSort2(&*vec.begin(), &*vec.end());
     mergeSortI(vec);
     for (const auto& x : vec)
         cout << x << " ";

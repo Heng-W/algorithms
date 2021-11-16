@@ -99,7 +99,7 @@ public:
         {
             Node* next = cur->next; // 保存next节点
             cur->prev = cur->next = cur; // 断开节点
-            if (cur->degree >= roots.size())
+            if (cur->degree >= (int)roots.size())
                 roots.resize(cur->degree + 1);
             // 合并度数相同的树
             while (roots[cur->degree])
@@ -118,7 +118,7 @@ public:
 
                 ++root->degree;
                 cur = root; // 继续迭代
-                if (cur->degree >= roots.size())
+                if (cur->degree >= (int)roots.size())
                     roots.resize(cur->degree + 1);
             }
             roots[cur->degree] = cur;
@@ -126,7 +126,7 @@ public:
             if (cur == begin) break;
         }
         // 合并串联到根链表上
-        for (int i = 0; i < roots.size(); ++i)
+        for (int i = 0; i < (int)roots.size(); ++i)
         {
             if (roots[i]) root_ = _merge(root_, roots[i]);
         }

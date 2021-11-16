@@ -55,7 +55,7 @@ struct ALGraph
         for (const auto& vex : _vexs)
             adjList.emplace_back(vex);
 
-        for (int k = 0; k < _arcs.size(); ++k)
+        for (int k = 0; k < (int)_arcs.size(); ++k)
         {
             int i = _arcs[k].begin;
             int j = _arcs[k].end;
@@ -72,7 +72,7 @@ struct ALGraph
 
     ~ALGraph()
     {
-        for (int i = 0; i < adjList.size(); ++i)
+        for (int i = 0; i < (int)adjList.size(); ++i)
         {
             ArcNode* cur = adjList[i].firstArc;
             while (cur)

@@ -27,7 +27,6 @@ public:
 
     // 清空
     void clear() { tree_.clear(); }
-
     // 元素数量
     int size() const { return tree_.size(); }
 
@@ -68,4 +67,3 @@ int main()
 
     return 0;
 }
-

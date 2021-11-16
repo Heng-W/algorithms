@@ -6,26 +6,28 @@
 #include <iostream>
 
 
-typedef std::vector<double> VectorXd;
-typedef std::vector<VectorXd> MatrixXd;
+using VectorXd = std::vector<double>;
+using MatrixXd = std::vector<VectorXd>;
 
 
-//m: 插值次数(m<n)
+// m: 插值次数(m<n)
 double newtonInterpolation(const VectorXd& x, const VectorXd& y, int m, double xval)
 {
-    int n = x.size();//观测数据个数
+    int n = x.size(); // 观测数据个数
     MatrixXd form(n, VectorXd(n));
     double yval = 0, mul = 1;
-    for (int i = 0; i < n; i++)    /*计算均差表*/
+    // 计算均差表
+    for (int i = 0; i < n; ++i)
         form[i][0] = y[i];
-    for (int j = 1; j < n; j++)
-        for (int i = j; i < n; i++)
+    for (int j = 1; j < n; ++j)
+        for (int i = j; i < n; ++i)
             form[i][j] = (form[i][j - 1] - form[i - 1][j - 1]) / (x[i] - x[i - j]);
+    // 输出均差表
     puts("table: ");
-    for (int i = 0; i < n; i++, puts(""))   /*输出均差表*/
+    for (int i = 0; i < n; ++i, puts(""))   
     {
         printf("%f ", x[i]);
-        for (int j = 0; j < n; j++)
+        for (int j = 0; j < n; ++j)
         {
             if (i >= j)
             {
@@ -33,7 +35,7 @@ double newtonInterpolation(const VectorXd& x, const VectorXd& y, int m, double x
             }
         }
     }
-    for (int i = 0; i < m + 1; i++)
+    for (int i = 0; i < m + 1; ++i)
     {
         yval += form[i][i] * mul;
         mul *= (xval - x[i]);

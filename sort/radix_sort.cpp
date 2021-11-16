@@ -12,7 +12,7 @@ void radixSort(std::vector<int>& data)
     {
         std::fill_n(buckets, 10, 0);
         //记录数据出现次数
-        for (int i = 0; i < data.size(); ++i)
+        for (int i = 0; i < (int)data.size(); ++i)
             ++buckets[data[i] / exp % 10];
         //更改buckets使其为位置索引
         for (int i = 1; i < 10; ++i)

@@ -110,7 +110,7 @@ private:
 
     const Node* _begin() const
     {
-        for (int i = 0; i < buckets_.size(); ++i)
+        for (int i = 0; i < (int)buckets_.size(); ++i)
         {
             if (buckets_[i]) return buckets_[i];
         }
@@ -168,8 +168,8 @@ private:
             {
                 //根据元素值，定位出下一个bucket
                 int pos = tab->bucketPos(tab->getKey(old->obj)) + 1;
-                while (pos < tab->buckets_.size() && !tab->buckets_[pos]) ++pos;
-                if (pos < tab->buckets_.size())
+                while (pos < (int)tab->buckets_.size() && !tab->buckets_[pos]) ++pos;
+                if (pos < (int)tab->buckets_.size())
                     node = tab->buckets_[pos];
             }
             return *this;
@@ -293,24 +293,24 @@ remove(const KeyType& key)
 template <class Object, class HashFunc, class ExtractKey>
 void HashTable<Object, HashFunc, ExtractKey>::resize(int hintCnt)
 {
-    if (hintCnt <= buckets_.size())
+    if (hintCnt <= (int)buckets_.size())
         return;
     int newSize = roundup(hintCnt);
     std::vector<Node*> tmp(newSize, nullptr);
 
-    for (int i = 0; i < buckets_.size(); ++i)
+    for (int i = 0; i < (int)buckets_.size(); ++i)
     {
         Node* first = buckets_[i];
         while (first)
         {
             //找到在新buckets中的位置
             int newPos = bucketPos(getKey(first->obj), newSize);
-            //旧bucket指向下一个节点
+            // 旧bucket指向下一个节点
             buckets_[i] = first->next;
-            //当前节点插入到新bucket
+            // 当前节点插入到新bucket
             first->next = tmp[newPos];
             tmp[newPos] = first;
-            //准备处理旧bucket的下一个节点
+            // 准备处理旧bucket的下一个节点
             first = buckets_[i];
         }
     }
@@ -321,7 +321,7 @@ void HashTable<Object, HashFunc, ExtractKey>::resize(int hintCnt)
 template <class Object, class HashFunc, class ExtractKey>
 void HashTable<Object, HashFunc, ExtractKey>::clear()
 {
-    for (int i = 0; i < buckets_.size(); ++i)
+    for (int i = 0; i < (int)buckets_.size(); ++i)
     {
         Node* cur = buckets_[i];
         while (cur)
@@ -342,7 +342,7 @@ HashTable<Object, HashFunc, ExtractKey>::
 HashTable(const HashTable& rhs): nodeCount_(rhs.nodeCount_)
 {
     buckets_.resize(rhs.buckets_.size());
-    for (int i = 0; i < rhs.buckets_.size(); ++i)
+    for (int i = 0; i < (int)rhs.buckets_.size(); ++i)
     {
         if (rhs.buckets_[i])
         {

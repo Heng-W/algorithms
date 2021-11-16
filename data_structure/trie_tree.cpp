@@ -38,7 +38,7 @@ public:
     void insert(const std::string& word)
     {
         Node* cur = root_;
-        for (int i = 0; i < word.size(); ++i)
+        for (int i = 0; i < (int)word.size(); ++i)
         {
             int pos = word[i] - 'a';
             if (cur->childs[pos] == nullptr)
@@ -57,7 +57,7 @@ public:
         int count = findCount(word);
         if (count == 0) return;
         Node* cur = root_;
-        for (int i = 0; i < word.size(); ++i)
+        for (int i = 0; i < (int)word.size(); ++i)
         {
             int pos = word[i] - 'a';
             cur->childs[pos]->prefixCount -= count;
@@ -78,7 +78,7 @@ public:
         int count = findPrefix(prefix);
         if (count == 0) return;
         Node* cur = root_;
-        for (int i = 0; i < prefix.size(); ++i)
+        for (int i = 0; i < (int)prefix.size(); ++i)
         {
             int pos = prefix[i] - 'a';
             cur->childs[pos]->prefixCount -= count;
@@ -96,7 +96,7 @@ public:
     int findCount(const std::string& word) const
     {
         Node* cur = root_;
-        for (int i = 0; i < word.size(); ++i)
+        for (int i = 0; i < (int)word.size(); ++i)
         {
             int pos = word[i] - 'a';
             if (cur->childs[pos] == nullptr) return 0;
@@ -108,7 +108,7 @@ public:
     int findPrefix(const std::string& prefix) const
     {
         Node* cur = root_;
-        for (int i = 0; i < prefix.size(); ++i)
+        for (int i = 0; i < (int)prefix.size(); ++i)
         {
             int pos = prefix[i] - 'a';
             if (cur->childs[pos] == nullptr) return 0;

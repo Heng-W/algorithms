@@ -167,7 +167,7 @@ private:
     template <class NodePtr>
     struct Iterator_
     {
-        NodePtr node; // 封装的指针
+        NodePtr node; // 原始指针
         const RBTree* tree; // 用于获取nil节点
 
         using Self = Iterator_;

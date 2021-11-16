@@ -95,13 +95,13 @@ private:
     {
         if (!root_) return nullptr;
         NodeBase* cur = root_;
-        while (!cur->isLeaf()) cur = ((IndexNode*)cur)->childs[0];
-        return (LeafNode*)cur;
+        while (!cur->isLeaf()) cur = static_cast<IndexNode*>(cur)->childs[0];
+        return static_cast<LeafNode*>(cur);
     }
 
     // 键数量的最小值和最大值
-    static constexpr int KEY_MIN = (M + 1) / 2 - 1;
-    static constexpr int KEY_MAX = M - 1;
+    static constexpr int kMinKeyNum = (M + 1) / 2 - 1;
+    static constexpr int kMaxKeyNum = M - 1;
 
     // 定义迭代器
     template <class NodePtr>
@@ -187,13 +187,13 @@ find(const KeyType& key) const -> std::pair<Iterator, bool>
         while (pos < cur->keyCount && cur->keys[pos] <= key)
             ++pos;
         if (!cur->isLeaf())
-            cur = ((IndexNode*)cur)->childs[pos];
+            cur = static_cast<IndexNode*>(cur)->childs[pos];
         else if (pos > 0 && key == cur->keys[pos - 1])
-            return {Iterator((LeafNode*)cur, pos - 1), true};
+            return {Iterator(static_cast<LeafNode*>(cur), pos - 1), true};
         else
             break;
     }
-    return {Iterator((LeafNode*)cur, pos), false};
+    return {Iterator(static_cast<LeafNode*>(cur), pos), false};
 }
 
 
@@ -224,7 +224,7 @@ bool BPlusTree<Key, Value, M>::_insert(const KeyType& key, X&& value)
         cur->values[pos] = std::forward<X>(value);
         ++cur->keyCount;
 
-        if (cur->keyCount <= KEY_MAX) return true;
+        if (cur->keyCount <= kMaxKeyNum) return true;
 
         // 分裂
         LeafNode* brother = new LeafNode();
@@ -263,7 +263,7 @@ bool BPlusTree<Key, Value, M>::_insert(const KeyType& key, X&& value)
 
     IndexNode* cur = res.first.node->parent;
 
-    while (cur->keyCount > KEY_MAX)
+    while (cur->keyCount > kMaxKeyNum)
     {
         IndexNode* brother = new IndexNode();
         int mid = M / 2;
@@ -321,7 +321,7 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
             cur->values[i] = std::move(cur->values[i + 1]);
         }
         --cur->keyCount;
-        if (cur->keyCount >= KEY_MIN) // 键数量足够，结束
+        if (cur->keyCount >= kMinKeyNum) // 键数量足够，结束
             return pos < cur->keyCount ? position : cur->next;
         // 判断是否是根节点
         if (cur == root_)
@@ -331,7 +331,7 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
                 delete root_;
                 root_ = nullptr;
             }
-            return Iterator((LeafNode*)root_, pos);
+            return Iterator(static_cast<LeafNode*>(root_), pos);
         }
 
         IndexNode* parent = cur->parent;
@@ -339,9 +339,9 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
         while (cur != parent->childs[childPos]) ++childPos;
 
         // 如果左兄弟的键数量足够，向其借一个
-        if (childPos > 0 && parent->childs[childPos - 1]->keyCount > KEY_MIN)
+        if (childPos > 0 && parent->childs[childPos - 1]->keyCount > kMinKeyNum)
         {
-            LeafNode* left = (LeafNode*)parent->childs[childPos - 1];
+            LeafNode* left = static_cast<LeafNode*>(parent->childs[childPos - 1]);
             for (int i = cur->keyCount; i > 0; --i)
             {
                 cur->keys[i] = cur->keys[i - 1];
@@ -356,9 +356,9 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
         }
         // 如果右兄弟的键数量足够，向其借一个
         else if (childPos < parent->keyCount &&
-                 parent->childs[childPos + 1]->keyCount > KEY_MIN)
+                 parent->childs[childPos + 1]->keyCount > kMinKeyNum)
         {
-            LeafNode* right = (LeafNode*)parent->childs[childPos + 1];
+            LeafNode* right = static_cast<LeafNode*>(parent->childs[childPos + 1]);
 
             cur->keys[cur->keyCount] = right->keys[0];
             cur->values[cur->keyCount] = std::move(right->values[0]);
@@ -378,7 +378,7 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
         {
             if (childPos > 0)
             {
-                LeafNode* left = (LeafNode*)parent->childs[childPos - 1];
+                LeafNode* left = static_cast<LeafNode*>(parent->childs[childPos - 1]);
                 next = pos < cur->keyCount ? Iterator(left, pos + left->keyCount)
                        : cur->next;
                 mergeLeafNode(parent, childPos - 1); // 合并到左子树
@@ -393,7 +393,7 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
 
     IndexNode* cur = position.node->parent;
 
-    while (cur->keyCount < KEY_MIN)
+    while (cur->keyCount < kMinKeyNum)
     {
         if (cur == root_)
         {
@@ -415,9 +415,9 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
         IndexNode* parent = cur->parent;
         int childPos = 0;
         while (cur != parent->childs[childPos]) ++childPos;
-        if (childPos > 0 && parent->childs[childPos - 1]->keyCount > KEY_MIN)
+        if (childPos > 0 && parent->childs[childPos - 1]->keyCount > kMinKeyNum)
         {
-            IndexNode* left = (IndexNode*)parent->childs[childPos - 1];
+            IndexNode* left = static_cast<IndexNode*>(parent->childs[childPos - 1]);
             for (int i = cur->keyCount; i > 0; --i)
             {
                 cur->keys[i] = cur->keys[i - 1];
@@ -434,9 +434,9 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
             return next;
         }
         else if (childPos < parent->keyCount &&
-                 parent->childs[childPos + 1]->keyCount > KEY_MIN)
+                 parent->childs[childPos + 1]->keyCount > kMinKeyNum)
         {
-            IndexNode* right = (IndexNode*)parent->childs[childPos + 1];
+            IndexNode* right = static_cast<IndexNode*>(parent->childs[childPos + 1]);
 
             cur->keys[cur->keyCount] = parent->keys[childPos];
             cur->parent->keys[childPos] = right->keys[0];
@@ -470,8 +470,8 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
 template <class Key, class Value, int M>
 void BPlusTree<Key, Value, M>::mergeLeafNode(IndexNode* parent, int pos)
 {
-    LeafNode* left = (LeafNode*)parent->childs[pos];
-    LeafNode* right = (LeafNode*)parent->childs[pos + 1];
+    LeafNode* left = static_cast<LeafNode*>(parent->childs[pos]);
+    LeafNode* right = static_cast<LeafNode*>(parent->childs[pos + 1]);
 
     for (int i = pos; i < parent->keyCount - 1; ++i)
     {
@@ -496,8 +496,8 @@ void BPlusTree<Key, Value, M>::mergeLeafNode(IndexNode* parent, int pos)
 template <class Key, class Value, int M>
 void BPlusTree<Key, Value, M>::mergeIndexNode(IndexNode* parent, int pos)
 {
-    IndexNode* left = (IndexNode*)parent->childs[pos];
-    IndexNode* right = (IndexNode*)parent->childs[pos + 1];
+    IndexNode* left = static_cast<IndexNode*>(parent->childs[pos]);
+    IndexNode* right = static_cast<IndexNode*>(parent->childs[pos + 1]);
 
     left->keys[left->keyCount] = parent->keys[pos];
     for (int i = pos; i < parent->keyCount - 1; ++i)
@@ -527,10 +527,10 @@ void BPlusTree<Key, Value, M>::destroy(NodeBase* cur)
 {
     if (cur->isLeaf())
     {
-        delete (LeafNode*)cur;
+        delete static_cast<LeafNode*>(cur);
         return;
     }
-    IndexNode* node = (IndexNode*)cur;
+    IndexNode* node = static_cast<IndexNode*>(cur);
     int pos = 0;
     while (pos <= node->keyCount)
     {
@@ -561,7 +561,7 @@ clone(NodeBase* node, IndexNode* parent, LeafNode*& prev) -> NodeBase*
         initNode(copy);
         for (int i = 0; i <= node->keyCount; ++i)
         {
-            copy->childs[i] = clone(((IndexNode*)node)->childs[i], copy, prev);
+            copy->childs[i] = clone(static_cast<IndexNode*>(node)->childs[i], copy, prev);
         }
         return copy;
     }
@@ -571,7 +571,7 @@ clone(NodeBase* node, IndexNode* parent, LeafNode*& prev) -> NodeBase*
         initNode(copy);
         for (int i = 0; i < node->keyCount; ++i)
         {
-            copy->values[i] = ((LeafNode*)node)->values[i];
+            copy->values[i] = static_cast<LeafNode*>(node)->values[i];
         }
         copy->next = nullptr;
         if (prev) prev->next = copy;
@@ -600,7 +600,7 @@ int main()
     }
 
     BPlusTree<int, int, 4> tree;
-    for (int i = 0; i < vec.size(); ++i)
+    for (int i = 0; i < (int)vec.size(); ++i)
     {
         tree.insert(vec[i], i);
     }

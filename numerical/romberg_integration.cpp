@@ -6,29 +6,29 @@
 #include <vector>
 #include <functional>
 
-#define EPS 0.5e-7  //精度
+#define EPS 0.5e-7  // 精度
 
 
-typedef std::vector<double> VectorXd;
-typedef std::vector<VectorXd> MatrixXd;
+using VectorXd = std::vector<double>;
+using MatrixXd = std::vector<VectorXd>;
 
-using Function = std::function<double(double)>;
+using Functor = std::function<double(double)>;
 
 
-//Romberg法求积分
-double rombergIntegration(const Function& f, double a, double b)
+// Romberg法求积分
+double rombergIntegration(const Functor& f, double a, double b)
 {
     assert(a < b);
-    int n = 1;//区间等分数
-    double h = b - a;//步长
+    int n = 1; // 区间等分数
+    double h = b - a; // 步长
     VectorXd Tn, Sn, Cn, Rn;
 
     Tn.push_back(0.5 * (b - a) * (f(a) + f(b)));
 
-    for (int i = 1; i < 1000; i++)
+    for (int i = 1; i < 1000; ++i)
     {
         double sum = 0;
-        for (int k = 0; k < n; k++)
+        for (int k = 0; k < n; ++k)
         {
             sum += f(a + h * (k + 0.5));
         }
@@ -41,17 +41,17 @@ double rombergIntegration(const Function& f, double a, double b)
         n *= 2;
         h /= 2;
 
-        //达到精度要求，则返回积分结果
+        // 达到精度要求，则返回积分结果
         if (i >= 4 && (fabs(Rn[i - 3] - Rn[i - 4])) / 255 < EPS)
         {
-            MatrixXd vec{ Tn, Sn, Cn, Rn };
+            MatrixXd vec = {Tn, Sn, Cn, Rn};
 
-            for (int i = 0; i < Tn.size(); i++)
+            for (int i = 0; i < (int)Tn.size(); ++i)
             {
                 printf("%3d  ", (int)pow(2, i));
-                for (int j = 0; j < vec.size(); j++)
+                for (int j = 0; j < (int)vec.size(); ++j)
                 {
-                    if (i < vec[j].size())
+                    if (i < (int)vec[j].size())
                         printf("%.8f  ", vec[j][i]);
                 }
                 printf("\n");
@@ -59,7 +59,7 @@ double rombergIntegration(const Function& f, double a, double b)
             return Rn.back();
         }
     }
-    assert(-1);
+    abort();
 }
 
 

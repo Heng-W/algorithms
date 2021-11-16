@@ -71,7 +71,7 @@ private:
     {
         T value = std::move(data_[holeIndex]);
         // 从左节点开始更新
-        for (int i = holeIndex * D + 1; i < data_.size(); i = i * D + 1)
+        for (int i = holeIndex * D + 1; i < (int)data_.size(); i = i * D + 1)
         {
             // 指向较小的子节点
             int minPos = i;

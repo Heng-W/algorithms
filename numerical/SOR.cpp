@@ -6,14 +6,14 @@
 #include <vector>
 #include <iostream>
 
-#define EPS 1e-13//精度
+#define EPS 1e-13 // 精度
 
 
-typedef std::vector<double> VectorXd;
-typedef std::vector<VectorXd> MatrixXd;
+using VectorXd = std::vector<double>;
+using MatrixXd = std::vector<VectorXd>;
 
 
-//w: 松弛度
+// w: 松弛度
 VectorXd SOR(const MatrixXd& A, const VectorXd& b, double w)
 {
     assert(A.size() == A[0].size());
@@ -25,10 +25,10 @@ VectorXd SOR(const MatrixXd& A, const VectorXd& b, double w)
     while (++k < 1000)
     {
         double norm = 0;
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < n; ++i)
         {
             double sum = 0;
-            for (int j = 0; j < n; j++)
+            for (int j = 0; j < n; ++j)
             {
                 if (j != i)
                     sum += A[i][j] * x[j];
@@ -44,6 +44,7 @@ VectorXd SOR(const MatrixXd& A, const VectorXd& b, double w)
     }
     return {};
 }
+
 
 int main()
 {

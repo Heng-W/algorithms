@@ -106,7 +106,7 @@ int main()
     using namespace std;
     cout << "Solution count: " << res.size() << endl;
 
-    for (int k = 0; k < res.size(); ++k)
+    for (int k = 0; k < (int)res.size(); ++k)
     {
         for (int i = 0; i < 9; ++i)
         {

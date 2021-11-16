@@ -319,19 +319,19 @@ erase(Iterator it) -> Iterator
         prev = cur;
         cur = cur->next;
     }
-    assert(0);
+    abort();
 }
 
 
 template <class Object, class HashFunc, class ExtractKey>
 void LinkedHashTable<Object, HashFunc, ExtractKey>::resize(int hintCnt)
 {
-    if (hintCnt <= buckets_.size())
+    if (hintCnt <= (int)buckets_.size())
         return;
     int newSize = roundup(hintCnt);
     std::vector<Node*> tmp(newSize, nullptr);
 
-    for (int i = 0; i < buckets_.size(); ++i)
+    for (int i = 0; i < (int)buckets_.size(); ++i)
     {
         Node* first = buckets_[i];
         while (first)

@@ -31,7 +31,7 @@ int main()
     }
     cout << endl;
 
-    for (int i = 0; i < vec.size(); ++i)
+    for (int i = 0; i < (int)vec.size(); ++i)
     {
         tree.remove(vec[i]);
         for (const auto& x : tree) cout << setw(3) << x;

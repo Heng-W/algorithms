@@ -16,7 +16,7 @@ public:
         : roots_(rhs.roots_.size()),
           nodeCount_(rhs.nodeCount_)
     {
-        for (int i = 0; i < rhs.roots_.size(); ++i)
+        for (int i = 0; i < (int)rhs.roots_.size(); ++i)
             roots_[i] = clone(rhs.roots_[i]);
     }
 
@@ -90,10 +90,10 @@ public:
             roots_.resize(rhs.roots_.size());
 
         Node* carry = nullptr; // 进位
-        for (int i = 0; i < roots_.size(); ++i)
+        for (int i = 0; i < (int)roots_.size(); ++i)
         {
             Node* root1 = roots_[i];
-            Node* root2 =  i < rhs.roots_.size() ? rhs.roots_[i] : nullptr;
+            Node* root2 =  i < (int)rhs.roots_.size() ? rhs.roots_[i] : nullptr;
             int caseNum = (root1 ? 1 : 0) | (root2 ? 2 : 0) | (carry ? 4 : 0);
             switch (caseNum)
             {
@@ -176,7 +176,7 @@ private:
         assert(!empty());
         int pos = 0;
         while (!roots_[pos]) ++pos;
-        for (int i = pos + 1; i < roots_.size(); ++i)
+        for (int i = pos + 1; i < (int)roots_.size(); ++i)
         {
             if (roots_[i] && comp(roots_[i]->data, roots_[pos]->data))
                 pos = i;

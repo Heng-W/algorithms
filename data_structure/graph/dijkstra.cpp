@@ -22,7 +22,7 @@ void dijkstra(const MGraph<T>& graph, int start,
     for (int i = 1; i < graph.vexNum(); ++i)
     {
         int min = INT_MAX;
-        int k;
+        int k = -1;
         for (int j = 0; j < graph.vexNum(); ++j)
         {
             if (!final[j] && shortPath[j] < min)

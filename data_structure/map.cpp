@@ -1,7 +1,7 @@
 
 #include "rb_tree.hpp"
 
-
+// 基于红黑树的有序map
 template <class Key, class Value, class Compare = std::less<Key>>
 class Map
 {
@@ -19,27 +19,29 @@ public:
     using ConstIterator = typename Tree::ConstIterator;
     using KeyType = typename Tree::KeyType;
 
-
+    // 插入
     std::pair<Iterator, bool> insert(const Object& obj)
     { return tree_.insert(obj); }
 
     std::pair<Iterator, bool> insert(Object&& obj)
     { return tree_.insert(std::move(obj)); }
 
+    // 查找
     Iterator find(const KeyType& key) {return tree_.find(key);}
     ConstIterator find(const KeyType& key) const {return tree_.find(key);}
 
     Value& operator[](const KeyType& key)
-    {
-        return tree_.findOrInsert({key, Value()}).second;
-    }
+    { return tree_.findOrInsert({key, Value()}).second; }
 
+    // 删除
     bool remove(const KeyType& key) { return tree_.remove(key); }
 
+    // 清空
     void clear() { tree_.clear(); }
-
+    // 元素数量
     int size() const { return tree_.size(); }
 
+    // 首尾迭代器
     ConstIterator begin() const { return tree_.begin(); }
     Iterator begin() { return tree_.begin(); }
 
@@ -47,13 +49,13 @@ public:
     Iterator end() { return tree_.end(); }
 
 private:
-    Tree tree_;
+    Tree tree_; // 底层容器：红黑树
 };
 
 
+// 测试
 #include <iostream>
 #include <memory>
-
 
 int main()
 {
@@ -79,4 +81,3 @@ int main()
 
     return 0;
 }
-
