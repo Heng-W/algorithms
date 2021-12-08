@@ -8,14 +8,13 @@ class CircularQueue
 {
 public:
     // 构造函数，参数为初始容量
-    CircularQueue(int capacity = 32)
+    explicit CircularQueue(int capacity = 32)
         : front_(0), rear_(0)
     {
         capacity_ = roundupPowerOfTwo(capacity);
         data_ = alloc_.allocate(capacity_);
     }
 
-    // 析构函数
     ~CircularQueue() { free(); }
 
     // 拷贝构造函数
@@ -23,17 +22,19 @@ public:
         : front_(0), rear_(0), capacity_(rhs.capacity_)
     {
         data_ = alloc_.allocate(capacity_);
-        unsigned int src = rhs.front_;
-        while (src != rhs.rear_)
+        unsigned int cur = rhs.front_;
+        while (cur != rhs.rear_)
         {
-            alloc_.construct(&data_[rear_++], std::move(data_[src++]));
-            src &= capacity_ - 1;
+            alloc_.construct(&data_[rear_++], rhs.data_[cur++]);
+            cur &= rhs.capacity_ - 1;
         }
     }
 
     // 移动构造函数
     CircularQueue(CircularQueue&& rhs) noexcept
-        : data_(rhs.data_), front_(rhs.front_), rear_(rhs.rear_),
+        : data_(rhs.data_),
+          front_(rhs.front_),
+          rear_(rhs.rear_),
           capacity_(rhs.capacity_)
     {
         rhs.data_ = nullptr;
@@ -79,11 +80,11 @@ public:
     // 清空
     void clear()
     {
-        unsigned int pos = front_;
-        while (pos != rear_)
+        unsigned int cur = front_;
+        while (cur != rear_)
         {
-            alloc_.destroy(&data_[pos++]);
-            pos &= capacity_ - 1;
+            alloc_.destroy(&data_[cur++]);
+            cur &= capacity_ - 1;
         }
         front_ = rear_ = 0;
     }

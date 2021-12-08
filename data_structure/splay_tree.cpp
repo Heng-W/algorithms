@@ -20,10 +20,7 @@ public:
     // 伸展调整
     void splay(const T& data) { splay(root_, data); }
 
-    // 清除
     void clear() { destroy(root_); }
-
-    // 打印
     void print() const { if (root_) print(root_); }
 
 private:
