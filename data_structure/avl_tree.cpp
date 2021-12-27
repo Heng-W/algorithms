@@ -52,7 +52,6 @@ public:
     // 中序遍历
     void inOrder() const { inOrder(root_); }
 
-    // 清除
     void clear() { destroy(root_); }
 
 private:
@@ -63,11 +62,9 @@ private:
 
     bool _remove(Node*& node, const T& data);
 
-    // 获取节点高度
     static int height(const Node* node)
     { return node != nullptr ? node->height : 0; }
 
-    // 更新节点高度
     static void updateHeight(Node* node)
     { node->height = std::max(height(node->left), height(node->right)) + 1; }
 
@@ -108,7 +105,6 @@ private:
         }
     }
 
-    // 销毁
     void destroy(Node*& node)
     {
         if (node)
@@ -120,7 +116,6 @@ private:
         }
     }
 
-    // 克隆
     Node* clone(Node* node)
     {
         if (node == nullptr) return nullptr;
@@ -131,19 +126,18 @@ private:
         return copy;
     }
 
-    // 定义节点
     struct Node
     {
         T data;
         Node* left;
         Node* right;
-        int height; // 高度
+        int height;
 
         Node(const T& _data): data(_data) {}
         Node(T&& _data): data(std::move(_data)) {}
     };
 
-    Node* root_; // 根节点
+    Node* root_;
 };
 
 
@@ -199,7 +193,7 @@ bool AVLTree<T>::_insert(Node*& node, X&& x)
     {
         return false;
     }
-    updateHeight(node); // 更新高度
+    updateHeight(node);
     return true;
 }
 
@@ -250,7 +244,7 @@ bool AVLTree<T>::_remove(Node*& node, const T& data)
             return true;
         }
     }
-    updateHeight(node); // 更新高度
+    updateHeight(node);
     return true;
 }
 

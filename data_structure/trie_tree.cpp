@@ -1,7 +1,7 @@
 
 #include <string>
 
-//字典树
+// 字典树
 class TrieTree
 {
 public:
@@ -11,11 +11,11 @@ public:
     // 拷贝构造函数
     TrieTree(const TrieTree& rhs) { root_ = clone(rhs.root_); }
 
-    //移动构造函数
+    // 移动构造函数
     TrieTree(TrieTree&& rhs): TrieTree()
     { std::swap(root_, rhs.root_); }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     TrieTree& operator=(const TrieTree& rhs)
     {
         TrieTree copy = rhs;
@@ -23,7 +23,7 @@ public:
         return *this;
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     TrieTree& operator=(TrieTree&& rhs) noexcept
     {
         if (this != &rhs)
@@ -158,7 +158,7 @@ private:
         Node* childs[CHILD_NUM] = {nullptr};
     };
 
-    Node* root_; // 根节点
+    Node* root_;
 };
 
 

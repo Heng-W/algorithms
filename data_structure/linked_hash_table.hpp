@@ -5,7 +5,7 @@
 #include <functional>
 #include <vector>
 
-//哈希表和双向循环链表结合
+// 哈希表和双向循环链表结合
 template <class Object, class HashFunc = std::hash<Object>,
           class ExtractKey = std::_Identity<Object>>
 class LinkedHashTable
@@ -30,7 +30,7 @@ public:
 
     ~LinkedHashTable() { clear(); ::free(head_); }
 
-    //拷贝构造函数
+    // 拷贝构造函数
     LinkedHashTable(const LinkedHashTable& rhs)
         : LinkedHashTable(rhs.buckets_.size())
     {
@@ -40,11 +40,11 @@ public:
         removeCallback_ = rhs.removeCallback_;
     }
 
-    //移动构造函数
+    // 移动构造函数
     LinkedHashTable(LinkedHashTable&& rhs)
         : LinkedHashTable(0) { swap(rhs); }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     LinkedHashTable& operator=(const LinkedHashTable& rhs)
     {
         LinkedHashTable copy = rhs;
@@ -52,7 +52,7 @@ public:
         return *this;
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     LinkedHashTable& operator=(LinkedHashTable&& rhs) noexcept
     {
         if (this != &rhs)
@@ -76,42 +76,36 @@ public:
     void setRemoveCallback(const RemoveCallback& cb)
     { removeCallback_ = cb; }
 
-    //插入元素
+    // 插入
     std::pair<Iterator, bool> insert(const Object& obj)
     { return _insert(obj); }
 
     std::pair<Iterator, bool> insert(Object&& obj)
     { return _insert(std::move(obj)); }
 
-
-    //查找
+    // 查找
     ConstIterator find(const KeyType& key) const
     { return _find(key); }
 
     Iterator find(const KeyType& key)
     { return const_cast<Node*>(_find(key)); }
 
-
+    // 查找（未找到则插入）
     Object& findOrInsert(const Object& obj)
     { return *insert(obj).first; }
 
     Object& findOrInsert(Object&& obj)
     { return *insert(std::move(obj)).first; }
 
+    // 删除
     void removeFirst() { erase(begin()); }
-
     Iterator erase(Iterator it);
-
     bool remove(const KeyType& key);
-
 
     void clear();
 
-
-    int count() const { return nodeCount_; }
-
+    int size() const { return nodeCount_; }
     int bucketCount() const { return buckets_.size(); }
-
 
     ConstIterator begin() const { return head_->after; }
     Iterator begin() { return head_->after; }
@@ -126,7 +120,6 @@ private:
     template <class X>
     std::pair<Iterator, bool> _insert(X&& obj);
 
-
     template <class X>
     Node* _insert(int pos, X&& obj);
 
@@ -139,7 +132,6 @@ private:
 
     static const KeyType& getKey(const Object& obj)
     { return ExtractKey()(obj); }
-
 
     static int roundup(int n)
     { return roundupPowerOfTwo(n); }
@@ -157,7 +149,7 @@ private:
 
     void resize(int hintCnt);
 
-
+    // 迭代器
     template <class NodePtr>
     struct Iterator_
     {
@@ -204,8 +196,8 @@ private:
         Node(Object&& _obj): obj(std::move(_obj)) {}
     };
 
-    std::vector<Node*> buckets_; //桶
-    Node* head_; //头结点
+    std::vector<Node*> buckets_; // 桶
+    Node* head_; // 头结点
     int nodeCount_;
     RemoveCallback removeCallback_;
 };
@@ -215,7 +207,7 @@ template <class Object, class HashFunc, class ExtractKey>
 auto LinkedHashTable<Object, HashFunc, ExtractKey>::
 _find(const KeyType& key) const -> const Node*
 {
-    int pos = bucketPos(key);//找到位置
+    int pos = bucketPos(key); // 找到位置
     const Node* cur = buckets_[pos];
     while (cur)
     {
@@ -248,9 +240,9 @@ template <class X>
 auto LinkedHashTable<Object, HashFunc, ExtractKey>::
 _insert(X&& obj) -> std::pair<Iterator, bool>
 {
-    resize(nodeCount_ + 1);//检查是否需要重建表格
+    resize(nodeCount_ + 1); // 检查是否需要重建表格
 
-    int pos = bucketPos(getKey(obj));//找到位置
+    int pos = bucketPos(getKey(obj)); // 找到位置
     Node* cur = buckets_[pos];
     while (cur)
     {
@@ -270,7 +262,7 @@ template <class Object, class HashFunc, class ExtractKey>
 bool LinkedHashTable<Object, HashFunc, ExtractKey>::
 remove(const KeyType& key)
 {
-    int pos = bucketPos(key);//找到位置
+    int pos = bucketPos(key); // 找到位置
     Node* cur = buckets_[pos];
     Node* prev = nullptr;
     while (cur)
@@ -298,7 +290,7 @@ template <class Object, class HashFunc, class ExtractKey>
 auto LinkedHashTable<Object, HashFunc, ExtractKey>::
 erase(Iterator it) -> Iterator
 {
-    int pos = bucketPos(getKey(*it));//找到位置
+    int pos = bucketPos(getKey(*it)); // 找到位置
     Node* cur = buckets_[pos];
     Node* prev = nullptr;
     while (cur)
@@ -336,14 +328,14 @@ void LinkedHashTable<Object, HashFunc, ExtractKey>::resize(int hintCnt)
         Node* first = buckets_[i];
         while (first)
         {
-            //找到在新buckets中的位置
+            // 找到在新buckets中的位置
             int newPos = bucketPos(getKey(first->obj), newSize);
-            //旧bucket指向下一个节点
+            // 旧bucket指向下一个节点
             buckets_[i] = first->next;
-            //当前节点插入到新bucket
+            // 当前节点插入到新bucket
             first->next = tmp[newPos];
             tmp[newPos] = first;
-            //准备处理旧bucket的下一个节点
+            // 准备处理旧bucket的下一个节点
             first = buckets_[i];
         }
     }

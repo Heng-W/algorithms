@@ -70,7 +70,6 @@ public:
 
     void clear() { if (root_) destroy(root_); }
 
-    // 首尾迭代器
     Iterator begin() { return minimum(); }
     ConstIterator begin() const { return minimum(); }
 
@@ -99,7 +98,6 @@ private:
         return static_cast<LeafNode*>(cur);
     }
 
-    // 键数量的最小值和最大值
     static constexpr int kMinKeyNum = (M + 1) / 2 - 1;
     static constexpr int kMaxKeyNum = M - 1;
 
@@ -141,7 +139,7 @@ private:
         }
     };
 
-    // 定义节点基类
+    // 节点基类
     struct NodeBase
     {
         KeyType keys[M];
@@ -154,7 +152,7 @@ private:
         bool isLeaf() const { return leaf; }
     };
 
-    // 索引节点，包含child指针域
+    // 索引节点
     struct IndexNode : NodeBase
     {
         NodeBase* childs[M + 1] = {nullptr};
@@ -162,7 +160,7 @@ private:
         IndexNode(): NodeBase(false) {}
     };
 
-    // 叶子节点，包含value及next指针域
+    // 叶子节点
     struct LeafNode : NodeBase
     {
         ValueType values[M];
@@ -171,7 +169,7 @@ private:
         LeafNode(): NodeBase(true) {}
     };
 
-    NodeBase* root_; // 根节点
+    NodeBase* root_;
 };
 
 

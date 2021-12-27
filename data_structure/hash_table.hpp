@@ -4,7 +4,7 @@
 #include <functional>
 #include <vector>
 
-//哈希表
+// 哈希表
 template <class Object, class HashFunc = std::hash<Object>,
           class ExtractKey = std::_Identity<Object>>
 class HashTable
@@ -19,23 +19,23 @@ public:
     HashTable(int n = 32): nodeCount_(0) { initBuckets(n); }
     ~HashTable() { clear(); }
 
-    //拷贝构造函数
+    // 拷贝构造函数
     HashTable(const HashTable& rhs);
 
-    //移动构造函数
+    // 移动构造函数
     HashTable(HashTable&& rhs) noexcept
         : buckets_(std::move(rhs.buckets_)),
           nodeCount_(rhs.nodeCount_)
     { rhs.nodeCount_ = 0; }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     HashTable& operator=(const HashTable& rhs)
     {
         HashTable copy = rhs;
         return *this = std::move(copy);
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     HashTable& operator=(HashTable&& rhs) noexcept
     {
         if (this != &rhs)
@@ -48,40 +48,38 @@ public:
         return *this;
     }
 
-    //插入元素（不重复）
+    // 插入元素（不重复）
     std::pair<Iterator, bool> insert(const Object& obj)
     { return _insert(obj); }
 
     std::pair<Iterator, bool> insert(Object&& obj)
     { return _insert(std::move(obj)); }
 
-    //插入元素（可以重复）
+    // 插入元素（允许重复）
     Iterator insertEqual(const Object& obj) { return _insertEqual(obj); }
     Iterator insertEqual(Object&& obj) { return _insertEqual(std::move(obj)); }
 
-    //查找
+    // 查找
     ConstIterator find(const KeyType& key) const
     { return ConstIterator(_find(key), this); }
 
     Iterator find(const KeyType& key)
     { return Iterator(const_cast<Node*>(_find(key)), this); }
 
-    //查找（不存在则插入）
+    // 查找（不存在则插入）
     Object& findOrInsert(const Object& obj)
     { return *insert(obj).first; }
 
     Object& findOrInsert(Object&& obj)
     { return *insert(std::move(obj)).first; }
 
+    // 删除
     bool remove(const KeyType& key);
 
     void clear();
 
-
     int size() const { return nodeCount_; }
-
     int bucketCount() const { return buckets_.size(); }
-
 
     ConstIterator begin() const { return ConstIterator(_begin(), this); }
     Iterator begin() { return Iterator(const_cast<Node*>(_begin()), this); }
@@ -126,6 +124,7 @@ private:
     static int roundup(int n)
     { return roundupPowerOfTwo(n); }
 
+    // 取整为2的幂次方
     static unsigned int roundupPowerOfTwo(unsigned int i)
     {
         --i;
@@ -140,7 +139,7 @@ private:
     static const KeyType& getKey(const Object& obj)
     { return ExtractKey()(obj); }
 
-
+    // 迭代器
     template <class NodePtr>
     struct Iterator_
     {
@@ -166,7 +165,7 @@ private:
             node = node->next;
             if (!node)
             {
-                //根据元素值，定位出下一个bucket
+                // 根据元素值，定位出下一个bucket
                 int pos = tab->bucketPos(tab->getKey(old->obj)) + 1;
                 while (pos < (int)tab->buckets_.size() && !tab->buckets_[pos]) ++pos;
                 if (pos < (int)tab->buckets_.size())
@@ -201,7 +200,7 @@ template <class Object, class HashFunc, class ExtractKey>
 auto HashTable<Object, HashFunc, ExtractKey>::
 _find(const KeyType& key) const -> const Node*
 {
-    int pos = bucketPos(key);//找到位置
+    int pos = bucketPos(key); // 找到位置
     const Node* cur = buckets_[pos];
     while (cur)
     {
@@ -218,9 +217,9 @@ template <class X>
 auto HashTable<Object, HashFunc, ExtractKey>::
 _insert(X&& obj) -> std::pair<Iterator, bool>
 {
-    resize(nodeCount_ + 1);//检查是否需要重建表格
+    resize(nodeCount_ + 1); // 检查是否需要重建表格
 
-    int pos = bucketPos(getKey(obj));//找到位置
+    int pos = bucketPos(getKey(obj)); // 找到位置
     Node* cur = buckets_[pos];
     while (cur)
     {
@@ -241,10 +240,10 @@ template <class X>
 auto HashTable<Object, HashFunc, ExtractKey>::
 _insertEqual(X&& obj) -> Iterator
 {
-    resize(nodeCount_ + 1);//检查是否需要重建表格
+    resize(nodeCount_ + 1); // 检查是否需要重建表格
 
     Node* node = new Node(std::forward<X>(obj));
-    int pos = bucketPos(getKey(obj));//找到位置
+    int pos = bucketPos(getKey(obj)); // 找到位置
     Node* cur = buckets_[pos];
     while (cur)
     {
@@ -268,7 +267,7 @@ template <class Object, class HashFunc, class ExtractKey>
 bool HashTable<Object, HashFunc, ExtractKey>::
 remove(const KeyType& key)
 {
-    int pos = bucketPos(key);//找到位置
+    int pos = bucketPos(key);
     Node* cur = buckets_[pos];
     Node* prev = nullptr;
     while (cur)
@@ -303,7 +302,7 @@ void HashTable<Object, HashFunc, ExtractKey>::resize(int hintCnt)
         Node* first = buckets_[i];
         while (first)
         {
-            //找到在新buckets中的位置
+            // 找到在新buckets中的位置
             int newPos = bucketPos(getKey(first->obj), newSize);
             // 旧bucket指向下一个节点
             buckets_[i] = first->next;

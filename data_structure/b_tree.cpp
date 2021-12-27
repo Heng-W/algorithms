@@ -46,11 +46,14 @@ public:
         return *this;
     }
 
+    // 查找
     std::pair<Node*, int> find(const KeyType& key) const;
 
+    // 插入
     bool insert(const Object& obj) { return _insert(obj); }
     bool insert(Object&& obj) { return _insert(std::move(obj)); }
 
+    // 删除
     bool remove(const KeyType& key);
 
     void levelOrder() const;
@@ -393,6 +396,7 @@ auto BTree<Key, Value, M>::clone(Node* node, Node* parent) -> Node*
 }
 
 
+// 测试
 #include <cstdlib>
 #include <ctime>
 #include <vector>

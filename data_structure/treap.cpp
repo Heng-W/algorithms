@@ -87,7 +87,6 @@ private:
         node = lchild;
     }
 
-    // 销毁
     void destroy(Node*& node)
     {
         if (node)
@@ -99,7 +98,6 @@ private:
         }
     }
 
-    // 克隆
     Node* clone(Node* node)
     {
         if (node == nullptr) return nullptr;

@@ -4,16 +4,15 @@
 #include <iostream>
 
 
-//链表实现的堆栈
+// 链表实现的堆栈
 template <class T>
 class Stack
 {
 public:
-
     Stack(): head_(nullptr), size_(0) {}
     ~Stack() { clear(); }
 
-    //拷贝构造函数
+    // 拷贝构造函数
     Stack(const Stack& rhs)
         : head_(nullptr), size_(0)
     {
@@ -25,7 +24,7 @@ public:
         }
     }
 
-    //移动构造函数
+    // 移动构造函数
     Stack(Stack&& rhs) noexcept
         : head_(rhs.head_), size_(rhs.size_)
     {
@@ -33,14 +32,14 @@ public:
         rhs.size_ = 0;
     }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     Stack& operator=(const Stack& rhs)
     {
         Stack copy = rhs;
         return *this = std::move(copy);
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     Stack& operator=(Stack&& rhs) noexcept
     {
         if (this != &rhs)
@@ -55,11 +54,11 @@ public:
         return *this;
     }
 
-    //压入
+    // 压入
     void push(const T& x) { _push(x); }
     void push(T&& x) { _push(std::move(x)); }
 
-    //弹出
+    // 弹出
     void pop()
     {
         assert(!empty());
@@ -69,7 +68,6 @@ public:
         --size_;
     }
 
-    //清空
     void clear()
     {
         Node* cur = head_;
@@ -82,14 +80,13 @@ public:
         size_ = 0;
     }
 
-    //栈顶元素
     const T& top() const { return head_->data; }
 
     bool empty() const { return size_ == 0; }
     int size() const { return size_; }
 
 private:
-    //加入元素
+
     template <class X>
     void _push(X&& x)
     {
@@ -113,7 +110,7 @@ private:
 };
 
 
-//测试
+// 测试
 #include <ctime>
 #include <cstdlib>
 

@@ -18,7 +18,6 @@ public:
     using ConstIterator = Iterator_<const Node*>;
     using KeyType = Key;
 
-    // 默认构造函数
     RBTree(): nodeCount_(0)
     {
         nil_ = (Node*)::malloc(sizeof(Node));
@@ -27,7 +26,6 @@ public:
         root_ = nil_;
     }
 
-    // 析构函数
     ~RBTree() { clear(); ::free(nil_); }
 
     // 拷贝构造函数
@@ -56,7 +54,6 @@ public:
         return *this;
     }
 
-    // 交换
     void swap(RBTree& rhs)
     {
         using std::swap;
@@ -90,13 +87,10 @@ public:
     // 删除
     bool remove(const KeyType& key);
 
-    // 清除
     void clear() { destroy(root_); }
 
-    // 元素数量
     int size() const { return nodeCount_; }
 
-    // 首尾迭代器
     ConstIterator begin() const { return ConstIterator(minimum(), this); }
     Iterator begin() { return Iterator(const_cast<Node*>(minimum()), this); }
 
@@ -118,14 +112,13 @@ private:
     // 删除平衡调整
     void removeRebalance(Node* cur);
 
-    // 左旋，右旋
+    // 左旋/右旋
     void leftRotation(Node* node);
     void rightRotation(Node* node);
 
     // child接到node的parent节点
     void setParentPtr(Node* node, Node* child);
 
-    // 最小值
     const Node* minimum() const
     {
         const Node* cur = root_;
@@ -133,7 +126,6 @@ private:
         return cur;
     }
 
-    // 销毁
     void destroy(Node*& node)
     {
         if (node != nil_)
@@ -145,7 +137,6 @@ private:
         }
     }
 
-    // 克隆
     Node* clone(const RBTree& tree, Node* cur, Node* parent) const
     {
         if (cur == tree.nil_) return nil_;
@@ -163,11 +154,11 @@ private:
     static bool comp(const KeyType& key1, const KeyType& key2)
     { return Compare()(key1, key2); }
 
-    // 迭代器定义
+    // 迭代器
     template <class NodePtr>
     struct Iterator_
     {
-        NodePtr node; // 原始指针
+        NodePtr node;
         const RBTree* tree; // 用于获取nil节点
 
         using Self = Iterator_;
@@ -199,13 +190,13 @@ private:
             return tmp;
         }
     private:
-        void increase(); // 前进
-        void decrease(); // 后退
+        void increase();
+        void decrease();
     };
 
     enum Color : char {RED, BLACK};
 
-    // 节点定义
+    // 节点
     struct Node
     {
         Object obj;
@@ -219,9 +210,9 @@ private:
         Node(Object&& _obj): obj(std::move(_obj)) {}
     };
 
-    Node* root_; // 根节点
+    Node* root_;
     Node* nil_; // 哨兵节点
-    int nodeCount_; // 节点数量
+    int nodeCount_;
 };
 
 

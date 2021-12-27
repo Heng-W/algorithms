@@ -92,7 +92,7 @@ private:
     static bool comp(const T& lhs, const T& rhs)
     { return Compare()(lhs, rhs); }
 
-    Sequence data_; // 数据
+    Sequence data_;
 };
 
 

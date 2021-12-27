@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <memory>
 
-//链表实现的队列
+// 链表实现的队列
 template <class T>
 class Queue
 {
@@ -10,7 +10,7 @@ public:
     Queue(): head_(nullptr), tail_(nullptr), size_(0) {}
     ~Queue() { clear(); }
 
-    //拷贝构造函数
+    // 拷贝构造函数
     Queue(const Queue& rhs)
         : Queue()
     {
@@ -22,7 +22,7 @@ public:
         }
     }
 
-    //移动构造函数
+    // 移动构造函数
     Queue(Queue&& rhs) noexcept
         : head_(rhs.head_), tail_(rhs.tail_), size_(rhs.size)
     {
@@ -30,14 +30,13 @@ public:
         rhs.size_ = 0;
     }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     Queue& operator=(const Queue& rhs)
     {
-        Queue copy = rhs;
-        return *this = std::move(copy);
+        return *this = std::move(Query(rhs));
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     Queue& operator=(Queue&& rhs) noexcept
     {
         if (this != &rhs)
@@ -53,11 +52,11 @@ public:
         return *this;
     }
 
-    //压入
+    // 压入
     void push(const T& data) { _push(data); }
     void push(T&& data) { _push(std::move(data)); }
 
-    //弹出
+    // 弹出
     void pop()
     {
         assert(!empty());
@@ -67,7 +66,6 @@ public:
         --size_;
     }
 
-    //清空
     void clear()
     {
         Node* cur = head_;
@@ -81,7 +79,6 @@ public:
         size_ = 0;
     }
 
-    //队首元素
     const T& front() const { return head_->data; }
 
     bool empty() const { return size_ == 0; }
@@ -106,7 +103,7 @@ private:
         ++size_;
     }
 
-    //定义节点
+    // 节点
     struct Node
     {
         T data;
@@ -116,13 +113,13 @@ private:
         Node(T&& _data): data(std::move(_data)) {}
     };
 
-    Node* head_; //头节点
-    Node* tail_; //尾节点
-    int size_; //元素数量
+    Node* head_;
+    Node* tail_;
+    int size_; // 元素数量
 };
 
 
-//测试
+// 测试
 #include <ctime>
 #include <cstdlib>
 #include <iostream>

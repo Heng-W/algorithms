@@ -77,7 +77,6 @@ public:
         front_ &= capacity_ - 1;
     }
 
-    // 清空
     void clear()
     {
         unsigned int cur = front_;
@@ -93,6 +92,7 @@ public:
 
     // 元素数量
     int size() const { return (rear_ - front_ + capacity_) & (capacity_ - 1); }
+    
     // 容量
     int capacity() const { return capacity_; }
 

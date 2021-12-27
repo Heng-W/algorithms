@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <functional>
 #include <vector>
-#include <unordered_map> // for copy SkipList
+#include <unordered_map> // for copy skip_list
 
 
 // 跳跃表
@@ -59,11 +59,11 @@ public:
         nodeCount_ = rhs.nodeCount_;
     }
 
-    //移动构造函数
+    // 移动构造函数
     SkipList(SkipList&& rhs)
         : SkipList() { swap(rhs); }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     SkipList& operator=(const SkipList& rhs)
     {
         SkipList copy = rhs;
@@ -71,7 +71,7 @@ public:
         return *this;
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     SkipList& operator=(SkipList&& rhs) noexcept
     {
         if (this != &rhs)
@@ -82,7 +82,6 @@ public:
         return *this;
     }
 
-    //交换
     void swap(SkipList& rhs)
     {
         using std::swap;
@@ -92,21 +91,21 @@ public:
         swap(nodeCount_, rhs.nodeCount_);
     }
 
-    //插入元素
+    // 插入
     std::pair<Iterator, bool> insert(const Object& obj)
     { return _insert(obj); }
 
     std::pair<Iterator, bool> insert(Object&& obj)
     { return _insert(std::move(obj)); }
 
-    //查找
+    // 查找
     ConstIterator find(const KeyType& key) const
     { return _find(key); }
 
     Iterator find(const KeyType& key)
     { return const_cast<Node*>(_find(key)); }
 
-    //删除
+    // 删除
     Iterator remove(const KeyType& key)
     {
         std::vector<Node*> update(level_ + 1);
@@ -150,15 +149,13 @@ public:
         nodeCount_ = 0;
     }
 
+    int count() const { return nodeCount_; }
+
     ConstIterator begin() const { return head_->forward[0]; }
     Iterator begin() { return head_->forward[0]; }
 
     ConstIterator end() const { return nullptr; }
     Iterator end() { return nullptr; }
-
-
-    int count() const { return nodeCount_; }
-
 
 private:
 
@@ -212,7 +209,6 @@ private:
             return cur;
     }
 
-
     static const KeyType& getKey(const Object& obj)
     { return ExtractKey()(obj);}
 
@@ -242,7 +238,7 @@ private:
         ::free(node);
     }
 
-
+    // 迭代器
     template <class NodePtr>
     struct Iterator_
     {
@@ -270,7 +266,6 @@ private:
             return tmp;
         }
     };
-
 
     struct Node
     {
@@ -317,6 +312,3 @@ int main()
 
     return 0;
 }
-
-
-

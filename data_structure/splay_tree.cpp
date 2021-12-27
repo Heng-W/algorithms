@@ -32,7 +32,6 @@ private:
 
     void print(Node* node, Node* parent = nullptr) const;
 
-    // 销毁子树
     void destroy(Node*& node)
     {
         if (node)
@@ -50,6 +49,7 @@ private:
         Node* left;
         Node* right;
     };
+    
     Node* root_;
 };
 

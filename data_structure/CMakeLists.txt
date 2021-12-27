@@ -5,6 +5,5 @@ foreach(source ${SOURCE_FILES})
     add_executable(${target} ${source})
 endforeach(source)
 
-
 add_subdirectory(heap)
 add_subdirectory(graph)

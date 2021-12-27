@@ -6,7 +6,6 @@ template <class T>
 class ArrayList
 {
 public:
-    // 默认构造函数
     ArrayList(): data_(nullptr), size_(0), capacity_(0) {}
 
     // 构造函数，创建n个值初始化的元素
@@ -20,7 +19,6 @@ public:
         std::uninitialized_fill_n(data_, n, value);
     }
 
-    // 析构函数
     ~ArrayList() { free(); }
 
     // 拷贝构造函数
@@ -71,7 +69,7 @@ public:
     void add(const T& x) { _add(x); }
     void add(T&& x) { _add(std::move(x)); }
 
-    // 在pos位置插入元素
+    // 指定位置插入元素
     void insert(int pos, const T& x) { _insert(pos, x); }
     void insert(int pos, T&& x) { _insert(pos, std::move(x)); }
 
@@ -86,7 +84,7 @@ public:
         return -1;
     }
 
-    // 删除pos位置的元素
+    // 删除指定位置的元素
     void remove(int pos)
     {
         std::copy(data_ + pos + 1, data_ + size_, data_ + pos);
@@ -94,7 +92,7 @@ public:
         alloc_.destroy(data_ + size_);
     }
 
-    // 删除pos位置的连续n个元素
+    // 删除指定位置的连续n个元素
     void remove(int pos, int n)
     {
         std::copy(data_ + pos + n, data_ + size_, data_ + pos);
@@ -122,7 +120,6 @@ public:
         alloc_.destroy(data_ + size_);
     }
 
-    // 清除
     void clear()
     {
         for (int i = size_ - 1; i >= 0; --i)
@@ -135,17 +132,13 @@ public:
     const T& operator[](int i) const { return data_[i]; }
     T& operator[](int i) { return data_[i]; }
 
-    // 首尾迭代器
     const T* begin() const { return data_; }
     T* begin() { return data_; }
-
     const T* end() const { return data_ + size_; }
     T* end() { return data_ + size_; }
 
-    // 首尾元素
     const T& front() const { return data_[0]; }
     T& front() { return data_[0]; }
-
     const T& back() const { return data_[size_ - 1]; }
     T& back() { return data_[size_ - 1]; }
 
@@ -175,7 +168,8 @@ private:
     {
         if (size_ < capacity_)
         {
-            alloc_.construct(data_ + size_, std::move(data_[size_ - 1])); // 末尾构造一个元素
+            // 末尾构造一个元素
+            alloc_.construct(data_ + size_, std::move(data_[size_ - 1]));
             ++size_;
             // 元素后移
             for (int i = size_ - 2; i > pos; --i)
@@ -201,7 +195,6 @@ private:
             capacity_ = newCap;
         }
     }
-
     // 清空并释放内存
     void free()
     {
@@ -209,7 +202,8 @@ private:
         if (data_) alloc_.deallocate(data_, capacity_);
     }
 
-    static std::allocator<T> alloc_;
+    static std::allocator<T> alloc_; // 内存分配器
+
     T* data_; // 数据
     int size_; // 元素数量
     int capacity_; // 已分配的内存大小

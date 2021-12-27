@@ -123,7 +123,6 @@ private:
         return _remove(node->childs[index], level + 1, key);
     }
 
-    //  销毁node子树
     void destroyTree(Node* node, int level)
     {
         if (node->occupied)
@@ -177,10 +176,10 @@ private:
     };
 
     Node* root_;
-
 };
 
 
+// 测试
 #include <string>
 #include <iostream>
 

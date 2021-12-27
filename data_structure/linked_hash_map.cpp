@@ -5,7 +5,7 @@ template <class Key, class Value, class HashFunc = std::hash<Key>>
 class LinkedHashMap
 {
 public:
-    // 定义用于extractKey的函数对象
+    // 定义用于extractKey的function object
     template <class Pair>
     struct select1st
     {
@@ -25,28 +25,28 @@ public:
     void setRemoveCallback(const RemoveCallback& cb)
     { table_.setRemoveCallback(cb); }
 
+    // 插入
     std::pair<Iterator, bool> insert(const Object& obj)
     { return table_.insert(obj); }
 
     std::pair<Iterator, bool> insert(Object&& obj)
     { return table_.insert(std::move(obj)); }
 
+    // 查找
     Iterator find(const KeyType& key) {return table_.find(key);}
     ConstIterator find(const KeyType& key) const {return table_.find(key);}
 
     Value& operator[](const KeyType& key)
     { return table_.findOrInsert({key, Value()}).second; }
 
+    // 删除
     Iterator erase(Iterator it) { return table_.erase(it); }
-
     void removeFirst() { table_.removeFirst(); }
-
     bool remove(const KeyType& key) { return table_.remove(key); }
-
 
     void clear() { table_.clear(); }
 
-    int count() const { return table_.count(); }
+    int size() const { return table_.size(); }
 
     ConstIterator begin() const { return table_.begin(); }
     Iterator begin() { return table_.begin(); }
@@ -59,6 +59,7 @@ private:
 };
 
 
+// 测试
 #include <iostream>
 
 int main()

@@ -1,7 +1,7 @@
 
 #include <memory>
 
-//双向循环链表实现的线性表
+// 双向循环链表实现的线性表
 template <class T>
 class LinkedList
 {
@@ -11,7 +11,6 @@ public:
     using Iterator = Iterator_<Node*>;
     using ConstIterator = Iterator_<const Node*>;
 
-    //默认构造函数
     LinkedList(): size_(0)
     {
         head_ = (Node*)::malloc(sizeof(Node));
@@ -19,14 +18,13 @@ public:
         head_->prev = head_;
     }
 
-    //析构函数
     ~LinkedList()
     {
         clear();
         ::free(head_);
     }
 
-    //拷贝构造函数
+    // 拷贝构造函数
     LinkedList(const LinkedList& rhs)
         : LinkedList()
     {
@@ -38,19 +36,18 @@ public:
         }
     }
 
-    //移动构造函数
+    // 移动构造函数
     LinkedList(LinkedList&& rhs)
         : LinkedList() { swap(rhs); }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     LinkedList& operator=(const LinkedList& rhs)
     {
-        LinkedList copy = rhs;
-        swap(copy);
+        LinkedList().swap(*this);
         return *this;
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     LinkedList& operator=(LinkedList&& rhs) noexcept
     {
         if (this != &rhs)
@@ -61,7 +58,6 @@ public:
         return *this;
     }
 
-    //交换
     void swap(LinkedList& rhs)
     {
         using std::swap;
@@ -69,26 +65,24 @@ public:
         swap(size_, rhs.size_);
     }
 
-    //表头插入
+    // 插入
     void insertFront(const T& x) { insert(begin(), x); }
     void insertFront(T&& x) { insert(begin(), std::move(x)); }
 
-    //表尾插入
     void insertBack(const T& x) { insert(end(), x); }
     void insertBack(T&& x) { insert(end(), std::move(x)); }
 
-    //插入
     Iterator insert(Iterator pos, const T& x) { return _insert(pos, x); }
     Iterator insert(Iterator pos, T&& x) { return _insert(pos, std::move(x)); }
 
-    //查找
+    // 查找
     ConstIterator find(const T& data) const
     { return _find(data); }
 
     Iterator find(const T& data)
     { return const_cast<Node*>(_find(data)); }
 
-    //删除
+    // 删除
     Iterator remove(Iterator pos)
     {
         Node* p = pos.node;
@@ -100,7 +94,6 @@ public:
         return next;
     }
 
-    //清空
     void clear()
     {
         Node* cur = head_->next;
@@ -116,13 +109,11 @@ public:
 
     Iterator begin() { return head_->next; }
     ConstIterator begin() const { return head_->next; }
-
     Iterator end() { return head_; }
     ConstIterator end() const { return head_; }
 
     const T& front() const { return head_->next->data; }
     T& front() { return head_->next->data; }
-
     const T& back() const { return head_->prev->data; }
     T& back() { return head_->prev->data; }
 
@@ -155,7 +146,7 @@ private:
         return node;
     }
 
-    //定义迭代器
+    // 迭代器
     template <class NodePtr>
     struct Iterator_
     {
@@ -199,7 +190,6 @@ private:
         }
     };
 
-    //定义节点
     struct Node
     {
         T data;
@@ -210,12 +200,12 @@ private:
         Node(T&& _data): data(std::move(_data)) {}
     };
 
-    Node* head_; //头结点
-    int size_; //元素个数
+    Node* head_; // 头结点
+    int size_; // 元素个数
 };
 
 
-//测试
+// 测试
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
