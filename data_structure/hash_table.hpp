@@ -9,11 +9,11 @@ template <class Object, class HashFunc = std::hash<Object>,
           class ExtractKey = std::_Identity<Object>>
 class HashTable
 {
-    template <class NodePtr> struct Iterator_;
+    template <class NodePtr> struct IteratorT;
     struct Node;
 public:
-    using Iterator = Iterator_<Node*>;
-    using ConstIterator = Iterator_<const Node*>;
+    using Iterator = IteratorT<Node*>;
+    using ConstIterator = IteratorT<const Node*>;
     using KeyType = typename std::result_of<ExtractKey(Object)>::type;
 
     HashTable(int n = 32): nodeCount_(0) { initBuckets(n); }
@@ -141,17 +141,17 @@ private:
 
     // 迭代器
     template <class NodePtr>
-    struct Iterator_
+    struct IteratorT
     {
         NodePtr node;
         const HashTable* tab;
 
-        using Self = Iterator_;
+        using Self = IteratorT;
         using ObjectRef = decltype((node->obj));
         using ObjectPtr = decltype(&node->obj);
 
-        Iterator_() {}
-        Iterator_(NodePtr _node, const HashTable* _tab): node(_node), tab(_tab) {}
+        IteratorT() {}
+        IteratorT(NodePtr _node, const HashTable* _tab): node(_node), tab(_tab) {}
 
         bool operator==(const Self& it) const { return node == it.node; }
         bool operator!=(const Self& it) const { return node != it.node; }
@@ -169,7 +169,9 @@ private:
                 int pos = tab->bucketPos(tab->getKey(old->obj)) + 1;
                 while (pos < (int)tab->buckets_.size() && !tab->buckets_[pos]) ++pos;
                 if (pos < (int)tab->buckets_.size())
+                {
                     node = tab->buckets_[pos];
+                }
             }
             return *this;
         }
@@ -204,8 +206,7 @@ _find(const KeyType& key) const -> const Node*
     const Node* cur = buckets_[pos];
     while (cur)
     {
-        if (key == getKey(cur->obj))
-            return cur;
+        if (key == getKey(cur->obj)) return cur;
         cur = cur->next;
     }
     return nullptr;
@@ -224,7 +225,9 @@ _insert(X&& obj) -> std::pair<Iterator, bool>
     while (cur)
     {
         if (getKey(obj) == getKey(cur->obj))
+        {
             return {Iterator(cur, this), false};
+        }
         cur = cur->next;
     }
     Node* node = new Node(std::forward<X>(obj));
@@ -292,8 +295,7 @@ remove(const KeyType& key)
 template <class Object, class HashFunc, class ExtractKey>
 void HashTable<Object, HashFunc, ExtractKey>::resize(int hintCnt)
 {
-    if (hintCnt <= (int)buckets_.size())
-        return;
+    if (hintCnt <= (int)buckets_.size()) return;
     int newSize = roundup(hintCnt);
     std::vector<Node*> tmp(newSize, nullptr);
 

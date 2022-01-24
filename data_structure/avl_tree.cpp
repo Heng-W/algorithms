@@ -14,8 +14,8 @@ public:
     AVLTree(const AVLTree& rhs) { root_ = clone(rhs.root_); }
 
     // 移动构造函数
-    AVLTree(AVLTree&& rhs) noexcept
-    :root_(rhs.root_) { rhs.root_ = nullptr; }
+    AVLTree(AVLTree&& rhs) noexcept: root_(rhs.root_)
+    { rhs.root_ = nullptr; }
 
     // 拷贝赋值运算符
     AVLTree& operator=(const AVLTree& rhs)
@@ -152,9 +152,9 @@ auto AVLTree<T>::_find(const T& data) const -> const Node*
         else if (cur->data < data)
             cur = cur->right;
         else
-            return cur;
+            break;
     }
-    return nullptr;
+    return cur;
 }
 
 
@@ -169,23 +169,25 @@ bool AVLTree<T>::_insert(Node*& node, X&& x)
     }
     else if (x < node->data) // 进入左子树
     {
-        if (!_insert(node->left, std::forward<X>(x)))
-            return false; // 未找到
+        if (!_insert(node->left, std::forward<X>(x))) return false; // 未找到
         if (height(node->left) - height(node->right) == 2)
         {
             if (node->left->data < x)
+            {
                 leftRotation(node->left);
+            }
             rightRotation(node);
         }
     }
     else if (node->data < x) // 进入右子树
     {
-        if (!_insert(node->right, std::forward<X>(x)))
-            return false; // 未找到
+        if (!_insert(node->right, std::forward<X>(x))) return false; // 未找到
         if (height(node->right) - height(node->left) == 2)
         {
             if (x < node->right->data)
+            {
                 rightRotation(node->right);
+            }
             leftRotation(node);
         }
     }
@@ -201,27 +203,28 @@ bool AVLTree<T>::_insert(Node*& node, X&& x)
 template <class T>
 bool AVLTree<T>::_remove(Node*& node, const T& data)
 {
-    if (node == nullptr)
-        return false; // 未找到
+    if (node == nullptr) return false; // 未找到
     if (data < node->data) // 进入左子树
     {
-        if (!_remove(node->left, data))
-            return false;
+        if (!_remove(node->left, data)) return false;
         if (height(node->right) - height(node->left) == 2)
         {
             if (height(node->right->right) < height(node->right->left))
+            {
                 rightRotation(node->right);
+            }
             leftRotation(node);
         }
     }
     else if (node->data < data) // 进入右子树
     {
-        if (!_remove(node->right, data))
-            return false;
+        if (!_remove(node->right, data)) return false;
         if (height(node->left) - height(node->right) == 2)
         {
             if (height(node->left->left) < height(node->left->right))
+            {
                 leftRotation(node->left);
+            }
             rightRotation(node);
         }
     }
@@ -230,8 +233,7 @@ bool AVLTree<T>::_remove(Node*& node, const T& data)
         if (node->left && node->right)
         {
             Node* sub = node->right;
-            while (sub->left)
-                sub = sub->left;
+            while (sub->left) sub = sub->left;
             using std::swap;
             swap(node->data, sub->data);
             _remove(node->right, data);

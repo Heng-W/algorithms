@@ -11,24 +11,18 @@ template <class Object, class Key = Object,
           class Compare = std::less<Key>>
 class SkipList
 {
-    template <class NodePtr> struct Iterator_;
+    template <class NodePtr> struct IteratorT;
     struct Node;
 public:
-    using Iterator = Iterator_<Node*>;
-    using ConstIterator = Iterator_<const Node*>;
+    using Iterator = IteratorT<Node*>;
+    using ConstIterator = IteratorT<const Node*>;
     using KeyType = Key;
 
     SkipList(int maxLevel = 8):
         level_(0), maxLevel_(maxLevel), nodeCount_(0)
-    {
-        head_ = (Node*)::calloc(1, sizeof(Node) + sizeof(Node*) * (maxLevel_));
-    }
+    { head_ = (Node*)::calloc(1, sizeof(Node) + sizeof(Node*) * (maxLevel_)); }
 
-    ~SkipList()
-    {
-        clear();
-        ::free(head_);
-    }
+    ~SkipList() { clear(); ::free(head_); }
 
     // 拷贝构造函数
     SkipList(const SkipList& rhs): SkipList(rhs.maxLevel_)
@@ -114,18 +108,18 @@ public:
         for (int i = level_; i >= 0; --i)
         {
             while (cur->forward[i] && comp(getKey(cur->forward[i]->obj), key))
+            {
                 cur = cur->forward[i];
+            }
             update[i] = cur;
         }
         cur = cur->forward[0];
 
-        if (!cur || comp(key, getKey(cur->obj)))
-            return nullptr;
+        if (!cur || comp(key, getKey(cur->obj))) return nullptr;
 
         for (int i = 0; i <= level_; ++i)
         {
-            if (cur != update[i]->forward[i])
-                break;
+            if (cur != update[i]->forward[i]) break;
             update[i]->forward[i] = cur->forward[i];
         }
         while (level_ > 0 && !head_->forward[level_]) --level_;
@@ -168,19 +162,22 @@ private:
         for (int i = level_; i >= 0; --i)
         {
             while (cur->forward[i] && comp(getKey(cur->forward[i]->obj), getKey(obj)))
+            {
                 cur = cur->forward[i];
+            }
             update[i] = cur;
         }
         cur = cur->forward[0];
 
-        if (cur && !comp(getKey(obj), getKey(cur->obj)))
-            return {cur, false};
+        if (cur && !comp(getKey(obj), getKey(cur->obj))) return {cur, false};
 
         int level = randomLevel();
         if (level > level_)
         {
             for (int i = level_ + 1; i <= level; ++i)
+            {
                 update[i] = head_;
+            }
             level_ = level;
         }
         Node* node = createNode(std::forward<Object>(obj), level);
@@ -200,22 +197,19 @@ private:
         for (int i = level_; i >= 0; --i)
         {
             while (cur->forward[i] && comp(getKey(cur->forward[i]->obj), key))
+            {
                 cur = cur->forward[i];
+            }
         }
         cur = cur->forward[0];
-        if (comp(key, getKey(cur->obj)))
-            return nullptr;
-        else
-            return cur;
+        return comp(key, getKey(cur->obj)) ? nullptr : cur;
     }
 
     static const KeyType& getKey(const Object& obj)
     { return ExtractKey()(obj);}
 
-
     static bool comp(const KeyType& key1, const KeyType& key2)
     { return Compare()(key1, key2); }
-
 
     int randomLevel() const
     {
@@ -227,7 +221,7 @@ private:
     template <class X>
     static Node* createNode(X&& obj, int level = 0)
     {
-        Node* node = (Node*)::calloc(1, sizeof(Node) + sizeof(Node*)*level);
+        Node* node = static_cast<Node*>(::calloc(1, sizeof(Node) + sizeof(Node*)*level));
         new (&node->obj) Object(std::forward<X>(obj));
         return node;
     }
@@ -240,17 +234,17 @@ private:
 
     // 迭代器
     template <class NodePtr>
-    struct Iterator_
+    struct IteratorT
     {
-        using Self = Iterator_;
+        using Self = IteratorT;
 
         NodePtr node;
 
         using ObjectRef = decltype((node->obj));
         using ObjectPtr = decltype(&node->obj);
 
-        Iterator_() {}
-        Iterator_(NodePtr _node): node(_node) {}
+        IteratorT() {}
+        IteratorT(NodePtr _node): node(_node) {}
 
         bool operator==(const Self& it) const { return node == it.node; }
         bool operator!=(const Self& it) const { return node != it.node; }

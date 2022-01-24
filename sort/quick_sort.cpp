@@ -1,26 +1,26 @@
 // 快速排序
 
-#include <iostream>
+#include <algorithm>
 
-//三数取中
+// 三数取中
 inline int midIndex(int* arr, int left, int right)
 {
     int mid = left + (right - left) / 2;
 
     if (arr[left] < arr[mid])
     {
-        if (arr[mid] < arr[right]) //left<mid<right
+        if (arr[mid] < arr[right]) // left<mid<right
             return mid;
-        else if (arr[left] < arr[right]) //left<mid, right<=mid, left<right
+        else if (arr[left] < arr[right]) // left<mid, right<=mid, left<right
             return right;
         else
             return left;
     }
     else
     {
-        if (arr[right] < arr[mid]) //right<mid<=left
+        if (arr[right] < arr[mid]) // right<mid<=left
             return mid;
-        else if (arr[left] < arr[right]) //mid<=left, mid<=right, left<right
+        else if (arr[left] < arr[right]) // mid<=left, mid<=right, left<right
             return left;
         else
             return right;
@@ -84,6 +84,7 @@ void quickSort(int* arr, int left, int right)
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 
 int main()
 {

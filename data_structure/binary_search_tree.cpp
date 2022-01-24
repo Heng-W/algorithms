@@ -11,12 +11,13 @@ public:
     ~BinarySearchTree() { clear(); }
 
     // 拷贝构造函数
-    BinarySearchTree(const BinarySearchTree& rhs) 
+    BinarySearchTree(const BinarySearchTree& rhs)
     { root_ = clone(rhs.root_); }
 
     // 移动构造函数
     BinarySearchTree(BinarySearchTree&& rhs) noexcept
-        : root_(rhs.root_) { rhs.root_ = nullptr; }
+        : root_(rhs.root_)
+    { rhs.root_ = nullptr; }
 
     // 拷贝赋值运算符
     BinarySearchTree& operator=(const BinarySearchTree& rhs)
@@ -59,12 +60,8 @@ public:
     // 删除（非递归）
     bool removeByIter(const T& data);
 
-    // 清除
     void clear() { destroy(root_); }
-
-    // 中序遍历
     void inOrder() const { inOrder(root_); }
-
     int depth() const { return depth(root_); }
 
 private:
@@ -78,13 +75,11 @@ private:
 
     bool remove(Node*& node, const T& data);
 
-    // 删除节点
     void removeNode(Node*& node);
 
     int depth(Node* node) const
     { return node ? std::max(depth(node->left), depth(node->right)) + 1 : 0; }
 
-    // 中序遍历
     void inOrder(Node* node) const
     {
         if (node)
@@ -95,7 +90,6 @@ private:
         }
     }
 
-    // 销毁
     void destroy(Node*& node)
     {
         if (node)
@@ -107,7 +101,6 @@ private:
         }
     }
 
-    // 克隆
     static Node* clone(Node* node)
     {
         if (node == nullptr) return nullptr;
@@ -128,7 +121,7 @@ private:
         Node(T&& _data): data(std::move(_data)) {}
     };
 
-    Node* root_; // 根节点
+    Node* root_;
 };
 
 
@@ -217,13 +210,13 @@ template <class T>
 bool BinarySearchTree<T>::remove(Node*& node, const T& data)
 {
     if (node == nullptr)
-        return false;// 未找到
+        return false; // 未找到
     else if (data < node->data)
         return remove(node->left, data);
     else if (node->data < data)
         return remove(node->right, data);
     else
-        removeNode(node);// 删除节点
+        removeNode(node); // 删除节点
     return true;
 }
 
@@ -235,13 +228,9 @@ bool BinarySearchTree<T>::removeByIter(const T& data)
     Node* parent = nullptr;
     while (cur)
     {
-        if (data == cur->data)
-            break;
+        if (data == cur->data) break;
         parent = cur;
-        if (data < cur->data)
-            cur = cur->left;
-        else
-            cur = cur->right;
+        cur = data < cur->data ? cur->left : cur->right;
     }
     if (cur == nullptr) return false;
     if (cur == root_)
@@ -266,7 +255,7 @@ void BinarySearchTree<T>::removeNode(Node*& node)
             parent = sub;
             sub = sub->left;
         }
-        node->data = std::move(sub->data);// 被删节点后继
+        node->data = std::move(sub->data); // 被删节点后继
         if (parent != node)
             parent->left = sub->right;
         else

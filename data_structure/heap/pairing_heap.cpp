@@ -22,10 +22,7 @@ public:
 
     // 拷贝赋值运算符
     PairingHeap& operator=(const PairingHeap& rhs)
-    {
-        PairingHeap copy = rhs;
-        return *this = std::move(copy);
-    }
+    { return *this = PairingHeap(rhs); }
 
     // 移动赋值运算符
     PairingHeap& operator=(PairingHeap&& rhs)
@@ -52,7 +49,7 @@ public:
         root_ = _merge(root_, node);
         return node;
     }
-    
+
     // 合并
     void merge(PairingHeap& rhs) { merge(std::move(rhs)); }
 
@@ -96,8 +93,8 @@ public:
     // 更新键值，若堆顶为min只能decreaseKey，为max只能increaseKey
     bool updateKey(Node* node, const T& newValue)
     {
-        if (comp(node->data, newValue))
-            return false;
+        if (comp(node->data, newValue)) return false;
+
         node->data = newValue;
         if (node == root_) return true;
 
@@ -105,8 +102,8 @@ public:
             node->prev->child = node->next;
         else
             node->prev->next = node->next;
-        if (node->next != nullptr)
-            node->next->prev = node->prev;
+
+        if (node->next != nullptr) node->next->prev = node->prev;
         node->next = node->prev = nullptr;
         root_ = _merge(root_, node);
         return true;
@@ -130,14 +127,12 @@ private:
             std::swap(root1, root2);
         }
         root2->next = root1->child;
-        if (root2->next)
-            root2->next->prev = root2;
+        if (root2->next) root2->next->prev = root2;
         root1->child = root2;
         root2->prev = root1;
         return root1;
     }
 
-    // 销毁
     void destroy(Node*& node)
     {
         if (node != nullptr)
@@ -149,7 +144,6 @@ private:
         }
     }
 
-    // 克隆
     static Node* clone(Node* node, Node* prev = nullptr)
     {
         if (node == nullptr) return nullptr;
@@ -159,7 +153,7 @@ private:
         copy->child = clone(node->child, copy);
         return copy;
     }
-    
+
     static bool comp(const T& lhs, const T& rhs)
     { return Compare()(lhs, rhs); }
 

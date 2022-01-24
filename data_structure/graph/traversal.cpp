@@ -14,7 +14,9 @@ void DFS(const MGraph<T>& graph, int i)
     for (int j = 0; j < graph.vexNum(); ++j)
     {
         if (graph.arcs[i][j] == 1 && !visited[j])
+        {
             DFS(graph, j);
+        }
     }
 }
 
@@ -107,6 +109,7 @@ void BFSTraverse(const Graph& graph)
 }
 
 
+// 测试
 int main()
 {
     using namespace std;

@@ -1,7 +1,7 @@
 
 #include <memory>
 
-static constexpr int PRIME_NUMS[] =
+constexpr int kPrimeNums[] =
 {
     2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
     31, 37, 41, 43, 47, 53
@@ -19,8 +19,7 @@ public:
     using Iterator = Node*;
     using ConstIterator = const Node*;
 
-
-    HashTree() { root_ = createNode(PRIME_NUMS[0]); }
+    HashTree() { root_ = createNode(kPrimeNums[0]); }
 
     ~HashTree() { clear(); ::free(root_); }
 
@@ -77,7 +76,7 @@ private:
         {
             return node;
         }
-        int index = key % PRIME_NUMS[level];
+        int index = key % kPrimeNums[level];
         if (node->childs[index] == nullptr)
         {
             return nullptr;
@@ -99,10 +98,10 @@ private:
         {
             return {node, false};
         }
-        int index = key % PRIME_NUMS[level];
+        int index = key % kPrimeNums[level];
         if (node->childs[index] == nullptr)
         {
-            node->childs[index] = createNode(PRIME_NUMS[level + 1]);
+            node->childs[index] = createNode(kPrimeNums[level + 1]);
         }
         return _insert(node->childs[index], level + 1, key, std::forward<X>(value));
     }
@@ -115,7 +114,7 @@ private:
             node->occupied = false;
             return true;
         }
-        int index = key % PRIME_NUMS[level];
+        int index = key % kPrimeNums[level];
         if (node->childs[index] == nullptr)
         {
             return false;
@@ -127,7 +126,7 @@ private:
     {
         if (node->occupied)
             destroy(&node->value);
-        for (int i = 0; i < PRIME_NUMS[level]; ++i)
+        for (int i = 0; i < kPrimeNums[level]; ++i)
         {
             if (node->childs[i] != nullptr)
             {
@@ -139,14 +138,14 @@ private:
 
     Node* clone(Node* node, int level)
     {
-        Node* copy = createNode(PRIME_NUMS[level]);
+        Node* copy = createNode(kPrimeNums[level]);
         copy->key = node->key;
         if (node->occupied)
         {
             construct(&copy->value, node->value);
             copy->occupied = true;
         }
-        for (int i = 0; i < PRIME_NUMS[level]; ++i)
+        for (int i = 0; i < kPrimeNums[level]; ++i)
         {
             if (node->childs[i] != nullptr)
             {

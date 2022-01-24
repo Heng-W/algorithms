@@ -15,15 +15,12 @@ public:
     { root_ = clone(rhs.root_); }
 
     // 移动构造函数
-    SkewHeap(SkewHeap&& rhs) noexcept
-     : root_(rhs.root_) { rhs.root_ = nullptr; }
+    SkewHeap(SkewHeap&& rhs) noexcept: root_(rhs.root_)
+    { rhs.root_ = nullptr; }
 
     // 拷贝赋值运算符
     SkewHeap& operator=(const SkewHeap& rhs)
-    {
-        SkewHeap copy = rhs;
-        return *this = std::move(copy);
-    }
+    { return *this = SkewHeap(rhs); }
 
     // 移动赋值运算符
     SkewHeap& operator=(SkewHeap&& rhs) noexcept
@@ -74,12 +71,13 @@ private:
 
     static Node* _merge(Node* root1, Node* root2)
     {
-        if (root1 == nullptr)
-            return root2;
-        if (root2 == nullptr)
-            return root1;
+        if (root1 == nullptr) return root2;
+        if (root2 == nullptr) return root1;
+
         if (comp(root2->data, root1->data))
+        {
             std::swap(root1, root2);
+        }
         if (root1->left == nullptr)
         {
             root1->left = root2;

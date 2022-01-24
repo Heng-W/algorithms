@@ -45,7 +45,7 @@ public:
             head_ = rhs.head_;
             tail_ = rhs.tail_;
             size_ = rhs.size_;
-            //清空rhs
+            // 清空rhs
             rhs.head_ = rhs.tail_ = nullptr;
             rhs.size_ = 0;
         }
@@ -132,7 +132,7 @@ int main()
     Queue<int> q;
     for (int i = 0; i < 5; ++i)
     {
-        int data = 100.0 * rand() / RAND_MAX;
+        int data = rand() % 100;
         q.push(data);
         cout << data << " enQueue" << endl;
     }

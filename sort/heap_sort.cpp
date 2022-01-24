@@ -1,38 +1,37 @@
-//堆排序
+// 堆排序
 
-#include <iostream>
+#include <algorithm>
 
-
-//递归调整
+// 递归调整
 template <class T>
 void adjustHeapByRecursion(T* arr, int size, int idx)
 {
     int left = 2 * idx + 1;
     int right = 2 * idx + 2;
     int maxIdx = idx;
-    //找到3个数中最大数的下标
+    // 找到3个数中最大数的下标
     if (left < size && arr[left] > arr[maxIdx]) maxIdx = left;
     if (right < size && arr[right] > arr[maxIdx]) maxIdx = right;
     if (maxIdx != idx)
     {
         std::swap(arr[maxIdx], arr[idx]);
-        adjustHeap(arr, size, maxIdx);  //尾递归继续调整
+        adjustHeap(arr, size, maxIdx); // 尾递归继续调整
     }
 }
 
 
-//迭代调整
+// 迭代调整
 template <class T>
 void adjustHeap(T* arr, int size, int idx)
 {
     T tmp = arr[idx];
-    //从左节点开始更新
+    // 从左节点开始更新
     for (int i = idx * 2 + 1; i < size; i = i * 2 + 1)
     {
-        //指向较大的子节点
-        if (i + 1 < size && arr[i + 1] > arr[i])
-            ++i;
-        //判断子节点大于父节点
+        // 指向较大的子节点
+        if (i + 1 < size && arr[i + 1] > arr[i]) ++i;
+        
+        // 判断子节点大于父节点
         if (arr[i] > tmp)
         {
             arr[idx] = arr[i];
@@ -43,14 +42,14 @@ void adjustHeap(T* arr, int size, int idx)
             break;
         }
     }
-    arr[idx] = tmp;//将tmp值放到最终的位置
+    arr[idx] = tmp; // 将tmp值放到最终的位置
 }
 
 
 template <class T>
 void heapSort(T* arr, int size)
 {
-    //从最后一个非叶子节点开始，进行堆调整
+    // 从最后一个非叶子节点开始，进行堆调整
     for (int i = size / 2 - 1; i >= 0; --i)
     {
         adjustHeap(arr, size, i);
@@ -67,6 +66,7 @@ void heapSort(T* arr, int size)
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 
 int main()
 {

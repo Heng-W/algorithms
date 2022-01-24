@@ -6,13 +6,13 @@
 template <class Key, class Value, int M>
 class BPlusTree
 {
-    template <class NodePtr> struct Iterator_;
+    template <class NodePtr> struct IteratorT;
     struct LeafNode;
 public:
     using KeyType = Key;
     using ValueType = Value;
-    using Iterator = Iterator_<LeafNode*>;
-    using ConstIterator = Iterator_<const LeafNode*>;
+    using Iterator = IteratorT<LeafNode*>;
+    using ConstIterator = IteratorT<const LeafNode*>;
 
     BPlusTree(): root_(nullptr) {}
     ~BPlusTree() { clear(); }
@@ -66,6 +66,7 @@ public:
         erase(res.first);
         return true;
     }
+
     Iterator erase(Iterator pos);
 
     void clear() { if (root_) destroy(root_); }
@@ -103,17 +104,17 @@ private:
 
     // 定义迭代器
     template <class NodePtr>
-    struct Iterator_
+    struct IteratorT
     {
         NodePtr node;
         int pos;
 
-        using Self = Iterator_;
+        using Self = IteratorT;
         using ValueRef = decltype((node->values[0]));
         using ValuePtr = decltype(&node->values[0]);
 
-        Iterator_() {}
-        Iterator_(NodePtr _node, int _pos = 0): node(_node), pos(_pos) {}
+        IteratorT() {}
+        IteratorT(NodePtr _node, int _pos = 0): node(_node), pos(_pos) {}
 
         bool operator==(const Self& it) const { return node == it.node && pos == it.pos; }
         bool operator!=(const Self& it) const { return !(*this == it); }
@@ -182,8 +183,7 @@ find(const KeyType& key) const -> std::pair<Iterator, bool>
     while (cur)
     {
         pos = 0;
-        while (pos < cur->keyCount && cur->keys[pos] <= key)
-            ++pos;
+        while (pos < cur->keyCount && cur->keys[pos] <= key) ++pos;
         if (!cur->isLeaf())
             cur = static_cast<IndexNode*>(cur)->childs[pos];
         else if (pos > 0 && key == cur->keys[pos - 1])
@@ -320,7 +320,9 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
         }
         --cur->keyCount;
         if (cur->keyCount >= kMinKeyNum) // 键数量足够，结束
+        {
             return pos < cur->keyCount ? position : cur->next;
+        }
         // 判断是否是根节点
         if (cur == root_)
         {
@@ -377,8 +379,7 @@ auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
             if (childPos > 0)
             {
                 LeafNode* left = static_cast<LeafNode*>(parent->childs[childPos - 1]);
-                next = pos < cur->keyCount ? Iterator(left, pos + left->keyCount)
-                       : cur->next;
+                next = pos < cur->keyCount ? Iterator(left, pos + left->keyCount) : cur->next;
                 mergeLeafNode(parent, childPos - 1); // 合并到左子树
             }
             else

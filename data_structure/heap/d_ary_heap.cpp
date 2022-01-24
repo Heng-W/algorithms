@@ -78,8 +78,7 @@ private:
             int end = std::min(i + D, (int)data_.size());
             for (int k = i + 1; k < end; ++k)
             {
-                if (comp(data_[k], data_[minPos]))
-                    minPos = k;
+                if (comp(data_[k], data_[minPos])) minPos = k;
             }
             i = minPos;
             if (comp(data_[i], value))

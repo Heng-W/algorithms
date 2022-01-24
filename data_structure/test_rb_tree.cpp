@@ -27,7 +27,7 @@ int main()
     cout << endl;
     for (auto it = tree.begin(); it != tree.end(); ++it)
     {
-        cout << setw(3) << it.node->color;
+        cout << setw(3) << static_cast<int>(it.node->color);
     }
     cout << endl;
 
@@ -38,7 +38,7 @@ int main()
         cout << endl;
         for (auto it = tree.begin(); it != tree.end(); ++it)
         {
-            cout << setw(3) << it.node->color;
+            cout << setw(3) << static_cast<int>(it.node->color);
         }
         cout << endl;
     }

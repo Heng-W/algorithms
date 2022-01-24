@@ -1,7 +1,8 @@
-//基数排序
+
 #include <vector>
 #include <algorithm>
 
+// 基数排序
 void radixSort(std::vector<int>& data)
 {
     int max = *std::max_element(data.cbegin(), data.cend());
@@ -11,21 +12,22 @@ void radixSort(std::vector<int>& data)
     for (int exp = 1; exp <= max; exp *= 10)
     {
         std::fill_n(buckets, 10, 0);
-        //记录数据出现次数
+        // 记录数据出现次数
         for (int i = 0; i < (int)data.size(); ++i)
             ++buckets[data[i] / exp % 10];
-        //更改buckets使其为位置索引
+        // 更改buckets使其为位置索引
         for (int i = 1; i < 10; ++i)
             buckets[i] += buckets[i - 1];
-        //按照当前数位进行排序，结果存储在tmp数组
+        // 按照当前数位进行排序，结果存储在tmp数组
         for (int i = data.size() - 1; i >= 0; --i)
             tmp[--buckets[data[i] / exp % 10]] = data[i];
-        //指向tmp存储的数据
+        // 指向tmp存储的数据
         data.swap(tmp);
     }
 }
 
 
+// 测试
 #include <ctime>
 #include <cstdlib>
 #include <iostream>

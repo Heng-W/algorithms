@@ -19,7 +19,6 @@ public:
     using ConstIterator = typename MHashTable::ConstIterator;
     using KeyType = typename MHashTable::KeyType;
 
-
     HashMap(int n = 32): table_(n) {}
 
     // 插入
@@ -39,13 +38,10 @@ public:
     // 删除   
     bool remove(const KeyType& key) { return table_.remove(key); }
 
-    // 清除
     void clear() { table_.clear(); }
-
-    // 元素数量
+    
     int size() const { return table_.size(); }
 
-    // 首尾迭代器
     ConstIterator begin() const { return table_.begin(); }
     Iterator begin() { return table_.begin(); }
 

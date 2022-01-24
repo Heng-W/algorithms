@@ -1,7 +1,7 @@
-//插入排序
 
-#include <iostream>
+#include <algorithm>
 
+// 插入排序
 template <class T>
 void insertSort(T* arr, int size)
 {
@@ -20,6 +20,7 @@ void insertSort(T* arr, int size)
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 
 int main()
 {
@@ -31,8 +32,7 @@ int main()
         vec.push_back(rand() % 100);
     }
     insertSort(&vec[0], vec.size());
-    for (const auto& x : vec)
-        cout << x << " ";
+    for (const auto& x : vec) cout << x << " ";
     cout << endl;
     return 0;
 }

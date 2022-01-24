@@ -57,7 +57,6 @@ public:
     bool remove(const KeyType& key);
 
     void levelOrder() const;
-
     void inOrder() const { _inOrder(root_); }
 
     void clear() { destroyTree(root_); }
@@ -79,8 +78,8 @@ private:
     static const KeyType& getKey(const Object& obj)
     { return obj.first; }
 
-    static constexpr int KEY_MIN = (M + 1) / 2 - 1;
-    static constexpr int KEY_MAX = M - 1;
+    static constexpr int kMinKeyNum = (M + 1) / 2 - 1;
+    static constexpr int kMaxKeyNum = M - 1;
 
     struct Node
     {
@@ -120,10 +119,7 @@ template <class Key, class Value, int M>
 template <class X>
 bool BTree<Key, Value, M>::_insert(X&& obj)
 {
-    if (root_ == nullptr)
-    {
-        root_ = new Node();
-    }
+    if (root_ == nullptr) root_ = new Node();
     const KeyType& key = getKey(obj);
     Node* cur = root_;
     Node* parent = nullptr;
@@ -151,7 +147,7 @@ bool BTree<Key, Value, M>::_insert(X&& obj)
     cur->objects[pos] = std::forward<X>(obj);
     ++cur->keyCount;
 
-    while (cur->keyCount > KEY_MAX)
+    while (cur->keyCount > kMaxKeyNum)
     {
         Node* brother = new Node();
         int mid = M / 2;
@@ -160,14 +156,12 @@ bool BTree<Key, Value, M>::_insert(X&& obj)
         {
             brother->objects[pos] = std::move(cur->objects[i]);
             brother->childs[pos] = cur->childs[i];
-            if (brother->childs[pos])
-                brother->childs[pos]->parent = brother;
+            if (brother->childs[pos]) brother->childs[pos]->parent = brother;
             ++pos;
             ++brother->keyCount;
         }
         brother->childs[pos] = cur->childs[cur->keyCount];
-        if (brother->childs[pos])
-            brother->childs[pos]->parent = brother;
+        if (brother->childs[pos]) brother->childs[pos]->parent = brother;
 
         Node* parent = cur->parent;
         if (parent == nullptr)
@@ -202,13 +196,11 @@ bool BTree<Key, Value, M>::remove(const KeyType& key)
     auto res = find(key);
     Node* cur = res.first;
     int pos = res.second;
-    if (cur == nullptr)
-        return false;
+    if (cur == nullptr) return false;
     if (cur->childs[pos + 1])
     {
         Node* sub = cur->childs[pos + 1];
-        while (sub->childs[0])
-            sub = sub->childs[0];
+        while (sub->childs[0]) sub = sub->childs[0];
         // 后继节点替换
         cur->objects[pos] = std::move(sub->objects[0]);
         cur = sub;
@@ -220,7 +212,7 @@ bool BTree<Key, Value, M>::remove(const KeyType& key)
         cur->objects[i] = std::move(cur->objects[i + 1]);
     }
     --cur->keyCount;
-    while (cur->keyCount < KEY_MIN)
+    while (cur->keyCount < kMinKeyNum)
     {
         if (cur == root_)
         {
@@ -242,7 +234,7 @@ bool BTree<Key, Value, M>::remove(const KeyType& key)
         Node* parent = cur->parent;
         int childPos = 0;
         while (cur != parent->childs[childPos]) ++childPos;
-        if (childPos > 0 && parent->childs[childPos - 1]->keyCount > KEY_MIN)
+        if (childPos > 0 && parent->childs[childPos - 1]->keyCount > kMinKeyNum)
         {
             Node* left = parent->childs[childPos - 1];
             for (int i = cur->keyCount; i > 0; --i)
@@ -252,8 +244,7 @@ bool BTree<Key, Value, M>::remove(const KeyType& key)
             }
             cur->childs[1] = cur->childs[0];
             cur->childs[0] = left->childs[left->keyCount];
-            if (cur->childs[0])
-                cur->childs[0]->parent = cur;
+            if (cur->childs[0]) cur->childs[0]->parent = cur;
 
             cur->objects[0] = std::move(parent->objects[childPos - 1]);
             cur->parent->objects[childPos - 1] = std::move(left->objects[left->keyCount - 1]);
@@ -261,7 +252,7 @@ bool BTree<Key, Value, M>::remove(const KeyType& key)
             --left->keyCount;
             return true;
         }
-        else if (childPos < parent->keyCount && parent->childs[childPos + 1]->keyCount > KEY_MIN)
+        else if (childPos < parent->keyCount && parent->childs[childPos + 1]->keyCount > kMinKeyNum)
         {
             Node* right = parent->childs[childPos + 1];
 
@@ -269,8 +260,7 @@ bool BTree<Key, Value, M>::remove(const KeyType& key)
             cur->parent->objects[childPos] = std::move(right->objects[0]);
 
             cur->childs[cur->keyCount + 1] = right->childs[0];
-            if (cur->childs[cur->keyCount + 1])
-                cur->childs[cur->keyCount + 1]->parent = cur;
+            if (cur->childs[cur->keyCount + 1]) cur->childs[cur->keyCount + 1]->parent = cur;
             ++cur->keyCount;
 
             for (int i = 0; i < right->keyCount - 1; ++i)
@@ -314,13 +304,11 @@ void BTree<Key, Value, M>::mergeNode(Node* parent, int pos)
     {
         left->objects[leftPos] = std::move(right->objects[i]);
         left->childs[leftPos] = right->childs[i];
-        if (left->childs[leftPos])
-            left->childs[leftPos]->parent = left;
+        if (left->childs[leftPos]) left->childs[leftPos]->parent = left;
         ++leftPos;
     }
     left->childs[leftPos] = right->childs[right->keyCount];
-    if (left->childs[leftPos])
-        left->childs[leftPos]->parent = left;
+    if (left->childs[leftPos]) left->childs[leftPos]->parent = left;
     left->keyCount += right->keyCount + 1;
     delete right;
 }
@@ -338,11 +326,12 @@ void BTree<Key, Value, M>::levelOrder() const
         Node* cur = nodes.front();
         nodes.pop();
         for (int i = 0; i < cur->keyCount; ++i)
+        {
             std::cout << getKey(cur->objects[i]) << " ";
+        }
         for (int i = 0; i <= cur->keyCount; ++i)
         {
-            if (cur->childs[i])
-                nodes.push(cur->childs[i]);
+            if (cur->childs[i]) nodes.push(cur->childs[i]);
         }
     }
 }
@@ -351,8 +340,7 @@ void BTree<Key, Value, M>::levelOrder() const
 template <class Key, class Value, int M>
 void BTree<Key, Value, M>::_inOrder(Node* node) const
 {
-    if (node == nullptr)
-        return;
+    if (node == nullptr) return;
     int pos = 0;
     while (pos < node->keyCount)
     {
@@ -376,6 +364,7 @@ void BTree<Key, Value, M>::destroyTree(Node* node)
         delete node;
     }
 }
+
 
 template <class Key, class Value, int M>
 auto BTree<Key, Value, M>::clone(Node* node, Node* parent) -> Node*

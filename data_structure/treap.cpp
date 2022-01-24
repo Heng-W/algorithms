@@ -15,8 +15,8 @@ public:
     Treap(const Treap& rhs) { root_ = clone(rhs.root_); }
 
     // 移动构造函数
-    Treap(Treap&& rhs) noexcept
-    :root_(rhs.root_) { rhs.root_ = nullptr; }
+    Treap(Treap&& rhs) noexcept: root_(rhs.root_)
+    { rhs.root_ = nullptr; }
 
     // 拷贝赋值运算符
     Treap& operator=(const Treap& rhs)
@@ -57,9 +57,9 @@ public:
             else if (cur->data < data)
                 cur = cur->right;
             else
-                return cur;
+                break;
         }
-        return nullptr;
+        return cur;
     }
 
     void clear() { destroy(root_); }
@@ -123,7 +123,6 @@ private:
     };
 
     Node* root_;
-
 };
 
 
@@ -138,17 +137,19 @@ bool Treap<T>::insert(Node*& node, X&& x)
     }
     else if (x < node->data)
     {
-        if (!insert(node->left, std::forward<X>(x)))
-            return false;
+        if (!insert(node->left, std::forward<X>(x))) return false;
         if (node->left->priority < node->priority)
+        {
             rightRotation(node);
+        }
     }
     else if (node->data < x)
     {
-        if (!insert(node->right, std::forward<X>(x)))
-            return false;
+        if (!insert(node->right, std::forward<X>(x))) return false;
         if (node->right->priority < node->priority)
+        {
             leftRotation(node);
+        }
     }
     else
     {
@@ -160,12 +161,13 @@ bool Treap<T>::insert(Node*& node, X&& x)
 template <class T>
 bool Treap<T>::remove(Node*& node, const T& data)
 {
-    if (node == nullptr)
-        return false;// 未找到
+    if (node == nullptr) return false; // 未找到
+    
     if (data < node->data)
         return remove(node->left, data);
     else if (node->data < data)
         return remove(node->right, data);
+        
     // 找到元素
     if (!node->left || !node->right)
     {

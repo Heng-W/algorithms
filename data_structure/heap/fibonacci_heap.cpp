@@ -3,7 +3,7 @@
 #include <functional>
 #include <vector>
 #include <queue> // for print heap
-#include <iostream> // for std::cout
+#include <iostream>
 
 // 斐波那契堆
 template <class T, class Compare = std::less<T>>
@@ -46,10 +46,7 @@ public:
 
     // 拷贝赋值运算符
     FibonacciHeap& operator=(const FibonacciHeap& rhs)
-    {
-        FibonacciHeap copy = rhs;
-        return *this = std::move(copy);
-    }
+    { return *this = FibonacciHeap(rhs); }
 
     // 移动赋值运算符
     FibonacciHeap& operator=(FibonacciHeap&& rhs) noexcept
@@ -85,7 +82,9 @@ public:
             root_->prev->next = root_->next;
             root_->next->prev = root_->prev;
             if (root_->child)
+            {
                 splice(begin, root_->child, root_->child->prev);
+            }
         }
         delete root_;
         root_ = nullptr;
@@ -100,7 +99,9 @@ public:
             Node* next = cur->next; // 保存next节点
             cur->prev = cur->next = cur; // 断开节点
             if (cur->degree >= (int)roots.size())
+            {
                 roots.resize(cur->degree + 1);
+            }
             // 合并度数相同的树
             while (roots[cur->degree])
             {
@@ -110,7 +111,7 @@ public:
                 {
                     std::swap(cur, root);
                 }
-                //cur合并到root
+                // cur合并到root
                 if (root->child == nullptr)
                     root->child = cur;
                 else
@@ -119,7 +120,9 @@ public:
                 ++root->degree;
                 cur = root; // 继续迭代
                 if (cur->degree >= (int)roots.size())
+                {
                     roots.resize(cur->degree + 1);
+                }
             }
             roots[cur->degree] = cur;
             cur = next;
@@ -152,7 +155,6 @@ public:
         nodeCount_ = 0;
     }
 
-    // 打印
     void print() const
     {
         std::queue<Node*> que;
@@ -214,7 +216,6 @@ private:
         pos->prev = last;
     }
 
-    // 销毁
     void destroy(Node*& node)
     {
         if (node != nullptr)
@@ -231,7 +232,6 @@ private:
         }
     }
 
-    // 克隆
     static Node* clone(Node* node, Node* parent,
                        Node*& first, Node*& prev, int count)
     {

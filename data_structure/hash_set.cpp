@@ -31,7 +31,6 @@ public:
 
     int size() const { return table_.size(); }
 
-    // 首尾迭代器
     ConstIterator begin() const { return table_.begin(); }
     Iterator begin() { return table_.begin(); }
 

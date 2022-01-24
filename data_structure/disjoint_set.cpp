@@ -8,8 +8,7 @@ public:
     DisjointSet(int size)
     {
         root_.resize(size);
-        for (int i = 0; i < size; ++i)
-            root_[i] = i;
+        for (int i = 0; i < size; ++i) root_[i] = i;
         rank_.resize(size, 1);
     }
 
@@ -66,6 +65,7 @@ private:
 };
 
 
+// 测试
 #include <iostream>
 
 int main()

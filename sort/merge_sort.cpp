@@ -35,7 +35,7 @@ void mergeSort(T* first, T* last)
     }
 }
 
-//归并排序（递归），优化拷贝
+// 归并排序（递归），优化拷贝
 template <class T>
 void mergeSort2(T* arr, T* tmp, int size)
 {
@@ -56,12 +56,12 @@ void mergeSort2(T* first, T* last)
 }
 
 
-//归并排序（非递归）
+// 归并排序（非递归）
 template <class T>
 void mergeSortI(std::vector<T>& data)
 {
     std::vector<T> tmp = data;
-    //len：子序列长度
+    // len：子序列长度
     for (int len = 1; len < (int)data.size(); len *= 2)
     {
         T* cur = &*data.begin();
@@ -77,6 +77,7 @@ void mergeSortI(std::vector<T>& data)
             merge(cur, cur + len, cur + len, end, dst);
         else
             std::copy(cur, end, dst);
+            
         data.swap(tmp);
     }
 }

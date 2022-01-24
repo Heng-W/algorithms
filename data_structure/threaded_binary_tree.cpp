@@ -19,8 +19,7 @@ public:
 
     Node* createByPreAndIn(const T* preorder, const T* inorder, int n)
     {
-        if (n == 0)
-            return nullptr;
+        if (n == 0) return nullptr;
         Node* node = new Node(preorder[0]);
         int mid = std::find(inorder, inorder + n, node->data) - inorder;
         assert(mid != n);
@@ -35,16 +34,16 @@ public:
         if (node == nullptr) return;
         if (node->left == nullptr)
         {
-            node->leftTag = THREAD;
+            node->leftTag = PtrTag::THREAD;
             node->left = prev;
         }
         if (prev && prev->right == nullptr)
         {
-            prev->rightTag = THREAD;
+            prev->rightTag = PtrTag::THREAD;
             prev->right = node;
         }
         prev = node;
-        if (node->leftTag == LINK)
+        if (node->leftTag == PtrTag::LINK)
         {
             preThreading(node->left, prev);
         }
@@ -57,7 +56,7 @@ public:
         Node* cur = root_;
         while (cur)
         {
-            while (cur->leftTag == LINK)
+            while (cur->leftTag == PtrTag::LINK)
             {
                 std::cout << cur->data << " ";
                 cur = cur->left;
@@ -74,12 +73,12 @@ public:
         inThreading(node->left, prev);
         if (node->left == nullptr)
         {
-            node->leftTag = THREAD;
+            node->leftTag = PtrTag::THREAD;
             node->left = prev;
         }
         if (prev && prev->right == nullptr)
         {
-            prev->rightTag = THREAD;
+            prev->rightTag = PtrTag::THREAD;
             prev->right = node;
         }
         prev = node;
@@ -92,10 +91,12 @@ public:
         Node* cur = root_;
         while (cur)
         {
-            while (cur->leftTag == LINK)
+            while (cur->leftTag == PtrTag::LINK)
+            {
                 cur = cur->left;
+            }
             std::cout << cur->data << " ";
-            while (cur->rightTag == THREAD)
+            while (cur->rightTag == PtrTag::THREAD)
             {
                 cur = cur->right;
                 std::cout << cur->data << " ";
@@ -109,10 +110,12 @@ public:
         Node* cur = root_;
         while (cur)
         {
-            while (cur->leftTag == LINK)
+            while (cur->leftTag == PtrTag::LINK)
+            {
                 cur = cur->left;
+            }
             Node* tmp = cur;
-            while (cur->rightTag == THREAD)
+            while (cur->rightTag == PtrTag::THREAD)
             {
                 cur = cur->right;
                 delete tmp;
@@ -125,7 +128,7 @@ public:
 
 
 private:
-    enum PtrTag : char {LINK, THREAD};
+    enum class PtrTag : uint8_t { LINK, THREAD };
 
     struct Node
     {
@@ -142,6 +145,8 @@ private:
     Node* root_;
 };
 
+
+// 测试
 int main()
 {
     using namespace std;

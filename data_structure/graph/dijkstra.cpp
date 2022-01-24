@@ -2,13 +2,13 @@
 #include "graph_type.h"
 
 
-//Dijkstra算法
+// Dijkstra算法
 template <class T>
 void dijkstra(const MGraph<T>& graph, int start,
               std::vector<int>& pathArc,
               std::vector<int>& shortPath)
 {
-    pathArc.resize(graph.vexNum(), -1);//前驱顶点下标
+    pathArc.resize(graph.vexNum(), -1); // 前驱顶点下标
     shortPath.resize(graph.vexNum());
     std::vector<bool> final(graph.vexNum(), false);
 
@@ -18,7 +18,7 @@ void dijkstra(const MGraph<T>& graph, int start,
     }
     shortPath[start] = 0;
     final[start] = true;
-    //递推求取最短路径
+    // 递推求取最短路径
     for (int i = 1; i < graph.vexNum(); ++i)
     {
         int min = INT_MAX;
@@ -32,7 +32,7 @@ void dijkstra(const MGraph<T>& graph, int start,
             }
         }
         final[k] = true;
-        //修正当前的最短路径
+        // 修正当前的最短路径
         for (int j = 0; j < graph.vexNum(); ++j)
         {
             if (!final[j] && graph.arcs[k][j] < INT_MAX &&
@@ -44,6 +44,7 @@ void dijkstra(const MGraph<T>& graph, int start,
         }
     }
 }
+
 
 #include <cstdio>
 

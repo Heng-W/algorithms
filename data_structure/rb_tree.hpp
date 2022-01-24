@@ -5,23 +5,23 @@
 
 // 红黑树
 // Object：节点存储的对象，Key：键类型
-// ExtractKey：键值提取，Compare：元素比较
+// ExtractKey：键值提取函数对象，Compare：元素比较函数对象
 template <class Object, class Key = Object,
           class ExtractKey = std::_Identity<Object>,
           class Compare = std::less<Key>>
 class RBTree
 {
-    template <class NodePtr> struct Iterator_;
+    template <class NodePtr> struct IteratorT;
     struct Node;
 public:
-    using Iterator = Iterator_<Node*>;
-    using ConstIterator = Iterator_<const Node*>;
+    using Iterator = IteratorT<Node*>;
+    using ConstIterator = IteratorT<const Node*>;
     using KeyType = Key;
 
     RBTree(): nodeCount_(0)
     {
-        nil_ = (Node*)::malloc(sizeof(Node));
-        nil_->color = BLACK;
+        nil_ = static_cast<Node*>(::malloc(sizeof(Node)));
+        nil_->color = Color::BLACK;
         nil_->left = nil_->right = nil_;
         root_ = nil_;
     }
@@ -156,17 +156,17 @@ private:
 
     // 迭代器
     template <class NodePtr>
-    struct Iterator_
+    struct IteratorT
     {
         NodePtr node;
         const RBTree* tree; // 用于获取nil节点
 
-        using Self = Iterator_;
+        using Self = IteratorT;
         using ObjectRef = decltype((node->obj));
         using ObjectPtr = decltype(&node->obj);
 
-        Iterator_() {}
-        Iterator_(NodePtr _node, const RBTree* _tree): node(_node), tree(_tree) {}
+        IteratorT() {}
+        IteratorT(NodePtr _node, const RBTree* _tree): node(_node), tree(_tree) {}
 
         bool operator==(const Self& it) const { return node == it.node; }
         bool operator!=(const Self& it) const { return node != it.node; }
@@ -194,7 +194,7 @@ private:
         void decrease();
     };
 
-    enum Color : char {RED, BLACK};
+    enum class Color : uint8_t { RED, BLACK };
 
     // 节点
     struct Node
@@ -218,19 +218,17 @@ private:
 
 template <class Object, class KeyType, class ExtractKey, class Compare>
 template <class NodePtr>
-void RBTree<Object, KeyType, ExtractKey, Compare>::Iterator_<NodePtr>::
+void RBTree<Object, KeyType, ExtractKey, Compare>::IteratorT<NodePtr>::
 increase()
 {
     if (node->right != tree->nil_)
     {
         node = node->right;
-        while (node->left != tree->nil_)
-            node = node->left;
+        while (node->left != tree->nil_) node = node->left;
     }
     else
     {
-        while (node == node->parent->right)
-            node = node->parent;
+        while (node == node->parent->right) node = node->parent;
         node = node->parent;
     }
 }
@@ -238,19 +236,17 @@ increase()
 
 template <class Object, class KeyType, class ExtractKey, class Compare>
 template <class NodePtr>
-void RBTree<Object, KeyType, ExtractKey, Compare>::Iterator_<NodePtr>::
+void RBTree<Object, KeyType, ExtractKey, Compare>::IteratorT<NodePtr>::
 decrease()
 {
     if (node->left != tree->nil_)
     {
         node = node->left;
-        while (node->right != tree->nil_)
-            node = node->right;
+        while (node->right != tree->nil_) node = node->right;
     }
     else
     {
-        while (node == node->parent->left)
-            node = node->parent;
+        while (node == node->parent->left) node = node->parent;
         node = node->parent;
     }
 }
@@ -276,8 +272,7 @@ leftRotation(Node* node)
 {
     Node* rchild = node->right;
     node->right = rchild->left;
-    if (rchild->left != nil_)
-        rchild->left->parent = node;
+    if (rchild->left != nil_) rchild->left->parent = node;
 
     setParentPtr(node, rchild);
 
@@ -292,8 +287,7 @@ rightRotation(Node* node)
 {
     Node* lchild = node->left;
     node->left = lchild->right;
-    if (lchild->right != nil_)
-        lchild->right->parent = node;
+    if (lchild->right != nil_) lchild->right->parent = node;
 
     setParentPtr(node, lchild);
 
@@ -340,7 +334,7 @@ _insert(X&& x) -> std::pair<Iterator, bool>
     Node* node = new Node(std::forward<X>(x));
     node->left = node->right = nil_;
     node->parent = parent;
-    node->color = RED; // 新节点必为红色
+    node->color = Color::RED; // 新节点必为红色
 
     if (root_ == nil_)
         root_ = node;
@@ -348,6 +342,7 @@ _insert(X&& x) -> std::pair<Iterator, bool>
         parent->left = node;
     else
         parent->right = node;
+
     ++nodeCount_;
     insertRebalance(node); // 平衡调整
     return {Iterator(node, this), true};
@@ -364,15 +359,12 @@ _insertEqual(X&& x) -> Iterator
     while (cur != nil_)
     {
         parent = cur;
-        if (comp(getKey(x), getKey(cur->obj)))
-            cur = cur->left;
-        else
-            cur = cur->right;
+        cur = comp(getKey(x), getKey(cur->obj)) ? cur->left : cur->right;
     }
     Node* node = new Node(std::forward<X>(x));
     node->left = node->right = nil_;
     node->parent = parent;
-    node->color = RED;
+    node->color = Color::RED;
 
     if (root_ == nil_)
         root_ = node;
@@ -380,6 +372,7 @@ _insertEqual(X&& x) -> Iterator
         parent->left = node;
     else
         parent->right = node;
+
     ++nodeCount_;
     insertRebalance(node);
     return Iterator(node, this);
@@ -395,8 +388,7 @@ remove(const KeyType& key)
     if (node->left != nil_ && node->right != nil_)
     {
         Node* sub = node->right;
-        while (sub->left != nil_)
-            sub = sub->left;
+        while (sub->left != nil_) sub = sub->left;
         node->obj.~Object();
         new (&node->obj) Object(std::move(sub->obj));
         node = sub;
@@ -404,14 +396,13 @@ remove(const KeyType& key)
     if (node->left == nil_ && node->right == nil_)
     {
         setParentPtr(node, nil_);
-        if (node->color == BLACK)
-            removeRebalance(nil_);
+        if (node->color == Color::BLACK) removeRebalance(nil_);
     }
     else
     {
         Node* child = (node->left != nil_) ? node->left : node->right;
         setParentPtr(node, child);
-        child->color = BLACK;
+        child->color = Color::BLACK;
     }
     delete node;
     --nodeCount_;
@@ -423,16 +414,16 @@ template <class Object, class KeyType, class ExtractKey, class Compare>
 void  RBTree<Object, KeyType, ExtractKey, Compare>::
 insertRebalance(Node* cur)
 {
-    while (cur->parent->color == RED)
+    while (cur->parent->color == Color::RED)
     {
         if (cur->parent == cur->parent->parent->left) // 父节点为祖父节点左子
         {
             Node* uncle = cur->parent->parent->right; // 伯父节点
-            if (uncle->color == RED)
+            if (uncle->color == Color::RED)
             {
-                cur->parent->color = BLACK;
-                uncle->color = BLACK;
-                cur->parent->parent->color = RED;
+                cur->parent->color = Color::BLACK;
+                uncle->color = Color::BLACK;
+                cur->parent->parent->color = Color::RED;
                 cur = cur->parent->parent;
             }
             else
@@ -442,19 +433,19 @@ insertRebalance(Node* cur)
                     cur = cur->parent;
                     leftRotation(cur);
                 }
-                cur->parent->color = BLACK;
-                cur->parent->parent->color = RED;
+                cur->parent->color = Color::BLACK;
+                cur->parent->parent->color = Color::RED;
                 rightRotation(cur->parent->parent);
             }
         }
         else // 父节点为祖父节点右子，情况对称处理
         {
             Node* uncle = cur->parent->parent->left;
-            if (uncle->color == RED)
+            if (uncle->color == Color::RED)
             {
-                cur->parent->color = BLACK;
-                uncle->color = BLACK;
-                cur->parent->parent->color = RED;
+                cur->parent->color = Color::BLACK;
+                uncle->color = Color::BLACK;
+                cur->parent->parent->color = Color::RED;
                 cur = cur->parent->parent;
             }
             else
@@ -464,13 +455,13 @@ insertRebalance(Node* cur)
                     cur = cur->parent;
                     rightRotation(cur);
                 }
-                cur->parent->color = BLACK;
-                cur->parent->parent->color = RED;
+                cur->parent->color = Color::BLACK;
+                cur->parent->parent->color = Color::RED;
                 leftRotation(cur->parent->parent);
             }
         }
     }
-    root_->color = BLACK; // 根节点始终为黑色
+    root_->color = Color::BLACK; // 根节点始终为黑色
 }
 
 
@@ -483,77 +474,77 @@ removeRebalance(Node* cur)
         if (cur == cur->parent->left) // 当前平衡点为左子
         {
             Node* brother = cur->parent->right;
-            if (brother->color == RED) // 兄弟节点为红色，则先旋转调整为黑色
+            if (brother->color == Color::RED) // 兄弟节点为红色，则先旋转调整为黑色
             {
-                brother->color = BLACK;
-                cur->parent->color = RED;
+                brother->color = Color::BLACK;
+                cur->parent->color = Color::RED;
                 leftRotation(cur->parent);
                 brother = cur->parent->right;
             }
-            if (brother->left->color == BLACK && brother->right->color == BLACK)
+            if (brother->left->color == Color::BLACK && brother->right->color == Color::BLACK)
             {
-                brother->color = RED;
-                if (cur->parent->color == RED) // 父节点为红色
-                {
-                    cur->parent->color = BLACK;
-                    return; // 父节点涂黑后平衡结束
-                }
-                else // 父节点为黑色
+                brother->color = Color::RED;
+                if (cur->parent->color == Color::BLACK) // 父节点为黑色
                 {
                     cur = cur->parent; // 继续向上调整
                 }
-            }
-            else // 兄弟的子节点不是全黑
-            {
-                if (brother->right->color == BLACK)
+                else // 父节点为红色
                 {
-                    brother->color = RED;
-                    brother->left->color = BLACK;
+                    cur->parent->color = Color::BLACK;
+                    return; // 父节点涂黑后平衡结束
+                }
+            }
+            else // 兄弟的子节点非全黑
+            {
+                if (brother->right->color == Color::BLACK)
+                {
+                    brother->color = Color::RED;
+                    brother->left->color = Color::BLACK;
                     rightRotation(brother);
                     brother = cur->parent->right;
                 }
                 brother->color = cur->parent->color;
-                cur->parent->color = BLACK;
-                brother->right->color = BLACK;
+                cur->parent->color = Color::BLACK;
+                brother->right->color = Color::BLACK;
                 leftRotation(cur->parent);
                 return; // 平衡结束
             }
         }
-        else  // 当前平衡点为右子，情况对称处理
+        else // 当前平衡点为右子，所有情况对称处理
         {
             Node* brother = cur->parent->left;
-            if (brother->color == RED)
+            if (brother->color == Color::RED)
             {
-                brother->color = BLACK;
-                cur->parent->color = RED;
+                brother->color = Color::BLACK;
+                cur->parent->color = Color::RED;
                 rightRotation(cur->parent);
                 brother = cur->parent->left;
             }
-            if (brother->left->color == BLACK && brother->right->color == BLACK)
+            if (brother->left->color == Color::BLACK && brother->right->color == Color::BLACK)
             {
-                brother->color = RED;
-                if (cur->parent->color == RED)
+                brother->color = Color::RED;
+                if (cur->parent->color == Color::BLACK)
                 {
-                    cur->parent->color = BLACK;
-                    return;
+                    cur = cur->parent;
                 }
                 else
                 {
-                    cur = cur->parent;
+                    cur->parent->color = Color::BLACK;
+                    return;
                 }
             }
             else
             {
-                if (brother->left->color == BLACK)
+                if (brother->left->color == Color::BLACK)
                 {
-                    brother->color = RED;
-                    brother->right->color = BLACK;
+                    brother->color = Color::RED;
+                    brother->right->color = Color::BLACK;
                     leftRotation(brother);
                     brother = cur->parent->left;
                 }
                 brother->color = cur->parent->color;
-                cur->parent->color = BLACK;
-                brother->left->color = BLACK;
+                cur->parent->color = Color::BLACK;
+                brother->left->color = Color::BLACK;
                 rightRotation(cur->parent);
                 return;
             }
@@ -562,4 +553,3 @@ removeRebalance(Node* cur)
 }
 
 #endif // RB_TREE_HPP
-

@@ -1,4 +1,4 @@
-// 二叉树
+
 #include <assert.h>
 #include <vector>
 #include <stack>
@@ -6,11 +6,11 @@
 #include <algorithm>
 #include <iostream>
 
-
+// 二叉树
 template <class T>
 class BinaryTree
 {
-    class Node;
+    struct Node;
 public:
     BinaryTree(): root_(nullptr) {}
 
@@ -32,14 +32,14 @@ public:
 
     ~BinaryTree() { clear(); }
 
-    //拷贝构造函数
+    // 拷贝构造函数
     BinaryTree(const BinaryTree& rhs) { root_ = clone(rhs.root_); }
 
-    //移动构造函数
+    // 移动构造函数
     BinaryTree(BinaryTree&& rhs) noexcept: root_(rhs.root_)
     { rhs.root_ = nullptr; }
 
-    //拷贝赋值运算符
+    // 拷贝赋值运算符
     BinaryTree& operator=(const BinaryTree& rhs)
     {
         Node* newRoot = clone(rhs.root_);
@@ -48,7 +48,7 @@ public:
         return *this;
     }
 
-    //移动赋值运算符
+    // 移动赋值运算符
     BinaryTree& operator=(BinaryTree&& rhs) noexcept
     {
         if (this != &rhs)
@@ -60,11 +60,9 @@ public:
         return *this;
     }
 
-
     Node* createByPreAndIn(const T* preOrder, const T* inOrder, int n)
     {
-        if (n == 0)
-            return nullptr;
+        if (n == 0) return nullptr;
         Node* node = new Node(preOrder[0]);
         int mid = std::find(inOrder, inOrder + n, node->data) - inOrder;
         assert(mid != n);
@@ -75,8 +73,7 @@ public:
 
     Node* createByInAndPost(const T* inOrder, const T* postOrder, int n)
     {
-        if (n == 0)
-            return nullptr;
+        if (n == 0) return nullptr;
         Node* node = new Node(postOrder[n - 1]);
         int mid = std::find(inOrder, inOrder + n, node->data) - inOrder;
         assert(mid != n);
@@ -94,8 +91,7 @@ public:
 
     Node* createByLevelAndIn(std::vector<T>& levelOrder, const T* inOrder, int n)
     {
-        if (n == 0)
-            return nullptr;
+        if (n == 0) return nullptr;
         Node* node = new Node(levelOrder[0]);
         int mid = std::find(inOrder, inOrder + n, node->data) - inOrder;
         assert(mid != n);
@@ -124,8 +120,7 @@ public:
         return node;
     }
 
-
-    //设置根结点
+    // 设置根结点
     Node* setRoot(const T& data)
     {
         clear();
@@ -135,7 +130,7 @@ public:
         return root_;
     }
 
-    //添加左孩子结点
+    // 添加左孩子结点
     Node* addLeft(Node* pos, const T& data)
     {
         Node* node = new Node(data);
@@ -145,7 +140,7 @@ public:
         return node;
     }
 
-    //添加右孩子结点
+    // 添加右孩子结点
     Node* addRight(Node* pos, const T& data)
     {
         Node* node = new Node(data);
@@ -155,7 +150,7 @@ public:
         return node;
     }
 
-    //查找
+    // 查找
     const Node* find(const T& data) const
     { return _find(root_, data); }
 
@@ -192,7 +187,7 @@ public:
         return res;
     }
 
-    //先序遍历（非递归1）
+    // 先序遍历（非递归1）
     std::vector<T> preOrderI1() const
     {
         std::vector<T> res;
@@ -216,7 +211,7 @@ public:
         return res;
     }
 
-    //先序遍历（非递归2）
+    // 先序遍历（非递归2）
     std::vector<T> preOrderI2() const
     {
         if (root_ == nullptr) return {};
@@ -234,7 +229,7 @@ public:
         return res;
     }
 
-    //中序遍历（非递归）
+    // 中序遍历（非递归）
     std::vector<T> inOrderI(Node* t) const
     {
         std::vector<T> res;
@@ -258,7 +253,7 @@ public:
         return res;
     }
 
-    //后序遍历（非递归1）
+    // 后序遍历（非递归1）
     std::vector<T> postOrderI1() const
     {
         std::vector<T> res;
@@ -288,7 +283,7 @@ public:
         return res;
     }
 
-    //后序遍历（非递归2）
+    // 后序遍历（非递归2）
     std::vector<T> postOrderI2() const
     {
         if (root_ == nullptr) return {};
@@ -316,7 +311,7 @@ public:
         return res;
     }
 
-    //层序遍历
+    // 层序遍历
     std::vector<T> levelOrder() const
     {
         if (root_ == nullptr) return {};
@@ -343,19 +338,19 @@ public:
             if (cur->left == nullptr)
             {
                 res.push_back(cur->data);
-                cur = cur->right; //将右孩子作为当前节点
+                cur = cur->right; // 将右孩子作为当前节点
             }
             else
             {
                 Node* node = cur->left;
                 while (node->right != nullptr && cur != node->right)
                     node = node->right;
-                if (node->right == nullptr) //还没有线索化，则建立线索
+                if (node->right == nullptr) // 还没有线索化，则建立线索
                 {
                     node->right = cur;
                     cur = cur->left;
                 }
-                else //已经线索化，则访问节点并删除线索
+                else // 已经线索化，则访问节点并删除线索
                 {
                     res.push_back(cur->data);
                     node->right = nullptr;
@@ -366,12 +361,12 @@ public:
         return res;
     }
 
-    //求深度
+    // 求深度
     int depth() const { return _depth(root_); }
 
     void clear() { destroy(root_); }
 
-    //层序遍历方式删除
+    // 层序遍历方式删除
     void clear2()
     {
         if (root_ == nullptr) return;
@@ -391,7 +386,6 @@ public:
 private:
     struct Node;
 
-    //克隆
     Node* clone(Node* node)
     {
         if (node == nullptr) return nullptr;
@@ -401,25 +395,17 @@ private:
         return copy;
     }
 
-    int _depth(Node* node) const
-    {
-        return node ? std::max(_depth(node->left), _depth(node->right)) + 1 : 0;
-    }
+    static int _depth(Node* node)
+    { return node ? std::max(_depth(node->left), _depth(node->right)) + 1 : 0; }
 
     Node* _find(Node* node, const T& data)
     {
-        if (node == nullptr)
-            return nullptr;
-        if (node->data == data)
-            return node;
+        if (node == nullptr) return nullptr;
+        if (node->data == data) return node;
         Node* result = _find(node->left, data);
-        if (result)
-            return result;
-        else
-            return _find(node->right, data);
+        return result != nullptr ? result : _find(node->right, data);
     }
 
-    //前序遍历（递归）
     void preOrder(Node* node, std::vector<T>& res) const
     {
         if (node)
@@ -430,7 +416,6 @@ private:
         }
     }
 
-    //中序遍历（递归）
     void inOrder(Node* node, std::vector<T>& res) const
     {
         if (node)
@@ -441,7 +426,6 @@ private:
         }
     }
 
-    //后序遍历（递归）
     void postOrder(Node* node, std::vector<T>& res) const
     {
         if (node)
@@ -452,7 +436,6 @@ private:
         }
     }
 
-    //递归删除子树节点
     void destroy(Node*& node)
     {
         if (node)
@@ -464,7 +447,7 @@ private:
         }
     }
 
-    //定义节点
+    // 定义节点
     struct Node
     {
         T data;
@@ -504,9 +487,9 @@ int main()
     auto post = tree1.postOrder();
     auto level = tree1.levelOrder();
 
-    auto println = [](const auto & vec)
+    auto println = [](const auto & container)
     {
-        for (const auto& x : vec) cout << x << " ";
+        for (const auto& x : container) cout << x << " ";
         cout << endl;
     };
 

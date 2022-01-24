@@ -5,24 +5,20 @@
 template <class T>
 class LinkedList
 {
-    template <class NodePtr> struct Iterator_;
+    template <class NodePtr> struct IteratorT;
     struct Node;
 public:
-    using Iterator = Iterator_<Node*>;
-    using ConstIterator = Iterator_<const Node*>;
+    using Iterator = IteratorT<Node*>;
+    using ConstIterator = IteratorT<const Node*>;
 
     LinkedList(): size_(0)
     {
-        head_ = (Node*)::malloc(sizeof(Node));
+        head_ = static_cast<Node*>(::malloc(sizeof(Node)));
         head_->next = head_;
         head_->prev = head_;
     }
 
-    ~LinkedList()
-    {
-        clear();
-        ::free(head_);
-    }
+    ~LinkedList() { clear(); ::free(head_); }
 
     // 拷贝构造函数
     LinkedList(const LinkedList& rhs)
@@ -37,8 +33,8 @@ public:
     }
 
     // 移动构造函数
-    LinkedList(LinkedList&& rhs)
-        : LinkedList() { swap(rhs); }
+    LinkedList(LinkedList&& rhs): LinkedList()
+    { swap(rhs); }
 
     // 拷贝赋值运算符
     LinkedList& operator=(const LinkedList& rhs)
@@ -53,7 +49,7 @@ public:
         if (this != &rhs)
         {
             clear();
-            swap(rhs);
+            rhs.swap(*this);
         }
         return *this;
     }
@@ -148,16 +144,16 @@ private:
 
     // 迭代器
     template <class NodePtr>
-    struct Iterator_
+    struct IteratorT
     {
         NodePtr node;
 
-        using Self = Iterator_;
+        using Self = IteratorT;
         using ObjectRef = decltype((node->data));
         using ObjectPtr = decltype(&node->data);
 
-        Iterator_() {}
-        Iterator_(NodePtr _node): node(_node) {}
+        IteratorT() {}
+        IteratorT(NodePtr _node): node(_node) {}
 
         bool operator==(const Self& it) const { return node == it.node; }
         bool operator!=(const Self& it) const { return node != it.node; }

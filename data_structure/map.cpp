@@ -36,12 +36,10 @@ public:
     // 删除
     bool remove(const KeyType& key) { return tree_.remove(key); }
 
-    // 清空
     void clear() { tree_.clear(); }
-    // 元素数量
+    
     int size() const { return tree_.size(); }
 
-    // 首尾迭代器
     ConstIterator begin() const { return tree_.begin(); }
     Iterator begin() { return tree_.begin(); }
 

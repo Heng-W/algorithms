@@ -49,7 +49,7 @@ private:
         Node* left;
         Node* right;
     };
-    
+
     Node* root_;
 };
 
@@ -76,8 +76,7 @@ void SplayTree<T>::splay(Node*& node, const T& data)
                 lchild->right = node;
                 node = lchild;
             }
-            if (node->left == nullptr)
-                break;
+            if (node->left == nullptr) break;
             // 右连接
             rightTreeMin->left = node;
             rightTreeMin = node;
@@ -93,8 +92,7 @@ void SplayTree<T>::splay(Node*& node, const T& data)
                 rchild->left = node;
                 node = rchild;
             }
-            if (node->right == nullptr)
-                break;
+            if (node->right == nullptr) break;
             // 左连接
             leftTreeMax->right = node;
             leftTreeMax = node;
@@ -153,12 +151,10 @@ bool SplayTree<T>::_insert(X&& x)
 template <class T>
 bool SplayTree<T>::remove(const T& data)
 {
-    if (root_ == nullptr)
-        return false;
+    if (root_ == nullptr) return false;
 
     splay(root_, data);
-    if (data != root_->data)
-        return false;
+    if (data != root_->data) return false;
 
     Node* newRoot;
     if (root_->left == nullptr)

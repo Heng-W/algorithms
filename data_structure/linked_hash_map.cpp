@@ -66,7 +66,7 @@ int main()
 {
     using namespace std;
     LinkedHashMap<int, int> map;
-    map.setRemoveCallback([&map] { return map.count() > 3; });
+    map.setRemoveCallback([&map] { return map.size() > 3; });
 
     map.insert({298, 153});
     map.insert({190, 123});
@@ -74,7 +74,7 @@ int main()
     map.insert({92, 456});
     map.insert({122, 125});
 
-    cout << map.count() << endl;
+    cout << map.size() << endl;
 
     cout << (map.find(92) != map.end()) << endl;
     cout << (map.find(10) != map.end()) << endl;

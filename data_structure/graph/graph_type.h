@@ -4,7 +4,6 @@
 #include <limits.h>
 #include <vector>
 
-
 struct Arc
 {
     int begin;
@@ -25,7 +24,7 @@ struct MGraph
     ArcMat arcs;
     int _arcNum;
 
-    //构造无向图
+    // 构造无向图
     MGraph(const VertexArray& _vexs,
            const std::vector<Arc>& _arcs)
         : vexs(_vexs),
@@ -50,15 +49,15 @@ struct MGraph
 };
 
 /** 邻接表  **/
-//边表
+// 边表
 struct ArcNode
 {
-    int adjvex; //邻接序号
+    int adjvex; // 邻接序号
     int weight = 1;
     ArcNode* next;
 };
 
-//顶点表
+// 顶点表
 template <class Vertex>
 struct VertexNode
 {
@@ -84,7 +83,7 @@ struct ALGraph
     AdjList adjList;
     int _arcNum;
 
-    //构造无向图
+    // 构造无向图
     ALGraph(const std::vector<VertexType>& _vexs,
             const std::vector<Arc>& _arcs)
         : _arcNum(_arcs.size())
@@ -131,4 +130,4 @@ struct ALGraph
     int arcNum() const { return _arcNum; }
 };
 
-#endif //GRAPH_TYPE_H
+#endif // GRAPH_TYPE_H

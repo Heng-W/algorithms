@@ -92,7 +92,7 @@ public:
 
     // 元素数量
     int size() const { return (rear_ - front_ + capacity_) & (capacity_ - 1); }
-    
+
     // 容量
     int capacity() const { return capacity_; }
 
@@ -148,11 +148,15 @@ private:
     }
 
     static std::allocator<T> alloc_;
+
     T* data_;
     unsigned int capacity_; // 容量
     unsigned int front_; // 队头索引
     unsigned int rear_; // 队尾索引
 };
+
+template <class T>
+std::allocator<T> CircularQueue<T>::alloc_;
 
 
 // 测试

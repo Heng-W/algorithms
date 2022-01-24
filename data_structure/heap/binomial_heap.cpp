@@ -17,7 +17,9 @@ public:
           nodeCount_(rhs.nodeCount_)
     {
         for (int i = 0; i < (int)rhs.roots_.size(); ++i)
+        {
             roots_[i] = clone(rhs.roots_[i]);
+        }
     }
 
     // 移动构造函数
@@ -29,8 +31,7 @@ public:
     // 拷贝赋值运算符
     BinomialHeap& operator=(const BinomialHeap& rhs)
     {
-        BinomialHeap copy = rhs;
-        swap(copy);
+        BinomialHeap(rhs).swap(*this);
         return *this;
     }
 
@@ -87,8 +88,9 @@ public:
         if (this == &rhs) return;
 
         if (rhs.roots_.size() > roots_.size())
+        {
             roots_.resize(rhs.roots_.size());
-
+        }
         Node* carry = nullptr; // 进位
         for (int i = 0; i < (int)roots_.size(); ++i)
         {
@@ -136,7 +138,6 @@ public:
         rhs.nodeCount_ = 0;
     }
 
-    // 清除
     void clear()
     {
         for (auto& root : roots_) destroy(root);
@@ -154,7 +155,7 @@ private:
     // 构造包含一个元素的堆
     BinomialHeap(const T& data): nodeCount_(1)
     { roots_.push_back(new Node(data)); }
-    
+
     BinomialHeap(T&& data): nodeCount_(1)
     { roots_.push_back(new Node(std::move(data))); }
 
@@ -179,7 +180,9 @@ private:
         for (int i = pos + 1; i < (int)roots_.size(); ++i)
         {
             if (roots_[i] && comp(roots_[i]->data, roots_[pos]->data))
+            {
                 pos = i;
+            }
         }
         return pos;
     }

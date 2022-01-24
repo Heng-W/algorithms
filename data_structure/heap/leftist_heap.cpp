@@ -15,15 +15,12 @@ public:
     { root_ = clone(rhs.root_); }
 
     // 移动构造函数
-    LeftistHeap(LeftistHeap&& rhs) noexcept
-        : root_(rhs.root_) { rhs.root_ = nullptr; }
+    LeftistHeap(LeftistHeap&& rhs) noexcept: root_(rhs.root_)
+    { rhs.root_ = nullptr; }
 
     // 拷贝赋值运算符
     LeftistHeap& operator=(const LeftistHeap& rhs)
-    {
-        LeftistHeap copy = rhs;
-        return *this = std::move(copy);
-    }
+    { return *this = LeftistHeap(rhs); }
 
     // 移动赋值运算符
     LeftistHeap& operator=(LeftistHeap&& rhs) noexcept
@@ -77,12 +74,13 @@ private:
     // 合并两个堆
     Node* _merge(Node* root1, Node* root2)
     {
-        if (root1 == nullptr)
-            return root2;
-        if (root2 == nullptr)
-            return root1;
+        if (root1 == nullptr) return root2;
+        if (root2 == nullptr) return root1;
+
         if (comp(root2->data, root1->data))
+        {
             std::swap(root1, root2);
+        }
         if (root1->left == nullptr)
         {
             root1->left = root2;
@@ -97,7 +95,6 @@ private:
         return root1;
     }
 
-    // 销毁
     void destroy(Node*& node)
     {
         if (node != nullptr)

@@ -10,15 +10,14 @@ template <class Object, class HashFunc = std::hash<Object>,
           class ExtractKey = std::_Identity<Object>>
 class LinkedHashTable
 {
-    template <class NodePtr> struct Iterator_;
+    template <class NodePtr> struct IteratorT;
     struct Node;
 public:
-    using Iterator = Iterator_<Node*>;
-    using ConstIterator = Iterator_<const Node*>;
+    using Iterator = IteratorT<Node*>;
+    using ConstIterator = IteratorT<const Node*>;
     using KeyType = typename std::result_of<ExtractKey(Object)>::type;
 
     using RemoveCallback = std::function<bool()>;
-
 
     LinkedHashTable(int n = 32): nodeCount_(0)
     {
@@ -34,15 +33,14 @@ public:
     LinkedHashTable(const LinkedHashTable& rhs)
         : LinkedHashTable(rhs.buckets_.size())
     {
-        for (const auto& x : rhs)
-            _insert(bucketPos(getKey(x)), x);
+        for (const auto& x : rhs) _insert(bucketPos(getKey(x)), x);
         nodeCount_ = rhs.nodeCount_;
         removeCallback_ = rhs.removeCallback_;
     }
 
     // 移动构造函数
-    LinkedHashTable(LinkedHashTable&& rhs)
-        : LinkedHashTable(0) { swap(rhs); }
+    LinkedHashTable(LinkedHashTable&& rhs): LinkedHashTable(0)
+    { swap(rhs); }
 
     // 拷贝赋值运算符
     LinkedHashTable& operator=(const LinkedHashTable& rhs)
@@ -71,7 +69,6 @@ public:
         swap(nodeCount_, rhs.nodeCount_);
         swap(removeCallback_, rhs.removeCallback_);
     }
-
 
     void setRemoveCallback(const RemoveCallback& cb)
     { removeCallback_ = cb; }
@@ -123,7 +120,6 @@ private:
     template <class X>
     Node* _insert(int pos, X&& obj);
 
-
     int bucketPos(const KeyType& key) const
     { return bucketPos(key, buckets_.size()); }
 
@@ -151,16 +147,16 @@ private:
 
     // 迭代器
     template <class NodePtr>
-    struct Iterator_
+    struct IteratorT
     {
         NodePtr node;
 
-        using Self = Iterator_;
+        using Self = IteratorT;
         using ObjectRef = decltype((node->obj));
         using ObjectPtr = decltype(&node->obj);
 
-        Iterator_() {}
-        Iterator_(NodePtr _node): node(_node) {}
+        IteratorT() {}
+        IteratorT(NodePtr _node): node(_node) {}
 
         bool operator==(const Self& it) const { return node == it.node; }
         bool operator!=(const Self& it) const { return node != it.node; }
@@ -211,8 +207,7 @@ _find(const KeyType& key) const -> const Node*
     const Node* cur = buckets_[pos];
     while (cur)
     {
-        if (key == getKey(cur->obj))
-            return cur;
+        if (key == getKey(cur->obj)) return cur;
         cur = cur->next;
     }
     return head_;
@@ -247,13 +242,14 @@ _insert(X&& obj) -> std::pair<Iterator, bool>
     while (cur)
     {
         if (getKey(obj) == getKey(cur->obj))
+        {
             return {cur, false};
+        }
         cur = cur->next;
     }
     Node* node = _insert(pos, std::forward<X>(obj));
     ++nodeCount_;
-    if (removeCallback_ && removeCallback_())
-        removeFirst();
+    if (removeCallback_ && removeCallback_()) removeFirst();
     return {node, true};
 }
 
@@ -273,6 +269,7 @@ remove(const KeyType& key)
                 buckets_[pos] = cur->next;
             else
                 prev->next = cur->next;
+                
             cur->before->after = cur->after;
             cur->after->before = cur->before;
             delete cur;
@@ -301,6 +298,7 @@ erase(Iterator it) -> Iterator
                 buckets_[pos] = cur->next;
             else
                 prev->next = cur->next;
+                
             cur->before->after = cur->after;
             cur->after->before = cur->before;
             Node* after = cur->after;
@@ -318,8 +316,7 @@ erase(Iterator it) -> Iterator
 template <class Object, class HashFunc, class ExtractKey>
 void LinkedHashTable<Object, HashFunc, ExtractKey>::resize(int hintCnt)
 {
-    if (hintCnt <= (int)buckets_.size())
-        return;
+    if (hintCnt <= (int)buckets_.size()) return;
     int newSize = roundup(hintCnt);
     std::vector<Node*> tmp(newSize, nullptr);
 
@@ -358,4 +355,4 @@ void LinkedHashTable<Object, HashFunc, ExtractKey>::clear()
 }
 
 
-#endif //LINKED_HASH_TABLE_HPP
+#endif // LINKED_HASH_TABLE_HPP

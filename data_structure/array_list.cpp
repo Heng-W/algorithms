@@ -8,10 +8,10 @@ class ArrayList
 public:
     ArrayList(): data_(nullptr), size_(0), capacity_(0) {}
 
-    // 构造函数，创建n个值初始化的元素
+    // 构造n个值初始化的元素
     explicit ArrayList(int n): ArrayList(n, T()) {}
 
-    // 构造函数，创建n个值为value的元素
+    // 构造n个值为value的元素
     ArrayList(int n, const T& value)
         : size_(n), capacity_(n)
     {
@@ -102,7 +102,12 @@ public:
         size_ -= n;
     }
 
-    // 反转
+    void removeBack()
+    {
+        --size_;
+        alloc_.destroy(data_ + size_);
+    }
+
     void reverse()
     {
         using std::swap;
@@ -110,13 +115,6 @@ public:
         {
             swap(data_[i], data_[size_ - i - 1]);
         }
-    }
-
-    // 删除末尾元素
-    void removeBack()
-    {
-        --size_;
-        alloc_.destroy(data_ + size_);
     }
 
     void clear()
@@ -172,7 +170,9 @@ private:
             ++size_;
             // 元素后移
             for (int i = size_ - 2; i > pos; --i)
+            {
                 alloc_.construct(data_ + i, std::move(data_[i - 1]));
+            }
             data_[pos] = std::forward<X>(x);
         }
         else
@@ -182,11 +182,14 @@ private:
             auto newData = alloc_.allocate(newCap);
 
             for (int i = 0; i < pos; ++i)
+            {
                 alloc_.construct(newData + i, std::move(data_[i]));
+            }
             alloc_.construct(newData + pos, std::forward<X>(x));
             for (int i = pos; i < size_; ++i)
+            {
                 alloc_.construct(newData + i + 1, std::move(data_[i]));
-
+            }
             free();
             // 调整为新数据
             data_ = newData;
@@ -194,7 +197,7 @@ private:
             capacity_ = newCap;
         }
     }
-    // 清空并释放内存
+
     void free()
     {
         clear();
@@ -207,6 +210,9 @@ private:
     int size_; // 元素数量
     int capacity_; // 已分配的内存大小
 };
+
+template <class T>
+std::allocator<T> ArrayList<T>::alloc_;
 
 
 // 测试
