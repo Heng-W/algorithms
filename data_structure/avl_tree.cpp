@@ -169,10 +169,10 @@ bool AVLTree<T>::_insert(Node*& node, X&& x)
     }
     else if (x < node->data) // 进入左子树
     {
-        if (!_insert(node->left, std::forward<X>(x))) return false; // 未找到
+        if (!_insert(node->left, std::forward<X>(x))) return false; // 未插入
         if (height(node->left) - height(node->right) == 2)
         {
-            if (node->left->data < x)
+            if (node->left->data < x) // 插入点为当前左节点的右子树，先左旋
             {
                 leftRotation(node->left);
             }
@@ -181,7 +181,7 @@ bool AVLTree<T>::_insert(Node*& node, X&& x)
     }
     else if (node->data < x) // 进入右子树
     {
-        if (!_insert(node->right, std::forward<X>(x))) return false; // 未找到
+        if (!_insert(node->right, std::forward<X>(x))) return false; // 未插入
         if (height(node->right) - height(node->left) == 2)
         {
             if (x < node->right->data)
