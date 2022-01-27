@@ -3,7 +3,7 @@
 #include <functional>
 #include <vector>
 
-//二叉堆
+// 二叉堆
 template <class T, class Compare = std::less<T>>
 class BinaryHeap
 {
@@ -11,30 +11,26 @@ public:
     using Sequence = std::vector<T>;
 
     BinaryHeap() = default;
-
     BinaryHeap(const Sequence& data): data_(data) { build(); }
     BinaryHeap(Sequence&& data): data_(std::move(data)) { build(); }
 
-
+    // 压入
     void push(const T& x) { _push(x); }
     void push(T&& x) { _push(std::move(x)); }
 
-
+    // 弹出
     void pop()
     {
-        assert(!data_.empty());
+        assert(!empty());
         data_.front() = std::move(data_.back());
         data_.pop_back();
-        if (!data_.empty()) percolateDown(0);
+        if (!empty()) percolateDown(0);
     }
 
-    T& top() { return data_.front(); }
-    const T& top() const { return data_.front(); }
+    const T& top() const { assert(!empty()); return data_.front(); }
 
-    void clear() { std::vector<T>().swap(data_); }
-
+    void clear() { Sequence().swap(data_); }
     bool empty() const { return data_.empty(); }
-
     int size() const { return data_.size(); }
 
 private:
@@ -46,20 +42,22 @@ private:
         percolateUp(data_.size() - 1);
     }
 
+    // 构建堆
     void build()
     {
-        //从最后一个非叶节点开始
+        // 从最后一个非叶节点开始
         for (int i = data_.size() / 2 - 1; i >= 0; --i)
         {
             percolateDown(i);
         }
     }
 
+    // 上溯
     void percolateUp(int holeIndex)
     {
         T value = std::move(data_[holeIndex]);
         int parent = (holeIndex - 1) / 2;
-        while (holeIndex > 0 && comp_(value, data_[parent]))
+        while (holeIndex > 0 && comp(value, data_[parent]))
         {
             data_[holeIndex] = std::move(data_[parent]);
             holeIndex = parent;
@@ -68,16 +66,17 @@ private:
         data_[holeIndex] = std::move(value);
     }
 
+    // 下溯
     void percolateDown(int holeIndex)
     {
         T value = std::move(data_[holeIndex]);
-        //从左节点开始更新
-        for (int i = holeIndex * 2 + 1; i < data_.size(); i = i * 2 + 1)
+        // 从左节点开始更新
+        for (int i = holeIndex * 2 + 1; i < (int)data_.size(); i = i * 2 + 1)
         {
-            //指向较小的子节点
-            if (i + 1 < data_.size() && comp_(data_[i + 1], data_[i]))
-                ++i;
-            if (comp_(data_[i], value))
+            // 指向较小的子节点
+            if (i + 1 < (int)data_.size() && comp(data_[i + 1], data_[i])) ++i;
+            
+            if (comp(data_[i], value))
             {
                 data_[holeIndex] = std::move(data_[i]);
                 holeIndex = i;
@@ -90,11 +89,14 @@ private:
         data_[holeIndex] = std::move(value);
     }
 
-    std::vector<T> data_;
-    Compare comp_;
+    static bool comp(const T& lhs, const T& rhs)
+    { return Compare()(lhs, rhs); }
+
+    Sequence data_;
 };
 
 
+// 测试
 #include <ctime>
 #include <cstdlib>
 #include <iterator>

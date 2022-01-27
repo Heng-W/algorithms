@@ -1,7 +1,7 @@
 
 #include "rb_tree.hpp"
 
-
+// 基于红黑树的有序map
 template <class Key, class Value, class Compare = std::less<Key>>
 class Map
 {
@@ -10,9 +10,7 @@ public:
     struct select1st
     {
         const typename Pair::first_type& operator()(const Pair& pair) const
-        {
-            return pair.first;
-        }
+        { return pair.first; }
     };
 
     using Object = std::pair<const Key, Value>;
@@ -21,26 +19,26 @@ public:
     using ConstIterator = typename Tree::ConstIterator;
     using KeyType = typename Tree::KeyType;
 
-
+    // 插入
     std::pair<Iterator, bool> insert(const Object& obj)
     { return tree_.insert(obj); }
 
     std::pair<Iterator, bool> insert(Object&& obj)
     { return tree_.insert(std::move(obj)); }
 
+    // 查找
     Iterator find(const KeyType& key) {return tree_.find(key);}
     ConstIterator find(const KeyType& key) const {return tree_.find(key);}
 
     Value& operator[](const KeyType& key)
-    {
-        return tree_.findOrInsert({key, Value()}).second;
-    }
+    { return tree_.findOrInsert({key, Value()}).second; }
 
+    // 删除
     bool remove(const KeyType& key) { return tree_.remove(key); }
 
     void clear() { tree_.clear(); }
-
-    int count() const { return tree_.count(); }
+    
+    int size() const { return tree_.size(); }
 
     ConstIterator begin() const { return tree_.begin(); }
     Iterator begin() { return tree_.begin(); }
@@ -49,13 +47,13 @@ public:
     Iterator end() { return tree_.end(); }
 
 private:
-    Tree tree_;
+    Tree tree_; // 底层容器：红黑树
 };
 
 
+// 测试
 #include <iostream>
 #include <memory>
-
 
 int main()
 {
@@ -66,7 +64,7 @@ int main()
     map.insert({120, make_unique<int>(134)});
     map.insert({356, make_unique<int>(232)});
 
-    cout << map.count() << endl;
+    cout << map.size() << endl;
 
     cout << (map.find(120) != map.end()) << endl;
     cout << (map.find(10) != map.end()) << endl;
@@ -81,4 +79,3 @@ int main()
 
     return 0;
 }
-

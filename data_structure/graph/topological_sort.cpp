@@ -4,22 +4,22 @@
 #include <iostream>
 
 
-//边表
+// 边表
 struct ArcNode
 {
-    int adjvex; //邻接序号
+    int adjvex; // 邻接序号
     int weight = 1;
     ArcNode* next;
 };
 
-//顶点表
+// 顶点表
 template <class Vertex>
 struct VertexNode
 {
     using VertexType = Vertex;
 
     VertexType data;
-    int in; //入度
+    int in; // 入度
     ArcNode* firstArc;
 
     VertexNode(const VertexType& _data)
@@ -35,7 +35,7 @@ struct ALGraph
 {
     using VertexType = Vertex;
     using AdjList = std::vector<VertexNode<Vertex>>;
-    
+
     struct Arc
     {
         int begin;
@@ -46,16 +46,18 @@ struct ALGraph
     AdjList adjList;
     int _arcNum;
 
-    //构造无向图
+    // 构造无向图
     ALGraph(const std::vector<VertexType>& _vexs,
             const std::vector<Arc>& _arcs)
         : _arcNum(_arcs.size())
     {
         adjList.reserve(_vexs.size());
         for (const auto& vex : _vexs)
+        {
             adjList.emplace_back(vex);
+        }
 
-        for (int k = 0; k < _arcs.size(); ++k)
+        for (int k = 0; k < (int)_arcs.size(); ++k)
         {
             int i = _arcs[k].begin;
             int j = _arcs[k].end;
@@ -72,7 +74,7 @@ struct ALGraph
 
     ~ALGraph()
     {
-        for (int i = 0; i < adjList.size(); ++i)
+        for (int i = 0; i < (int)adjList.size(); ++i)
         {
             ArcNode* cur = adjList[i].firstArc;
             while (cur)
@@ -96,7 +98,9 @@ bool topologicalSort(ALGraph<T>& graph)
     for (int i = 0; i < graph.vexNum(); ++i)
     {
         if (graph.adjList[i].in == 0)
+        {
             sta.push(i);
+        }
     }
     int count = 0;
     while (!sta.empty())
@@ -110,17 +114,17 @@ bool topologicalSort(ALGraph<T>& graph)
         {
             int i = cur->adjvex;
             if (--graph.adjList[i].in == 0)
+            {
                 sta.push(i);
+            }
             cur = cur->next;
         }
     }
-    if (count < graph.vexNum())
-        return false;
-    else
-        return true;
+    return count >= graph.vexNum();
 }
 
 
+// 测试
 int main()
 {
     using namespace std;

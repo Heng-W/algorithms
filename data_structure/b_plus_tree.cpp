@@ -1,65 +1,146 @@
 
 #include <functional>
-#include <queue>
-#include <iostream>
 
-//B+树
+// B+树
+// Key：键类型，Value：值类型，M：阶数
 template <class Key, class Value, int M>
 class BPlusTree
 {
-    struct NodeBase;
-    struct IndexNode;
+    template <class NodePtr> struct IteratorT;
     struct LeafNode;
 public:
     using KeyType = Key;
     using ValueType = Value;
-    using Iterator = LeafNode*;
+    using Iterator = IteratorT<LeafNode*>;
+    using ConstIterator = IteratorT<const LeafNode*>;
 
     BPlusTree(): root_(nullptr) {}
-
     ~BPlusTree() { clear(); }
 
-    std::tuple<LeafNode*, int, bool> find(const KeyType& key) const;
+    // 拷贝构造函数
+    BPlusTree(const BPlusTree& rhs)
+    {
+        LeafNode* prev = nullptr;
+        root_ = clone(rhs.root_, nullptr, prev);
+    }
 
+    // 移动构造函数
+    BPlusTree(BPlusTree&& rhs) noexcept: root_(rhs.root_)
+    { rhs.root_ = nullptr; }
+
+    // 拷贝赋值运算符
+    BPlusTree& operator=(const BPlusTree& rhs)
+    {
+        BPlusTree copy = rhs;
+        return *this = std::move(copy);
+    }
+
+    // 移动赋值运算符
+    BPlusTree& operator=(BPlusTree&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            clear();
+            root_ = rhs.root_;
+            rhs.root_ = nullptr;
+        }
+        return *this;
+    }
+
+    // 查找
+    std::pair<Iterator, bool> find(const KeyType& key) const;
+
+    // 插入
     bool insert(const KeyType& key, const ValueType& value)
     { return _insert(key, value); }
 
     bool insert(const KeyType& key, ValueType&& value)
     { return _insert(key, std::move(value)); }
 
-    bool remove(const KeyType& key);
+    // 删除
+    bool remove(const KeyType& key)
+    {
+        auto res = find(key);
+        bool exist = res.second;
+        if (!exist) return false;
+        erase(res.first);
+        return true;
+    }
 
-    void levelOrder() const;
+    Iterator erase(Iterator pos);
 
-    void traversal() const;
+    void clear() { if (root_) destroy(root_); }
 
-    void clear() { if (root_) deleteTree(root_); }
+    Iterator begin() { return minimum(); }
+    ConstIterator begin() const { return minimum(); }
+
+    Iterator end() { return nullptr; }
+    ConstIterator end() const { return nullptr; }
 
 private:
+    struct NodeBase;
+    struct IndexNode;
 
     template <class X>
     bool _insert(const KeyType& key, X&& value);
 
+    // 合并节点
     void mergeLeafNode(IndexNode* parent, int pos);
     void mergeIndexNode(IndexNode* parent, int pos);
 
-
-    void deleteTree(NodeBase* node);
-
+    void destroy(NodeBase* node);
+    static NodeBase* clone(NodeBase* node, IndexNode* parent, LeafNode*& prev);
 
     LeafNode* minimum() const
     {
         if (!root_) return nullptr;
         NodeBase* cur = root_;
-        while (!cur->isLeaf()) cur = ((IndexNode*)cur)->childs[0];
-        return (LeafNode*)cur;
+        while (!cur->isLeaf()) cur = static_cast<IndexNode*>(cur)->childs[0];
+        return static_cast<LeafNode*>(cur);
     }
 
+    static constexpr int kMinKeyNum = (M + 1) / 2 - 1;
+    static constexpr int kMaxKeyNum = M - 1;
 
-    static constexpr int KEY_MIN = (M + 1) / 2 - 1;
-    static constexpr int KEY_MAX = M - 1;
+    // 定义迭代器
+    template <class NodePtr>
+    struct IteratorT
+    {
+        NodePtr node;
+        int pos;
 
+        using Self = IteratorT;
+        using ValueRef = decltype((node->values[0]));
+        using ValuePtr = decltype(&node->values[0]);
 
+        IteratorT() {}
+        IteratorT(NodePtr _node, int _pos = 0): node(_node), pos(_pos) {}
+
+        bool operator==(const Self& it) const { return node == it.node && pos == it.pos; }
+        bool operator!=(const Self& it) const { return !(*this == it); }
+
+        const KeyType& key() const { return node->keys[pos]; }
+        ValueRef operator*() const { return node->values[pos]; }
+        ValuePtr operator->() const { return &*this; }
+
+        Self& operator++()
+        {
+            if (++pos >= node->keyCount)
+            {
+                node = node->next;
+                pos = 0;
+            }
+            return *this;
+        }
+        Self operator++(int)
+        {
+            Self tmp = *this;
+            ++*this;
+            return tmp;
+        }
+    };
+
+    // 节点基类
     struct NodeBase
     {
         KeyType keys[M];
@@ -72,6 +153,7 @@ private:
         bool isLeaf() const { return leaf; }
     };
 
+    // 索引节点
     struct IndexNode : NodeBase
     {
         NodeBase* childs[M + 1] = {nullptr};
@@ -79,6 +161,7 @@ private:
         IndexNode(): NodeBase(false) {}
     };
 
+    // 叶子节点
     struct LeafNode : NodeBase
     {
         ValueType values[M];
@@ -86,28 +169,29 @@ private:
 
         LeafNode(): NodeBase(true) {}
     };
+
     NodeBase* root_;
 };
 
 
 template <class Key, class Value, int M>
-auto BPlusTree<Key, Value, M>::find(const KeyType& key) const -> std::tuple<LeafNode*, int, bool>
+auto BPlusTree<Key, Value, M>::
+find(const KeyType& key) const -> std::pair<Iterator, bool>
 {
     NodeBase* cur = root_;
     int pos = 0;
     while (cur)
     {
         pos = 0;
-        while (pos < cur->keyCount && cur->keys[pos] <= key)
-            ++pos;
+        while (pos < cur->keyCount && cur->keys[pos] <= key) ++pos;
         if (!cur->isLeaf())
-            cur = ((IndexNode*)cur)->childs[pos];
+            cur = static_cast<IndexNode*>(cur)->childs[pos];
         else if (pos > 0 && key == cur->keys[pos - 1])
-            return {(LeafNode*)cur, pos - 1, true};
+            return {Iterator(static_cast<LeafNode*>(cur), pos - 1), true};
         else
             break;
     }
-    return {(LeafNode*)cur, pos, false};
+    return {Iterator(static_cast<LeafNode*>(cur), pos), false};
 }
 
 
@@ -122,12 +206,12 @@ bool BPlusTree<Key, Value, M>::_insert(const KeyType& key, X&& value)
         root_ = node;
     }
     auto res = find(key);
-    bool exist = std::get<2>(res);
+    bool exist = res.second;
     if (exist) return false;
 
     {
-        LeafNode* cur = std::get<0>(res);
-        int pos = std::get<1>(res);
+        LeafNode* cur = res.first.node;
+        int pos = res.first.pos;
 
         for (int i = cur->keyCount; i > pos; --i)
         {
@@ -138,9 +222,9 @@ bool BPlusTree<Key, Value, M>::_insert(const KeyType& key, X&& value)
         cur->values[pos] = std::forward<X>(value);
         ++cur->keyCount;
 
-        if (cur->keyCount <= KEY_MAX) return true;
+        if (cur->keyCount <= kMaxKeyNum) return true;
 
-        //分裂
+        // 分裂
         LeafNode* brother = new LeafNode();
         int mid = M / 2;
         for (int i = mid; i < cur->keyCount; ++i)
@@ -175,9 +259,9 @@ bool BPlusTree<Key, Value, M>::_insert(const KeyType& key, X&& value)
         ++parent->keyCount;
     }
 
-    IndexNode* cur = std::get<0>(res)->parent;
+    IndexNode* cur = res.first.node->parent;
 
-    while (cur->keyCount > KEY_MAX)
+    while (cur->keyCount > kMaxKeyNum)
     {
         IndexNode* brother = new IndexNode();
         int mid = M / 2;
@@ -221,26 +305,25 @@ bool BPlusTree<Key, Value, M>::_insert(const KeyType& key, X&& value)
 
 
 template <class Key, class Value, int M>
-bool BPlusTree<Key, Value, M>::remove(const KeyType& key)
+auto BPlusTree<Key, Value, M>::erase(Iterator position) -> Iterator
 {
-    auto res = find(key);
-    bool exist = std::get<2>(res);
-    if (!exist) return false;
-
+    Iterator next;
     {
-        LeafNode* cur = std::get<0>(res);
-        int pos = std::get<1>(res);
+        LeafNode* cur = position.node;
+        int pos = position.pos;
 
-        //删除节点
+        // 删除位置后的数据前移
         for (int i = pos; i < cur->keyCount - 1; ++i)
         {
             cur->keys[i] = cur->keys[i + 1];
             cur->values[i] = std::move(cur->values[i + 1]);
         }
         --cur->keyCount;
-
-        if (cur->keyCount >= KEY_MIN) return true;
-
+        if (cur->keyCount >= kMinKeyNum) // 键数量足够，结束
+        {
+            return pos < cur->keyCount ? position : cur->next;
+        }
+        // 判断是否是根节点
         if (cur == root_)
         {
             if (cur->keyCount == 0)
@@ -248,15 +331,17 @@ bool BPlusTree<Key, Value, M>::remove(const KeyType& key)
                 delete root_;
                 root_ = nullptr;
             }
-            return true;
+            return Iterator(static_cast<LeafNode*>(root_), pos);
         }
 
         IndexNode* parent = cur->parent;
-        int childPos = 0;
+        int childPos = 0; // 当前节点在parent的位置
         while (cur != parent->childs[childPos]) ++childPos;
-        if (childPos > 0 && parent->childs[childPos - 1]->keyCount > KEY_MIN)
+
+        // 如果左兄弟的键数量足够，向其借一个
+        if (childPos > 0 && parent->childs[childPos - 1]->keyCount > kMinKeyNum)
         {
-            LeafNode* left = (LeafNode*)parent->childs[childPos - 1];
+            LeafNode* left = static_cast<LeafNode*>(parent->childs[childPos - 1]);
             for (int i = cur->keyCount; i > 0; --i)
             {
                 cur->keys[i] = cur->keys[i - 1];
@@ -267,11 +352,13 @@ bool BPlusTree<Key, Value, M>::remove(const KeyType& key)
             cur->parent->keys[childPos - 1] = cur->keys[0];
             ++cur->keyCount;
             --left->keyCount;
-            return true;
+            return pos + 1 < cur->keyCount ? Iterator(cur, pos + 1) : cur->next;
         }
-        else if (childPos < parent->keyCount && parent->childs[childPos + 1]->keyCount > KEY_MIN)
+        // 如果右兄弟的键数量足够，向其借一个
+        else if (childPos < parent->keyCount &&
+                 parent->childs[childPos + 1]->keyCount > kMinKeyNum)
         {
-            LeafNode* right = (LeafNode*)parent->childs[childPos + 1];
+            LeafNode* right = static_cast<LeafNode*>(parent->childs[childPos + 1]);
 
             cur->keys[cur->keyCount] = right->keys[0];
             cur->values[cur->keyCount] = std::move(right->values[0]);
@@ -285,20 +372,27 @@ bool BPlusTree<Key, Value, M>::remove(const KeyType& key)
                 right->values[i] = std::move(right->values[i + 1]);
             }
             --right->keyCount;
-            return true;
+            return Iterator(cur, pos);
         }
-        else
+        else // 兄弟节点的键数量不足，合并节点
         {
             if (childPos > 0)
-                mergeLeafNode(parent, childPos - 1); //合并到左子树
+            {
+                LeafNode* left = static_cast<LeafNode*>(parent->childs[childPos - 1]);
+                next = pos < cur->keyCount ? Iterator(left, pos + left->keyCount) : cur->next;
+                mergeLeafNode(parent, childPos - 1); // 合并到左子树
+            }
             else
-                mergeLeafNode(parent, childPos); //右子树合并到当前
+            {
+                next = Iterator(cur, pos);
+                mergeLeafNode(parent, childPos); // 右子树合并到当前
+            }
         }
     }
 
-    IndexNode* cur = std::get<0>(res)->parent;
+    IndexNode* cur = position.node->parent;
 
-    while (cur->keyCount < KEY_MIN)
+    while (cur->keyCount < kMinKeyNum)
     {
         if (cur == root_)
         {
@@ -315,14 +409,14 @@ bool BPlusTree<Key, Value, M>::remove(const KeyType& key)
                 }
                 delete cur;
             }
-            return true;
+            return next;
         }
         IndexNode* parent = cur->parent;
         int childPos = 0;
         while (cur != parent->childs[childPos]) ++childPos;
-        if (childPos > 0 && parent->childs[childPos - 1]->keyCount > KEY_MIN)
+        if (childPos > 0 && parent->childs[childPos - 1]->keyCount > kMinKeyNum)
         {
-            IndexNode* left = (IndexNode*)parent->childs[childPos - 1];
+            IndexNode* left = static_cast<IndexNode*>(parent->childs[childPos - 1]);
             for (int i = cur->keyCount; i > 0; --i)
             {
                 cur->keys[i] = cur->keys[i - 1];
@@ -336,11 +430,12 @@ bool BPlusTree<Key, Value, M>::remove(const KeyType& key)
             cur->parent->keys[childPos - 1] = left->keys[left->keyCount - 1];
             ++cur->keyCount;
             --left->keyCount;
-            return true;
+            return next;
         }
-        else if (childPos < parent->keyCount && parent->childs[childPos + 1]->keyCount > KEY_MIN)
+        else if (childPos < parent->keyCount &&
+                 parent->childs[childPos + 1]->keyCount > kMinKeyNum)
         {
-            IndexNode* right = (IndexNode*)parent->childs[childPos + 1];
+            IndexNode* right = static_cast<IndexNode*>(parent->childs[childPos + 1]);
 
             cur->keys[cur->keyCount] = parent->keys[childPos];
             cur->parent->keys[childPos] = right->keys[0];
@@ -356,26 +451,26 @@ bool BPlusTree<Key, Value, M>::remove(const KeyType& key)
             }
             right->childs[right->keyCount - 1] = right->childs[right->keyCount];
             --right->keyCount;
-            return true;
+            return next;
         }
         else
         {
             if (childPos > 0)
-                mergeIndexNode(parent, childPos - 1); //合并到左子树
+                mergeIndexNode(parent, childPos - 1); // 合并到左子树
             else
-                mergeIndexNode(parent, childPos); //右子树合并到当前
+                mergeIndexNode(parent, childPos); // 右子树合并到当前
             cur = parent;
         }
     }
-    return true;
+    return next;
 }
 
 
 template <class Key, class Value, int M>
 void BPlusTree<Key, Value, M>::mergeLeafNode(IndexNode* parent, int pos)
 {
-    LeafNode* left = (LeafNode*)parent->childs[pos];
-    LeafNode* right = (LeafNode*)parent->childs[pos + 1];
+    LeafNode* left = static_cast<LeafNode*>(parent->childs[pos]);
+    LeafNode* right = static_cast<LeafNode*>(parent->childs[pos + 1]);
 
     for (int i = pos; i < parent->keyCount - 1; ++i)
     {
@@ -400,8 +495,8 @@ void BPlusTree<Key, Value, M>::mergeLeafNode(IndexNode* parent, int pos)
 template <class Key, class Value, int M>
 void BPlusTree<Key, Value, M>::mergeIndexNode(IndexNode* parent, int pos)
 {
-    IndexNode* left = (IndexNode*)parent->childs[pos];
-    IndexNode* right = (IndexNode*)parent->childs[pos + 1];
+    IndexNode* left = static_cast<IndexNode*>(parent->childs[pos]);
+    IndexNode* right = static_cast<IndexNode*>(parent->childs[pos + 1]);
 
     left->keys[left->keyCount] = parent->keys[pos];
     for (int i = pos; i < parent->keyCount - 1; ++i)
@@ -427,65 +522,70 @@ void BPlusTree<Key, Value, M>::mergeIndexNode(IndexNode* parent, int pos)
 
 
 template <class Key, class Value, int M>
-void BPlusTree<Key, Value, M>::levelOrder() const
-{
-    if (root_ == nullptr) return;
-    NodeBase* cur = root_;
-    std::queue<NodeBase*> nodes;
-    nodes.push(cur);
-    while (!nodes.empty())
-    {
-        NodeBase* cur = nodes.front();
-        nodes.pop();
-        for (int i = 0; i < cur->keyCount; ++i)
-            std::cout << cur->keys[i] << " ";
-        for (int i = 0; i <= cur->keyCount; ++i)
-        {
-            if (!cur->isLeaf())
-                nodes.push(((IndexNode*)cur)->childs[i]);
-        }
-    }
-}
-
-
-template <class Key, class Value, int M>
-void BPlusTree<Key, Value, M>::traversal() const
-{
-    LeafNode* cur = minimum();
-    while (cur)
-    {
-        int pos = 0;
-        while (pos < cur->keyCount)
-        {
-            std::cout << cur->keys[pos] << " ";
-            ++pos;
-        }
-        cur = cur->next;
-    }
-}
-
-
-template <class Key, class Value, int M>
-void BPlusTree<Key, Value, M>::deleteTree(NodeBase* cur)
+void BPlusTree<Key, Value, M>::destroy(NodeBase* cur)
 {
     if (cur->isLeaf())
     {
-        delete (LeafNode*)cur;
+        delete static_cast<LeafNode*>(cur);
         return;
     }
-    IndexNode* node = (IndexNode*)cur;
+    IndexNode* node = static_cast<IndexNode*>(cur);
     int pos = 0;
     while (pos <= node->keyCount)
     {
-        deleteTree(node->childs[pos++]);
+        destroy(node->childs[pos++]);
     }
     delete node;
 }
 
 
+template <class Key, class Value, int M>
+auto BPlusTree<Key, Value, M>::
+clone(NodeBase* node, IndexNode* parent, LeafNode*& prev) -> NodeBase*
+{
+    if (node == nullptr) return nullptr;
+
+    auto initNode = [&](NodeBase * copy)
+    {
+        copy->keyCount = node->keyCount;
+        copy->parent = parent;
+        for (int i = 0; i < node->keyCount; ++i)
+        {
+            copy->keys[i] = node->keys[i];
+        }
+    };
+    if (!node->isLeaf())
+    {
+        IndexNode* copy = new IndexNode();
+        initNode(copy);
+        for (int i = 0; i <= node->keyCount; ++i)
+        {
+            copy->childs[i] = clone(static_cast<IndexNode*>(node)->childs[i], copy, prev);
+        }
+        return copy;
+    }
+    else
+    {
+        LeafNode* copy = new LeafNode();
+        initNode(copy);
+        for (int i = 0; i < node->keyCount; ++i)
+        {
+            copy->values[i] = static_cast<LeafNode*>(node)->values[i];
+        }
+        copy->next = nullptr;
+        if (prev) prev->next = copy;
+        prev = copy;
+        return copy;
+    }
+}
+
+
+// 测试
 #include <cstdlib>
 #include <ctime>
 #include <vector>
+#include <iostream>
+#include <iomanip>
 
 int main()
 {
@@ -499,32 +599,34 @@ int main()
     }
 
     BPlusTree<int, int, 4> tree;
-    for (int i = 0; i < vec.size(); ++i)
+    for (int i = 0; i < (int)vec.size(); ++i)
     {
         tree.insert(vec[i], i);
     }
-    cout << endl;
-
-    tree.traversal();
-    cout << endl;
-    tree.levelOrder();
-    cout << endl;
-
-    for (int i = 0; i < vec.size(); ++i)
+    for (auto it = tree.begin(); it != tree.end(); ++it)
     {
-        auto res = tree.find(vec[i]);
-        cout << std::get<2>(res) << " ";
+        cout << "(" << it.key() << "," << *it << ") ";
     }
-
     cout << endl;
 
+    cout << *tree.find(vec[0]).first << endl;
 
-    for (int i = 0; i < vec.size(); ++i)
+    auto tree2 = tree;
+    for (const auto& x : tree) cout << x << " ";
+    cout << endl;
+
+    for (const auto& x : vec) tree.remove(x);
+
+    // 删除value小于5的数据
+    for (auto it = tree2.begin(); it != tree2.end();)
     {
-        tree.remove(vec[i]);
-        tree.traversal();
-        cout << endl;
+        if (*it < 5)
+            it = tree2.erase(it);
+        else
+            ++it;
     }
+    for (const auto& x : tree2) cout << x << " ";
+    cout << endl;
 
     return 0;
 }

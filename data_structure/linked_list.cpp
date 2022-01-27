@@ -1,92 +1,99 @@
-// 双向循环链表实现的线性表
+
 #include <memory>
-#include <iostream>
-#include <chrono>
 
-
+// 双向循环链表实现的线性表
 template <class T>
 class LinkedList
 {
-    friend void swap(LinkedList& list1, LinkedList& list2)
-    {
-        list1.swap(list2);
-    }
-
-    friend std::ostream& operator<<(std::ostream& out, const LinkedList& list)
-    {
-        auto cur = list.begin();
-        while (cur != list.end())
-        {
-            out << cur->data << " ";
-            cur = cur->next;
-        }
-        return out;
-    }
-
+    template <class NodePtr> struct IteratorT;
     struct Node;
-
 public:
+    using Iterator = IteratorT<Node*>;
+    using ConstIterator = IteratorT<const Node*>;
 
     LinkedList(): size_(0)
     {
-        head_ = (Node*)::malloc(sizeof(Node));
+        head_ = static_cast<Node*>(::malloc(sizeof(Node)));
         head_->next = head_;
         head_->prev = head_;
     }
 
-    ~LinkedList()
-    {
-        clear();
-        ::free(head_);
-    }
+    ~LinkedList() { clear(); ::free(head_); }
 
-    LinkedList(const LinkedList& list):
-        LinkedList()
+    // 拷贝构造函数
+    LinkedList(const LinkedList& rhs)
+        : LinkedList()
     {
-        auto src = list.begin();
-        while (src != list.end())
+        auto src = rhs.begin();
+        while (src != rhs.end())
         {
             insertBack(src->data);
             src = src->next;
         }
     }
 
-    LinkedList(LinkedList&& list):
-        LinkedList()
-    {
-        swap(list);
-    }
+    // 移动构造函数
+    LinkedList(LinkedList&& rhs): LinkedList()
+    { swap(rhs); }
 
-
-    LinkedList& operator=(const LinkedList& list)
+    // 拷贝赋值运算符
+    LinkedList& operator=(const LinkedList& rhs)
     {
-        LinkedList tmp = list;
-        swap(tmp);
+        LinkedList().swap(*this);
         return *this;
     }
 
-    LinkedList& operator=(LinkedList&& list) noexcept
+    // 移动赋值运算符
+    LinkedList& operator=(LinkedList&& rhs) noexcept
     {
-        if (this != &list)
+        if (this != &rhs)
         {
             clear();
-            swap(list);
+            rhs.swap(*this);
         }
         return *this;
     }
 
-
-    void swap(LinkedList& list)
+    void swap(LinkedList& rhs)
     {
         using std::swap;
-        swap(head_, list.head_);
-        swap(size_, list.size_);
+        swap(head_, rhs.head_);
+        swap(size_, rhs.size_);
+    }
+
+    // 插入
+    void insertFront(const T& x) { insert(begin(), x); }
+    void insertFront(T&& x) { insert(begin(), std::move(x)); }
+
+    void insertBack(const T& x) { insert(end(), x); }
+    void insertBack(T&& x) { insert(end(), std::move(x)); }
+
+    Iterator insert(Iterator pos, const T& x) { return _insert(pos, x); }
+    Iterator insert(Iterator pos, T&& x) { return _insert(pos, std::move(x)); }
+
+    // 查找
+    ConstIterator find(const T& data) const
+    { return _find(data); }
+
+    Iterator find(const T& data)
+    { return const_cast<Node*>(_find(data)); }
+
+    // 删除
+    Iterator remove(Iterator pos)
+    {
+        Node* p = pos.node;
+        p->prev->next = p->next;
+        p->next->prev = p->prev;
+        Node* next = p->next;
+        delete p;
+        --size_;
+        return next;
     }
 
     void clear()
     {
-        auto cur = begin();
-        while (cur != end())
+        Node* cur = head_->next;
+        while (cur != head_)
         {
             cur = cur->next;
             delete cur->prev;
@@ -96,34 +103,25 @@ public:
         size_ = 0;
     }
 
-    //表头插入
-    void insertFront(const T& x) { insert(begin(), x); }
-    void insertFront(T&& x) { insert(begin(), std::move(x)); }
+    Iterator begin() { return head_->next; }
+    ConstIterator begin() const { return head_->next; }
+    Iterator end() { return head_; }
+    ConstIterator end() const { return head_; }
 
-    //表尾插入
-    void insertBack(const T& x) { insert(end(), x); }
-    void insertBack(T&& x) { insert(end(), std::move(x)); }
+    const T& front() const { return head_->next->data; }
+    T& front() { return head_->next->data; }
+    const T& back() const { return head_->prev->data; }
+    T& back() { return head_->prev->data; }
 
-    //插入
-    Node* insert(Node* p, const T& x) { return _insert(p, x); }
-    Node* insert(Node* p, T&& x) { return _insert(p, std::move(x)); }
+    int size() const { return size_; }
+    bool empty() const { return size_ == 0;}
 
-    //删除
-    Node* remove(Node* p)
+private:
+
+    const Node* _find(const T& data) const
     {
-        p->prev->next = p->next;
-        p->next->prev = p->prev;
-        Node* next = p->next;
-        delete p;
-        --size_;
-        return next;
-    }
-
-    //寻找指定结点
-    const Node* find(const T& data) const
-    {
-        auto cur = begin();
-        while (cur != end())
+        const Node* cur = head_->next;
+        while (cur != head_)
         {
             if (cur->data == data) return cur;
             cur = cur->next;
@@ -131,39 +129,62 @@ public:
         return nullptr;
     }
 
-    Node* find(const T& data)
-    {
-        const auto* obj = this;
-        return const_cast<Node*>(obj->find(data));
-    }
-
-
-    Node* begin() { return head_->next; }
-    const Node* begin() const { return head_->next; }
-
-    Node* end() { return head_; }
-    const Node* end() const { return head_; }
-
-
-    int size() const { return size_; }
-    bool empty() const { return size_ == 0;}
-
-    T& front() { return begin()->data; }
-    T& back() { return end()->prev->data; }
-
-private:
-    //插入
     template <class X>
-    Node* _insert(Node* p, X&& x)
+    Iterator _insert(Iterator pos, X&& x)
     {
-        Node* tmp = new Node(x);
-        tmp->next = p;
-        tmp->prev = p->prev;
-        p->prev->next = tmp;
-        p->prev = tmp;
+        Node* p = pos.node;
+        Node* node = new Node(x);
+        node->next = p;
+        node->prev = p->prev;
+        p->prev->next = node;
+        p->prev = node;
         ++size_;
-        return tmp;
+        return node;
     }
+
+    // 迭代器
+    template <class NodePtr>
+    struct IteratorT
+    {
+        NodePtr node;
+
+        using Self = IteratorT;
+        using ObjectRef = decltype((node->data));
+        using ObjectPtr = decltype(&node->data);
+
+        IteratorT() {}
+        IteratorT(NodePtr _node): node(_node) {}
+
+        bool operator==(const Self& it) const { return node == it.node; }
+        bool operator!=(const Self& it) const { return node != it.node; }
+
+        ObjectRef operator*() const { return node->data; }
+        ObjectPtr operator->() const { return &*this; }
+
+        Self& operator++()
+        {
+            node = node->next;
+            return *this;
+        }
+        Self operator++(int)
+        {
+            Self tmp = *this;
+            ++*this;
+            return tmp;
+        }
+
+        Self& operator--()
+        {
+            node = node->prev;
+            return *this;
+        }
+        Self operator--(int)
+        {
+            Self tmp = *this;
+            --*this;
+            return tmp;
+        }
+    };
 
     struct Node
     {
@@ -175,29 +196,25 @@ private:
         Node(T&& _data): data(std::move(_data)) {}
     };
 
-    Node* head_; //头结点
-    int size_; //元素个数
+    Node* head_; // 头结点
+    int size_; // 元素个数
 };
 
 
-#include <ctime>
+// 测试
 #include <cstdlib>
-
+#include <ctime>
+#include <iostream>
 
 int main()
 {
     using namespace std;
-    using namespace std::chrono;
-
-    auto t0 = steady_clock::now();
-
     srand(time(nullptr));
 
     float a[5];
-    cout << "origin: ";
     for (int i = 0; i < 5; i++)
     {
-        a[i] = 100.0 * rand() / (RAND_MAX + 1.0);
+        a[i] = rand() % 100;
         cout << a[i] << "  ";
     }
     cout << endl;
@@ -209,17 +226,18 @@ int main()
     list.insertBack(a[3]);
     list.remove(list.find(a[2]));
     list.insertFront(a[4]);
-    cout << "traversal: " << list << endl;
+    for (const auto& x : list) cout << x << " ";
+    cout << endl;
     cout << "size: " << list.size() << endl;
 
     auto list2 = std::move(list);
 
-    cout << "traversal: " << list << endl;
-    list2.find(a[4])->data = 12;
-    cout << "traversal2: " << list2 << endl;
+    for (const auto& x : list) cout << x << " ";
+    cout << endl;
 
+    *list2.find(a[4]) = 12;
+    for (const auto& x : list2) cout << x << " ";
+    cout << endl;
 
-    auto t1 = steady_clock::now();
-    cout << "runtime: " << duration_cast<milliseconds>(t1 - t0).count() << " ms" << endl;
     return 0;
 }

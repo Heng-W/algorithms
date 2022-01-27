@@ -8,7 +8,7 @@ int main()
     HashTable<int> ht;
     ht.insert(10);
     ht.insert(15);
-    cout << ht.nodeCount() << endl;
+    cout << ht.size() << endl;
 
     for (const auto& x : ht) cout << x << " ";
     cout << endl;

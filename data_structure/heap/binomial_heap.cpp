@@ -1,43 +1,42 @@
 
+#include <assert.h>
 #include <functional>
 #include <vector>
 
-//二项堆
+// 二项堆
 template <class T, class Compare = std::less<T>>
 class BinomialHeap
 {
 public:
-    BinomialHeap(): roots_(1), nodeCount_(0) {}
-
-    BinomialHeap(const T& data): roots_(1), nodeCount_(1)
-    { roots_[0] = new Node(data); }
-
-    BinomialHeap(T&& data) : roots_(1), nodeCount_(1)
-    { roots_[0] = new Node(std::move(data)); }
-
+    BinomialHeap(): nodeCount_(0) {}
     ~BinomialHeap() { clear(); }
 
+    // 拷贝构造函数
     BinomialHeap(const BinomialHeap& rhs)
-        : roots_(rhs.roots_.size()), nodeCount_(rhs.nodeCount_)
+        : roots_(rhs.roots_.size()),
+          nodeCount_(rhs.nodeCount_)
     {
-        for (int i = 0; i < rhs.roots_.size(); ++i)
+        for (int i = 0; i < (int)rhs.roots_.size(); ++i)
+        {
             roots_[i] = clone(rhs.roots_[i]);
+        }
     }
 
-    BinomialHeap(BinomialHeap&& rhs)
-        : roots_(std::move(rhs.roots_)), nodeCount_(rhs.nodeCount_) 
-    {
-        rhs.nodeCount_ = 0;
-    }
+    // 移动构造函数
+    BinomialHeap(BinomialHeap&& rhs) noexcept
+        : roots_(std::move(rhs.roots_)),
+          nodeCount_(rhs.nodeCount_)
+    { rhs.nodeCount_ = 0; }
 
+    // 拷贝赋值运算符
     BinomialHeap& operator=(const BinomialHeap& rhs)
     {
-        BinomialHeap copy = rhs;
-        swap(copy);
+        BinomialHeap(rhs).swap(*this);
         return *this;
     }
 
-    BinomialHeap& operator=(BinomialHeap&& rhs)
+    // 移动赋值运算符
+    BinomialHeap& operator=(BinomialHeap&& rhs) noexcept
     {
         if (this != &rhs)
         {
@@ -47,140 +46,148 @@ public:
         return *this;
     }
 
-    void swap(BinomialHeap& rhs)
+    // 交换
+    void swap(BinomialHeap& rhs) noexcept
     {
         using std::swap;
         roots_.swap(rhs.roots_);
         swap(nodeCount_, rhs.nodeCount_);
     }
 
-    void insert(const T& data) { merge(data); }
-    void insert(T&& data) { merge(std::move(data)); }
+    // 压入
+    void push(const T& data) { merge(data); }
+    void push(T&& data) { merge(std::move(data)); }
 
+    // 弹出
     void pop()
     {
-        int minIndex = findMinIndex();
-        Node* oldRoot = roots_[minIndex];
-        Node* child = oldRoot->child;
-        delete oldRoot;
+        int pos = findMinIndex();
+        Node* child = roots_[pos]->child;
+        delete roots_[pos];
+        roots_[pos] = nullptr;
 
         BinomialHeap heap;
-        heap.roots_.resize(minIndex + 1);
-        heap.nodeCount_ = (1 << minIndex) - 1;
-        for (int i = minIndex - 1; i >= 0; --i)
+        heap.roots_.resize(pos); // pos等于度数
+        // 反转
+        for (int i = pos - 1; i >= 0; --i)
         {
             heap.roots_[i] = child;
             child = child->next;
-            heap.roots_[i]->next = nullptr;
         }
-        roots_[minIndex] = nullptr;
+        heap.nodeCount_ = (1 << pos) - 1;
         nodeCount_ -= heap.nodeCount_ + 1;
+        // 将heap合并到当前
         merge(heap);
     }
 
-
+    // 合并
     void merge(BinomialHeap& rhs) { merge(std::move(rhs)); }
 
     void merge(BinomialHeap&& rhs)
     {
-        if (this == &rhs)
-            return;
+        if (this == &rhs) return;
 
-        nodeCount_ += rhs.nodeCount_;
-
-        if (nodeCount_ > capacity())
+        if (rhs.roots_.size() > roots_.size())
         {
-            int oldNum = roots_.size();
-            int newNum = std::max(roots_.size(), rhs.roots_.size()) + 1;
-            roots_.resize(newNum);
-            for (int i = oldNum; i < newNum; ++i)
-                roots_[i] = nullptr;
+            roots_.resize(rhs.roots_.size());
         }
-
-        Node* carry = nullptr;
-        for (int i = 0, j = 1; j <= nodeCount_; ++i, j *= 2)
+        Node* carry = nullptr; // 进位
+        for (int i = 0; i < (int)roots_.size(); ++i)
         {
             Node* root1 = roots_[i];
-            Node* root2 = i < rhs.roots_.size() ? rhs.roots_[i] : nullptr;
-            int caseNum = root1 == nullptr ? 0 : 1;
-            caseNum += root2 == nullptr ? 0 : 2;
-            caseNum += carry == nullptr ? 0 : 4;
-
+            Node* root2 =  i < (int)rhs.roots_.size() ? rhs.roots_[i] : nullptr;
+            int caseNum = (root1 ? 1 : 0) | (root2 ? 2 : 0) | (carry ? 4 : 0);
             switch (caseNum)
             {
-                case 0: //no trees
-                case 1: //only this
+                case 0: // none
+                case 1: // only this
                     break;
-                case 2:
-                    roots_[i] = root2; //only rhs
+                case 2: // only rhs
+                    roots_[i] = root2;
                     rhs.roots_[i] = nullptr;
                     break;
-                case 4: //only carry
+                case 4: // only carry
                     roots_[i] = carry;
                     carry = nullptr;
                     break;
-                case 3: //this and rhs
-                    carry = combineTrees(root1, root2);
+                case 3: // this and rhs
+                    carry = _merge(root1, root2);
                     roots_[i] = rhs.roots_[i] = nullptr;
                     break;
-                case 5: //this and carry
-                    carry = combineTrees(root1, carry);
+                case 5: // this and carry
+                    carry = _merge(root1, carry);
                     roots_[i] = nullptr;
                     break;
-                case 6: //rhs and carry
-                    carry = combineTrees(root2, carry);
+                case 6: // rhs and carry
+                    carry = _merge(root2, carry);
                     rhs.roots_[i] = nullptr;
                     break;
-                case 7: //all three
+                case 7: // this, rhs and carry
                     roots_[i] = carry;
-                    carry = combineTrees(root1, root2);
+                    carry = _merge(root1, root2);
                     rhs.roots_[i] = nullptr;
                     break;
             }
         }
-        for (auto& root : rhs.roots_)
-            root = nullptr;
+        // 最后有carry
+        if (carry) roots_.push_back(carry);
+
+        nodeCount_ += rhs.nodeCount_;
+        // 清空rhs
+        rhs.roots_.clear();
         rhs.nodeCount_ = 0;
     }
 
     void clear()
     {
-        for (auto& root : roots_)
-            destroy(root);
+        for (auto& root : roots_) destroy(root);
         nodeCount_ = 0;
     }
 
     const T& top() const { return roots_[findMinIndex()]->data; }
 
     bool empty() const { return nodeCount_ == 0; }
+    int size() const { return nodeCount_; }
 
 private:
-
     struct Node;
 
-    int findMinIndex() const
-    {
-        int pos = 0;
-        int minIndex;
-        while (roots_[pos] == nullptr) ++pos;
-        for (minIndex = pos; pos < roots_.size(); ++pos)
-            if (roots_[pos] != nullptr &&
-                    comp(roots_[pos]->data, roots_[minIndex]->data))
-                minIndex = pos;
-        return minIndex;
-    }
+    // 构造包含一个元素的堆
+    BinomialHeap(const T& data): nodeCount_(1)
+    { roots_.push_back(new Node(data)); }
 
-    Node* combineTrees(Node* root1, Node* root2)
+    BinomialHeap(T&& data): nodeCount_(1)
+    { roots_.push_back(new Node(std::move(data))); }
+
+    // 合并两棵树
+    static Node* _merge(Node* root1, Node* root2)
     {
         if (comp(root2->data, root1->data))
-            return combineTrees(root2, root1);
+        {
+            std::swap(root1, root2);
+        }
         root2->next = root1->child;
         root1->child = root2;
         return root1;
     }
 
-    int capacity() const { return (1 << roots_.size()) - 1; }
+    // 找到根节点值最小的树
+    int findMinIndex() const
+    {
+        assert(!empty());
+        int pos = 0;
+        while (!roots_[pos]) ++pos;
+        for (int i = pos + 1; i < (int)roots_.size(); ++i)
+        {
+            if (roots_[i] && comp(roots_[i]->data, roots_[pos]->data))
+            {
+                pos = i;
+            }
+        }
+        return pos;
+    }
 
+    // 销毁
     void destroy(Node*& node)
     {
         if (node != nullptr)
@@ -192,21 +199,22 @@ private:
         }
     }
 
-    Node* clone(Node* node) const
+    // 克隆
+    static Node* clone(Node* node)
     {
-        if (node == nullptr)
-            return nullptr;
+        if (node == nullptr) return nullptr;
         return new Node(node->data, clone(node->child), clone(node->next));
     }
 
     static bool comp(const T& lhs, const T& rhs)
     { return Compare()(lhs, rhs); }
 
+    // 定义节点
     struct Node
     {
         T data;
-        Node* child; //第一个子节点
-        Node* next; //兄弟
+        Node* child; // 第一个子节点
+        Node* next; // 右兄弟
 
         Node(const T& _data, Node* _child = nullptr, Node* _next = nullptr)
             : data(_data), child(_child), next(_next) {}
@@ -215,12 +223,12 @@ private:
             : data(std::move(_data)), child(_child), next(_next) {}
     };
 
-    std::vector<Node*> roots_;
-    int nodeCount_;
+    std::vector<Node*> roots_; // 二项树
+    int nodeCount_; // 节点数量
 };
 
 
-//测试
+// 测试
 #include <cstdlib>
 #include <ctime>
 #include <vector>
@@ -244,17 +252,26 @@ int main()
     cout << endl;
 
     BinomialHeap<int, greater<int>> heap1;
-    for (const auto& x : vec1) heap1.insert(x);
+    for (const auto& x : vec1) heap1.push(x);
 
     BinomialHeap<int, greater<int>> heap2;
-    for (const auto& x : vec2) heap2.insert(x);
+    for (const auto& x : vec2) heap2.push(x);
 
     heap1.merge(heap2);
+
+    auto heap3 = heap1;
 
     while (!heap1.empty())
     {
         cout << heap1.top() << " ";
         heap1.pop();
+    }
+    cout << endl;
+
+    while (!heap3.empty())
+    {
+        cout << heap3.top() << " ";
+        heap3.pop();
     }
     cout << endl;
     return 0;

@@ -1,7 +1,7 @@
-//希尔排序
 
-#include <iostream>
+#include <algorithm>
 
+// 希尔排序
 template <class T>
 void shellSort(T* arr, int size)
 {
@@ -13,16 +13,20 @@ void shellSort(T* arr, int size)
         {
             T tmp = std::move(arr[i]);
             for (pos = i; pos >= gap && arr[pos - gap] > tmp; pos -= gap)
+            {
                 arr[pos] = arr[pos - gap];
+            }
             arr[pos] = std::move(tmp);
         }
     }
 }
 
 
+// 测试
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 
 int main()
 {

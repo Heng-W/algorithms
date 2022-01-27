@@ -1,8 +1,7 @@
 
 #include <iostream>
 
-
-//伸展树（自顶向下）
+// 伸展树
 template <class T>
 class SplayTree
 {
@@ -11,22 +10,21 @@ public:
     SplayTree(): root_(nullptr) {}
     ~SplayTree() { clear(); }
 
-
+    // 插入
     bool insert(const T& data) { return _insert(data); }
     bool insert(T&& data) { return _insert(std::move(data)); }
 
+    // 删除
     bool remove(const T& data);
 
+    // 伸展调整
     void splay(const T& data) { splay(root_, data); }
 
-
-    void clear() { destroyTree(root_); }
-
+    void clear() { destroy(root_); }
     void print() const { if (root_) print(root_); }
 
 private:
 
-    //伸展调整
     void splay(Node*& node, const T& data);
 
     template <class X>
@@ -34,13 +32,12 @@ private:
 
     void print(Node* node, Node* parent = nullptr) const;
 
-    //销毁子树
-    void destroyTree(Node*& node)
+    void destroy(Node*& node)
     {
         if (node)
         {
-            destroyTree(node->left);
-            destroyTree(node->right);
+            destroy(node->left);
+            destroy(node->right);
             delete node;
             node = nullptr;
         }
@@ -52,6 +49,7 @@ private:
         Node* left;
         Node* right;
     };
+
     Node* root_;
 };
 
@@ -72,15 +70,14 @@ void SplayTree<T>::splay(Node*& node, const T& data)
         {
             if (node->left && data < node->left->data)
             {
-                //右旋
+                // 右旋
                 Node* lchild = node->left;
                 node->left = lchild->right;
                 lchild->right = node;
                 node = lchild;
             }
-            if (node->left == nullptr)
-                break;
-            //右连接
+            if (node->left == nullptr) break;
+            // 右连接
             rightTreeMin->left = node;
             rightTreeMin = node;
             node = node->left;
@@ -89,15 +86,14 @@ void SplayTree<T>::splay(Node*& node, const T& data)
         {
             if (node->right && node->right->data < data)
             {
-                //左旋
+                // 左旋
                 Node* rchild = node->right;
                 node->right = rchild->left;
                 rchild->left = node;
                 node = rchild;
             }
-            if (node->right == nullptr)
-                break;
-            //左连接
+            if (node->right == nullptr) break;
+            // 左连接
             leftTreeMax->right = node;
             leftTreeMax = node;
             node = node->right;
@@ -107,7 +103,7 @@ void SplayTree<T>::splay(Node*& node, const T& data)
             break;
         }
     }
-    //组合
+    // 组合
     leftTreeMax->right = node->left;
     rightTreeMin->left = node->right;
     node->left = head.right;
@@ -119,34 +115,34 @@ template <class T>
 template <class X>
 bool SplayTree<T>::_insert(X&& x)
 {
-    Node* newNode = new Node();
-    newNode->data = std::forward<X>(x);
+    Node* node = new Node();
+    node->data = std::forward<X>(x);
 
     if (root_ == nullptr)
     {
-        newNode->left = newNode->right = nullptr;
-        root_ = newNode;
+        node->left = node->right = nullptr;
+        root_ = node;
         return true;
     }
     splay(root_, x);
     if (x < root_->data)
     {
-        newNode->left = root_->left; //root左子树小于关键字
-        newNode->right = root_; //root及其右子树都大于关键字
+        node->left = root_->left; // root左子树小于关键字
+        node->right = root_; // root及其右子树都大于关键字
         root_->left = nullptr;
-        root_ = newNode; //新插入的节点作为root
+        root_ = node; // 新插入的节点作为root
     }
     else if (root_->data < x)
     {
-        newNode->right = root_->right;
-        newNode->left = root_;
+        node->right = root_->right;
+        node->left = root_;
         root_->right = nullptr;
-        root_ = newNode;
+        root_ = node;
     }
     else
     {
-        delete newNode;
-        return false;  //元素重复
+        delete node;
+        return false;  // 元素重复
     }
     return true;
 }
@@ -155,12 +151,10 @@ bool SplayTree<T>::_insert(X&& x)
 template <class T>
 bool SplayTree<T>::remove(const T& data)
 {
-    if (root_ == nullptr)
-        return false;
+    if (root_ == nullptr) return false;
 
     splay(root_, data);
-    if (data != root_->data)
-        return false;
+    if (data != root_->data) return false;
 
     Node* newRoot;
     if (root_->left == nullptr)
@@ -169,7 +163,7 @@ bool SplayTree<T>::remove(const T& data)
     }
     else
     {
-        //用左子树最大节点作为新的根节点
+        // 用左子树最大节点作为新的根节点
         newRoot = root_->left;
         splay(newRoot, data);
         newRoot->right = root_->right;
@@ -198,7 +192,7 @@ void SplayTree<T>::print(Node* node, Node* parent) const
 }
 
 
-//测试
+// 测试
 #include <cstdlib>
 #include <ctime>
 #include <vector>

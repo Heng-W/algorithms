@@ -1,18 +1,16 @@
 
 #include "linked_hash_table.hpp"
 
-
 template <class Key, class Value, class HashFunc = std::hash<Key>>
 class LinkedHashMap
 {
 public:
+    // 定义用于extractKey的function object
     template <class Pair>
     struct select1st
     {
         const typename Pair::first_type& operator()(const Pair& pair) const
-        {
-            return pair.first;
-        }
+        { return pair.first; }
     };
 
     using Object = std::pair<const Key, Value>;
@@ -22,37 +20,33 @@ public:
     using KeyType = typename Container::KeyType;
     using RemoveCallback = typename Container::RemoveCallback;
 
-
     LinkedHashMap(int n = 32): table_(n) {}
 
     void setRemoveCallback(const RemoveCallback& cb)
     { table_.setRemoveCallback(cb); }
 
+    // 插入
     std::pair<Iterator, bool> insert(const Object& obj)
     { return table_.insert(obj); }
 
     std::pair<Iterator, bool> insert(Object&& obj)
     { return table_.insert(std::move(obj)); }
 
+    // 查找
     Iterator find(const KeyType& key) {return table_.find(key);}
     ConstIterator find(const KeyType& key) const {return table_.find(key);}
 
     Value& operator[](const KeyType& key)
-    {
-        return table_.findOrInsert({key, Value()}).second;
-    }
+    { return table_.findOrInsert({key, Value()}).second; }
 
-
+    // 删除
     Iterator erase(Iterator it) { return table_.erase(it); }
-
     void removeFirst() { table_.removeFirst(); }
-
     bool remove(const KeyType& key) { return table_.remove(key); }
-
 
     void clear() { table_.clear(); }
 
-    int count() const { return table_.count(); }
+    int size() const { return table_.size(); }
 
     ConstIterator begin() const { return table_.begin(); }
     Iterator begin() { return table_.begin(); }
@@ -65,13 +59,14 @@ private:
 };
 
 
+// 测试
 #include <iostream>
 
 int main()
 {
     using namespace std;
     LinkedHashMap<int, int> map;
-    map.setRemoveCallback([&map] { return map.count() > 3; });
+    map.setRemoveCallback([&map] { return map.size() > 3; });
 
     map.insert({298, 153});
     map.insert({190, 123});
@@ -79,7 +74,7 @@ int main()
     map.insert({92, 456});
     map.insert({122, 125});
 
-    cout << map.count() << endl;
+    cout << map.size() << endl;
 
     cout << (map.find(92) != map.end()) << endl;
     cout << (map.find(10) != map.end()) << endl;

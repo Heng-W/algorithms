@@ -1,8 +1,8 @@
-//KMP模式匹配算法
+// KMP模式匹配算法
 #include <string>
 #include <vector>
 
-//求next数组
+// 求next数组
 void getNext(const std::string& pattern, std::vector<int>& next)
 {
     const int size = pattern.size();
@@ -42,7 +42,7 @@ int kmp(const std::string& text, const std::string& pattern)
 }
 
 
-//测试
+// 测试
 #include <iostream>
 
 int main()

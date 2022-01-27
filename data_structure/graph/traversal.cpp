@@ -8,13 +8,15 @@ static std::vector<bool> visited;
 
 template <class T>
 void DFS(const MGraph<T>& graph, int i)
-{    
+{
     visited[i] = true;
-    std::cout << graph.vexs[i] <<" ";
+    std::cout << graph.vexs[i] << " ";
     for (int j = 0; j < graph.vexNum(); ++j)
     {
         if (graph.arcs[i][j] == 1 && !visited[j])
+        {
             DFS(graph, j);
+        }
     }
 }
 
@@ -43,9 +45,9 @@ void BFS(const MGraph<T>& graph, int i)
 
 template <class T>
 void DFS(const ALGraph<T>& graph, int i)
-{    
+{
     visited[i] = true;
-    std::cout << graph.adjList[i].data <<" ";
+    std::cout << graph.adjList[i].data << " ";
     const auto* cur = graph.adjList[i].firstArc;
     while (cur)
     {
@@ -91,7 +93,7 @@ void DFSTraverse(const Graph& graph)
     std::fill(visited.begin(), visited.end(), false);
     for (int i = 0; i < graph.vexNum(); ++i)
     {
-        if(!visited[i]) DFS(graph, i);
+        if (!visited[i]) DFS(graph, i);
     }
 }
 
@@ -102,18 +104,19 @@ void BFSTraverse(const Graph& graph)
     std::fill(visited.begin(), visited.end(), false);
     for (int i = 0; i < graph.vexNum(); ++i)
     {
-        if(!visited[i]) BFS(graph, i);
+        if (!visited[i]) BFS(graph, i);
     }
 }
 
 
+// 测试
 int main()
 {
     using namespace std;
-    MGraph<char> mGraph({'a','b','c','d','e','f','g','h','i'},
+    MGraph<char> mGraph({'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'},
     {
         {0, 1}, {0, 5}, {1, 2}, {1, 8}, {1, 6},
-        {2, 3}, {2, 8}, {3, 4}, {3, 6}, {3, 7}, 
+        {2, 3}, {2, 8}, {3, 4}, {3, 6}, {3, 7},
         {3, 8}, {4, 5}, {4, 7}, {5, 6}, {6, 7}
     });
     DFSTraverse(mGraph);
@@ -121,10 +124,10 @@ int main()
     BFSTraverse(mGraph);
     cout << endl;
 
-    ALGraph<char> aLGraph({'a','b','c','d','e','f','g','h','i'},
+    ALGraph<char> aLGraph({'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'},
     {
         {0, 1}, {0, 5}, {1, 2}, {1, 8}, {1, 6},
-        {2, 3}, {2, 8}, {3, 4}, {3, 6}, {3, 7}, 
+        {2, 3}, {2, 8}, {3, 4}, {3, 6}, {3, 7},
         {3, 8}, {4, 5}, {4, 7}, {5, 6}, {6, 7}
     });
     DFSTraverse(aLGraph);

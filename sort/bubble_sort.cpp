@@ -1,7 +1,7 @@
-//冒泡排序
 
-#include <iostream>
+#include <algorithm>
 
+// 冒泡排序
 template <class T>
 void bubbleSort(T* arr, int size)
 {
@@ -20,9 +20,11 @@ void bubbleSort(T* arr, int size)
 }
 
 
+// 测试
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 
 int main()
 {

@@ -1,6 +1,7 @@
 
-build/
-.vscode
+build*/
+out/
+.vscode/
 
 .DS_Store
 
@@ -37,4 +38,7 @@ build/
 a.out
 *.out
 *.app
+
+
+CMakeCache.txt
 

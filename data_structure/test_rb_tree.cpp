@@ -19,24 +19,26 @@ int main()
         vec.push_back(rand() % 100);
     }
 
-    RBTree<int> tree(&*vec.cbegin(), &*vec.cend());
+    RBTree<int> tree;
+
+    for (const auto& x : vec) tree.insert(x);
 
     for (const auto& x : tree) cout << setw(3) << x;
     cout << endl;
     for (auto it = tree.begin(); it != tree.end(); ++it)
     {
-        cout << setw(3) << it.node->color;
+        cout << setw(3) << static_cast<int>(it.node->color);
     }
     cout << endl;
 
-    for (int i = 0; i < vec.size(); ++i)
+    for (int i = 0; i < (int)vec.size(); ++i)
     {
         tree.remove(vec[i]);
         for (const auto& x : tree) cout << setw(3) << x;
         cout << endl;
         for (auto it = tree.begin(); it != tree.end(); ++it)
         {
-            cout << setw(3) << it.node->color;
+            cout << setw(3) << static_cast<int>(it.node->color);
         }
         cout << endl;
     }

@@ -1,8 +1,8 @@
-//归并排序
+// 归并排序
 
 #include <vector>
 
-//合并两个有序序列
+// 合并两个有序序列
 template <class T>
 void merge(const T* first1, const T* last1,
            const T* first2, const T* last2,
@@ -21,7 +21,7 @@ void merge(const T* first1, const T* last1,
         *result++ = *first2++;
 }
 
-//归并排序（递归）
+// 归并排序（递归）
 template <class T>
 void mergeSort(T* first, T* last)
 {
@@ -35,7 +35,7 @@ void mergeSort(T* first, T* last)
     }
 }
 
-//归并排序（递归），优化拷贝
+// 归并排序（递归），优化拷贝
 template <class T>
 void mergeSort2(T* arr, T* tmp, int size)
 {
@@ -56,13 +56,13 @@ void mergeSort2(T* first, T* last)
 }
 
 
-//归并排序（非递归）
+// 归并排序（非递归）
 template <class T>
 void mergeSortI(std::vector<T>& data)
 {
     std::vector<T> tmp = data;
-    //len：子序列长度
-    for (int len = 1; len < data.size(); len *= 2)
+    // len：子序列长度
+    for (int len = 1; len < (int)data.size(); len *= 2)
     {
         T* cur = &*data.begin();
         T* end = &*data.end();
@@ -77,6 +77,7 @@ void mergeSortI(std::vector<T>& data)
             merge(cur, cur + len, cur + len, end, dst);
         else
             std::copy(cur, end, dst);
+            
         data.swap(tmp);
     }
 }
@@ -95,7 +96,7 @@ int main()
     {
         vec.push_back(rand() % 100);
     }
-    //mergeSort2(&*vec.begin(), &*vec.end());
+    // mergeSort2(&*vec.begin(), &*vec.end());
     mergeSortI(vec);
     for (const auto& x : vec)
         cout << x << " ";

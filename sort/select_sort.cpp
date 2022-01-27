@@ -1,7 +1,7 @@
-//选择排序
 
-#include <iostream>
+#include <algorithm>
 
+// 选择排序
 template <class T>
 void selectSort(T* arr, int size)
 {
@@ -9,7 +9,7 @@ void selectSort(T* arr, int size)
     for (int i = 0; i < size - 1; ++i)
     {
         int min = i;
-        //找到最小值下标
+        // 找到最小值下标
         for (int j = i + 1; j < size; ++j)
         {
             if (arr[j] < arr[min])
@@ -26,9 +26,11 @@ void selectSort(T* arr, int size)
 }
 
 
+// 测试
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 
 int main()
 {

@@ -4,7 +4,6 @@
 #include <limits.h>
 #include <vector>
 
-
 struct Arc
 {
     int begin;
@@ -19,24 +18,24 @@ struct MGraph
     using VertexType = Vertex;
     using VertexArray = std::vector<VertexType>;
     using ArcMat = std::vector<std::vector<int>>;
-    
+
 
     VertexArray vexs;
     ArcMat arcs;
     int _arcNum;
 
-    //构造无向图
+    // 构造无向图
     MGraph(const VertexArray& _vexs,
            const std::vector<Arc>& _arcs)
         : vexs(_vexs),
           _arcNum(_arcs.size())
     {
         arcs.resize(vexs.size(), std::vector<int>(vexs.size(), INT_MAX));
-        for (int i = 0; i < arcs.size(); ++i)
+        for (int i = 0; i < (int)arcs.size(); ++i)
         {
             arcs[i][i] = 0;
         }
-        for (int k = 0; k < _arcs.size(); ++k)
+        for (int k = 0; k < (int)_arcs.size(); ++k)
         {
             int i = _arcs[k].begin;
             int j = _arcs[k].end;
@@ -50,15 +49,15 @@ struct MGraph
 };
 
 /** 邻接表  **/
-//边表
+// 边表
 struct ArcNode
 {
-    int adjvex; //邻接序号
+    int adjvex; // 邻接序号
     int weight = 1;
     ArcNode* next;
 };
 
-//顶点表
+// 顶点表
 template <class Vertex>
 struct VertexNode
 {
@@ -84,7 +83,7 @@ struct ALGraph
     AdjList adjList;
     int _arcNum;
 
-    //构造无向图
+    // 构造无向图
     ALGraph(const std::vector<VertexType>& _vexs,
             const std::vector<Arc>& _arcs)
         : _arcNum(_arcs.size())
@@ -93,7 +92,7 @@ struct ALGraph
         for (const auto& vex : _vexs)
             adjList.emplace_back(vex);
 
-        for (int k = 0; k < _arcs.size(); ++k)
+        for (int k = 0; k < (int)_arcs.size(); ++k)
         {
             int i = _arcs[k].begin;
             int j = _arcs[k].end;
@@ -115,7 +114,7 @@ struct ALGraph
 
     ~ALGraph()
     {
-        for (int i = 0; i < adjList.size(); ++i)
+        for (int i = 0; i < (int)adjList.size(); ++i)
         {
             ArcNode* cur = adjList[i].firstArc;
             while (cur)
@@ -131,4 +130,4 @@ struct ALGraph
     int arcNum() const { return _arcNum; }
 };
 
-#endif //GRAPH_TYPE_H
+#endif // GRAPH_TYPE_H
