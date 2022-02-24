@@ -34,12 +34,12 @@ public:
 
     // 移动构造函数
     LinkedList(LinkedList&& rhs): LinkedList()
-    { swap(rhs); }
+    { rhs.swap(*this); }
 
     // 拷贝赋值运算符
     LinkedList& operator=(const LinkedList& rhs)
     {
-        LinkedList().swap(*this);
+        LinkedList(rhs).swap(*this);
         return *this;
     }
 

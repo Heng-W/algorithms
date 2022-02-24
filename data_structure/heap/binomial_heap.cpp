@@ -41,7 +41,7 @@ public:
         if (this != &rhs)
         {
             clear();
-            swap(rhs);
+            rhs.swap(*this);
         }
         return *this;
     }

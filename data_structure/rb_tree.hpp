@@ -33,13 +33,12 @@ public:
     { root_ = clone(rhs, rhs.root_, nil_); }
 
     // 移动构造函数
-    RBTree(RBTree&& rhs): RBTree() { swap(rhs); }
+    RBTree(RBTree&& rhs): RBTree() { rhs.swap(*this); }
 
     // 拷贝赋值运算符
     RBTree& operator=(const RBTree& rhs)
     {
-        RBTree copy = rhs;
-        swap(rhs);
+        RBTree(rhs).swap(*this);
         return *this;
     }
 
@@ -49,7 +48,7 @@ public:
         if (this != &rhs)
         {
             clear();
-            swap(rhs);
+            rhs.swap(*this);
         }
         return *this;
     }
