@@ -6,15 +6,16 @@ template <class T>
 void shellSort(T* arr, int size)
 {
     if (arr == nullptr || size <= 1) return;
-    int pos;
     for (int gap = size / 2; gap > 0; gap /= 2)
     {
         for (int i = gap; i < size; ++i)
         {
             T tmp = std::move(arr[i]);
-            for (pos = i; pos >= gap && arr[pos - gap] > tmp; pos -= gap)
+            int pos = i;
+            while (pos >= gap && arr[pos - gap] > tmp)
             {
                 arr[pos] = arr[pos - gap];
+                pos -= gap;
             }
             arr[pos] = std::move(tmp);
         }

@@ -339,7 +339,7 @@ public:
             if (cur->left)
             {
                 Node* node = cur->left;
-                while (node->right && cur != node->right)
+                while (node->right && node->right != cur)
                 {
                     node = node->right;
                 }
