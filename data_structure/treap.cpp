@@ -123,8 +123,11 @@ private:
     };
 
     Node* root_;
+    static unsigned int seed_;
 };
 
+template <class T>
+unsigned int Treap<T>::seed_ = time(nullptr);
 
 template <class T>
 template <class X>
@@ -132,7 +135,7 @@ bool Treap<T>::insert(Node*& node, X&& x)
 {
     if (node == nullptr)
     {
-        node = new Node(std::forward<X>(x), rand());
+        node = new Node(std::forward<X>(x), rand_r(&seed_));
         node->left = node->right = nullptr;
     }
     else if (x < node->data)
@@ -162,12 +165,16 @@ template <class T>
 bool Treap<T>::remove(Node*& node, const T& data)
 {
     if (node == nullptr) return false; // 未找到
-    
+
     if (data < node->data)
+    {
         return remove(node->left, data);
+    }
     else if (node->data < data)
+    {
         return remove(node->right, data);
-        
+    }
+
     // 找到元素
     if (!node->left || !node->right)
     {
