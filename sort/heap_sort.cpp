@@ -14,8 +14,9 @@ void adjustHeapByRecursion(T* arr, int size, int idx)
     if (right < size && arr[right] > arr[maxIdx]) maxIdx = right;
     if (maxIdx != idx)
     {
-        std::swap(arr[maxIdx], arr[idx]);
-        adjustHeap(arr, size, maxIdx); // 尾递归继续调整
+        using std::swap;
+        swap(arr[maxIdx], arr[idx]);
+        adjustHeapByRecursion(arr, size, maxIdx); // 尾递归继续调整
     }
 }
 
@@ -24,7 +25,7 @@ void adjustHeapByRecursion(T* arr, int size, int idx)
 template <class T>
 void adjustHeap(T* arr, int size, int idx)
 {
-    T tmp = arr[idx];
+    T value = std::move(arr[idx]);
     // 从左节点开始更新
     for (int i = idx * 2 + 1; i < size; i = i * 2 + 1)
     {
@@ -32,9 +33,9 @@ void adjustHeap(T* arr, int size, int idx)
         if (i + 1 < size && arr[i + 1] > arr[i]) ++i;
         
         // 判断子节点大于父节点
-        if (arr[i] > tmp)
+        if (arr[i] > value)
         {
-            arr[idx] = arr[i];
+            arr[idx] = std::move(arr[i]);
             idx = i;
         }
         else
@@ -42,7 +43,7 @@ void adjustHeap(T* arr, int size, int idx)
             break;
         }
     }
-    arr[idx] = tmp; // 将tmp值放到最终的位置
+    arr[idx] = std::move(value); // 将tmp值放到最终的位置
 }
 
 
@@ -55,7 +56,7 @@ void heapSort(T* arr, int size)
         adjustHeap(arr, size, i);
     }
     using std::swap;
-    for (int i = size - 1; i >= 1; --i)
+    for (int i = size - 1; i > 0; --i)
     {
         swap(arr[0], arr[i]);  // 将最大值交换到末尾保存
         adjustHeap(arr, i, 0); // 重新进行堆调整

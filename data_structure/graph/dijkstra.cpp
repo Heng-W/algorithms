@@ -10,36 +10,36 @@ void dijkstra(const MGraph<T>& graph, int start,
 {
     pathArc.resize(graph.vexNum(), -1); // 前驱顶点下标
     shortPath.resize(graph.vexNum());
-    std::vector<bool> final(graph.vexNum(), false);
+    std::vector<int> complete(graph.vexNum(), false);
 
     for (int j = 0; j < graph.vexNum(); ++j)
     {
         shortPath[j] = graph.arcs[start][j];
     }
     shortPath[start] = 0;
-    final[start] = true;
+    complete[start] = true;
     // 递推求取最短路径
     for (int i = 1; i < graph.vexNum(); ++i)
     {
         int min = INT_MAX;
-        int k = -1;
+        int idx = -1;
         for (int j = 0; j < graph.vexNum(); ++j)
         {
-            if (!final[j] && shortPath[j] < min)
+            if (!complete[j] && shortPath[j] < min)
             {
-                k = j;
+                idx = j;
                 min = shortPath[j];
             }
         }
-        final[k] = true;
+        complete[idx] = true;
         // 修正当前的最短路径
         for (int j = 0; j < graph.vexNum(); ++j)
         {
-            if (!final[j] && graph.arcs[k][j] < INT_MAX &&
-                    min + graph.arcs[k][j] < shortPath[j])
+            if (!complete[j] && graph.arcs[idx][j] < INT_MAX &&
+                    min + graph.arcs[idx][j] < shortPath[j])
             {
-                shortPath[j] = min + graph.arcs[k][j];
-                pathArc[j] = k;
+                shortPath[j] = min + graph.arcs[idx][j];
+                pathArc[j] = idx;
             }
         }
     }
@@ -66,7 +66,7 @@ int main()
 
     for (int i = 0; i < graph.vexNum(); ++i)
     {
-        printf("v%d - v%d: ", start, i);
+        printf("v%d - v%d: ", i, start);
         int j = i;
         while (pathArc[j] != -1)
         {

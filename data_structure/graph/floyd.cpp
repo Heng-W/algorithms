@@ -8,7 +8,7 @@ void floyd(const MGraph<T>& graph,
            std::vector<std::vector<int>>& shortPath)
 {
     const int vexNum = graph.vexNum();
-    pathArc.resize(vexNum, std::vector<int>(vexNum)); // 前驱顶点下标
+    pathArc.resize(vexNum, std::vector<int>(vexNum)); // 后驱顶点下标
     shortPath.resize(vexNum, std::vector<int>(vexNum));
 
     for (int i = 0; i < vexNum; ++i)

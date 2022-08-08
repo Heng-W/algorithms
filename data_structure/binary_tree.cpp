@@ -268,11 +268,11 @@ public:
                 cur = cur->left;
             }
             cur = sta.top();
-            if (!cur->right || prev == cur->right)
+            if (cur->right == nullptr || prev == cur->right) // 右子树不存在或已访问过
             {
+                sta.pop();
                 res.push_back(cur->data);
                 prev = cur;
-                sta.pop();
                 cur = nullptr;
             }
             else
@@ -295,12 +295,13 @@ public:
         while (!sta.empty())
         {
             cur = sta.top();
+            // 为叶子节点或已访问过子节点
             if ((cur->left == nullptr && cur->right == nullptr) ||
                     (prev != nullptr && (prev == cur->left || prev == cur->right)))
             {
+                sta.pop();
                 res.push_back(cur->data);
                 prev = cur;
-                sta.pop();
             }
             else
             {
@@ -335,16 +336,13 @@ public:
         Node* cur = root_;
         while (cur)
         {
-            if (cur->left == nullptr)
-            {
-                res.push_back(cur->data);
-                cur = cur->right; // 将右孩子作为当前节点
-            }
-            else
+            if (cur->left)
             {
                 Node* node = cur->left;
-                while (node->right != nullptr && cur != node->right)
+                while (node->right && node->right != cur)
+                {
                     node = node->right;
+                }
                 if (node->right == nullptr) // 还没有线索化，则建立线索
                 {
                     node->right = cur;
@@ -356,6 +354,11 @@ public:
                     node->right = nullptr;
                     cur = cur->right;
                 }
+            }
+            else
+            {
+                res.push_back(cur->data);
+                cur = cur->right;
             }
         }
         return res;

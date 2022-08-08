@@ -6,7 +6,7 @@ class TrieTree
 {
 public:
     TrieTree() { root_ = new Node(); }
-    ~TrieTree() { clear(); ::free(root_); }
+    ~TrieTree() { clear(); delete root_; }
 
     // 拷贝构造函数
     TrieTree(const TrieTree& rhs) { root_ = clone(rhs.root_); }
@@ -64,6 +64,7 @@ public:
             if (cur->childs[pos]->prefixCount == 0)
             {
                 destroyTree(cur->childs[pos]);
+                delete cur->childs[pos];
                 cur->childs[pos] = nullptr;
                 return;
             }
@@ -85,6 +86,7 @@ public:
             if (cur->childs[pos]->prefixCount == 0)
             {
                 destroyTree(cur->childs[pos]);
+                delete cur->childs[pos];
                 cur->childs[pos] = nullptr;
                 return;
             }

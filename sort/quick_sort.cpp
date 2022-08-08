@@ -52,20 +52,16 @@ int partition1(int* arr, int left, int right)
     using std::swap;
     swap(arr[left], arr[midIndex(arr, left, right)]);
 
-    int originLeft = left;
     int pivot = arr[left];
+    int pivotIndex = left;
 
-    while (true)
+    while (left < right)
     {
         while (left < right && arr[right] >= pivot) --right;
         while (left < right && arr[left] <= pivot) ++left;
-        if (left < right)
-            swap(arr[left], arr[right]);
-        else
-            break;
+        swap(arr[left], arr[right]);
     }
-    arr[originLeft] = arr[left];
-    arr[left] = pivot;
+    swap(arr[pivotIndex], arr[left]);
     return left;
 }
 

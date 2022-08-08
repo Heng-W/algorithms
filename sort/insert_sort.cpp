@@ -6,12 +6,15 @@ template <class T>
 void insertSort(T* arr, int size)
 {
     if (arr == nullptr || size <= 1) return;
-    int pos;
     for (int i = 1; i < size; ++i)
     {
         T tmp = std::move(arr[i]);
-        for (pos = i; pos > 0 && arr[pos - 1] > tmp; --pos)
+        int pos = i;
+        while (pos > 0 && arr[pos - 1] > tmp)
+        {
             arr[pos] = arr[pos - 1];
+            --pos;
+        }
         arr[pos] = std::move(tmp);
     }
 }

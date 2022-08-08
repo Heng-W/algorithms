@@ -84,7 +84,7 @@ private:
             return root1;
         }
         root1->right = _merge(root1->right, root2);
-        //合并后直接交换
+        // 合并后直接交换
         std::swap(root1->left, root1->right);
         return root1;
     }
