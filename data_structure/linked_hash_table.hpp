@@ -2,6 +2,7 @@
 #define LINKED_HASH_TABLE_HPP
 
 #include <assert.h>
+#include <cstdlib>
 #include <functional>
 #include <vector>
 

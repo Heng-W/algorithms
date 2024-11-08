@@ -1,4 +1,5 @@
 
+#include <cstdlib>
 #include <memory>
 
 constexpr int kPrimeNums[] =

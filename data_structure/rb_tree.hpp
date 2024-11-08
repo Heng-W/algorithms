@@ -1,6 +1,8 @@
 #ifndef RB_TREE_HPP
 #define RB_TREE_HPP
 
+#include <cstdint>
+#include <cstdlib>
 #include <functional>
 
 // 红黑树
